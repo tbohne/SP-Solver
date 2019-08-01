@@ -18,10 +18,10 @@ minimizing transport costs. MIP formulations are used for experimental compariso
 
 ### BUILD PROCESS (IntelliJ IDEA)
 ```
-Build -> Build Artifacts -> StorageLoadingProblems.jar
+Build -> Build Artifacts -> SP-Solver.jar
 ```
 
 ### RUN .jar and dynamically link CPLEX
 ```
-$ java -jar -Djava.library.path="/opt/ibm/ILOG/CPLEX_Studio128/opl/bin/x86-64_linux/" StorageLoadingProblems.jar
+$ java -jar -Djava.library.path="/opt/ibm/ILOG/CPLEX_Studio128/opl/bin/x86-64_linux/" SP-Solver.jar
 ```
