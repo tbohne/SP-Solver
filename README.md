@@ -14,6 +14,7 @@ minimizing transport costs. MIP formulations are used for experimental compariso
 ### DEPENDENCIES
 - **CPLEX (latest - academic license)**
 - **jgrapht-core-1.3.1**
+- **Google Guava (latest)**
 
 ### BUILD PROCESS (IntelliJ IDEA)
 ```
