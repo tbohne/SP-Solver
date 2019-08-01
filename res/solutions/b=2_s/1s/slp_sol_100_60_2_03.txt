@@ -1,0 +1,144 @@
+lower bound for relaxed s_ij: 6547.42
+
+#####################################################
+
+solved with: SP.mip_formulations.BinPackingFormulation
+Problem not solved.
+
+#####################################################
+
+solved with: SP.mip_formulations.ThreeIndexFormulation
+time limit: 1.0 s
+time to solve: 0,71 s
+objective value: 6549.86
+
+stacks (top to bottom):
+stack  0:    
+stack  1:    1 
+stack  2:    
+stack  3:    
+stack  4:    54 
+stack  5:    
+stack  6:    56 
+stack  7:    7 
+stack  8:    58 
+stack  9:    
+stack 10:    60 76 
+stack 11:    69 61 
+stack 12:    96 12 
+stack 13:    78 16 
+stack 14:    14 19 
+stack 15:    42 70 
+stack 16:    99 24 
+stack 17:    68 97 
+stack 18:    20 71 
+stack 19:    44 90 
+stack 20:    36 22 
+stack 21:    98 86 
+stack 22:    73 48 
+stack 23:    40 74 
+stack 24:    26 81 
+stack 25:    25 75 
+stack 26:    38 35 
+stack 27:    79 83 
+stack 28:    82 28 
+stack 29:    92 32 
+stack 30:    0 50 
+stack 31:    51 
+stack 32:    2 52 
+stack 33:    53 3 
+stack 34:    4 
+stack 35:    5 55 
+stack 36:    6 
+stack 37:    57 
+stack 38:    9 8 
+stack 39:    59 
+stack 40:    33 10 
+stack 41:    63 11 
+stack 42:    62 64 
+stack 43:    27 13 
+stack 44:    65 15 
+stack 45:    17 67 
+stack 46:    72 66 
+stack 47:    93 18 
+stack 48:    45 23 
+stack 49:    95 29 
+stack 50:    30 31 
+stack 51:    46 21 
+stack 52:    49 43 
+stack 53:    37 34 
+stack 54:    77 41 
+stack 55:    89 47 
+stack 56:    88 87 
+stack 57:    94 39 
+stack 58:    80 85 
+stack 59:    84 91 
+
+#####################################################
+
+solved with: SP.constructive_heuristics.TwoCapHeuristic
+time limit: 1.0 s
+time to solve: 0,03 s
+objective value: 6555.92
+
+stacks (top to bottom):
+stack  0:    
+stack  1:    1 
+stack  2:    
+stack  3:    
+stack  4:    54 
+stack  5:    
+stack  6:    56 
+stack  7:    7 
+stack  8:    
+stack  9:    66 
+stack 10:    60 63 
+stack 11:    11 61 
+stack 12:    16 12 
+stack 13:    74 77 
+stack 14:    17 14 
+stack 15:    21 19 
+stack 16:    71 70 
+stack 17:    72 75 
+stack 18:    22 25 
+stack 19:    84 87 
+stack 20:    46 47 
+stack 21:    38 24 
+stack 22:    49 48 
+stack 23:    41 39 
+stack 24:    92 93 
+stack 25:    89 88 
+stack 26:    79 80 
+stack 27:    95 94 
+stack 28:    78 86 
+stack 29:    96 97 
+stack 30:    0 50 
+stack 31:    51 
+stack 32:    2 52 
+stack 33:    53 3 
+stack 34:    4 
+stack 35:    5 55 
+stack 36:    6 
+stack 37:    57 
+stack 38:    58 8 
+stack 39:    59 
+stack 40:    9 10 
+stack 41:    27 26 
+stack 42:    64 62 
+stack 43:    15 13 
+stack 44:    65 67 
+stack 45:    20 18 
+stack 46:    68 69 
+stack 47:    83 85 
+stack 48:    33 34 
+stack 49:    82 81 
+stack 50:    98 99 
+stack 51:    32 31 
+stack 52:    30 23 
+stack 53:    73 76 
+stack 54:    29 28 
+stack 55:    42 43 
+stack 56:    36 37 
+stack 57:    40 35 
+stack 58:    45 44 
+stack 59:    91 90 

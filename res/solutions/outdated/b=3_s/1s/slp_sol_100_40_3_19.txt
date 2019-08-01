@@ -1,0 +1,56 @@
+solved with: SP.mip_formulations.BinPackingFormulation
+Problem not solved.
+
+#####################################################
+
+solved with: SP.mip_formulations.ThreeIndexFormulation
+Problem not solved.
+
+#####################################################
+
+solved with: SP.constructive_heuristics.ThreeCapHeuristic
+time limit: 1 s
+time to solve: 0.06 s
+objective value: 3336.0
+
+stacks (top to bottom):
+stack  0:
+stack  1:
+stack  2:
+stack  3:    3 4
+stack  4:    0 1
+stack  5:    2 7
+stack  6:    5 17
+stack  7:    91
+stack  8:    6 8
+stack  9:    14 81 11
+stack 10:    12 9
+stack 11:    13 10
+stack 12:    16 18
+stack 13:    36 88 43
+stack 14:    24 15
+stack 15:    21 19 75
+stack 16:    60 54 95
+stack 17:    31 33 77
+stack 18:    20 32 87
+stack 19:    27 83 23
+stack 20:    53 51 92
+stack 21:    70 28 22
+stack 22:    65 62 74
+stack 23:    29 82 25
+stack 24:    76 72 69
+stack 25:    79 30 26
+stack 26:    48 90 49
+stack 27:    71 66 73
+stack 28:    47 35 78
+stack 29:    42 86 44
+stack 30:    85 38 40
+stack 31:    56 50 94
+stack 32:    98 58 61
+stack 33:    37 34 80
+stack 34:    99 68 64
+stack 35:    96 52 55
+stack 36:    63 93 57
+stack 37:    39 41 84
+stack 38:    45 46 89
+stack 39:    67 97 59

@@ -1,0 +1,144 @@
+lower bound for relaxed s_ij: 6586.22
+
+#####################################################
+
+solved with: SP.mip_formulations.BinPackingFormulation
+Problem not solved.
+
+#####################################################
+
+solved with: SP.mip_formulations.ThreeIndexFormulation
+time limit: 0.5 s
+time to solve: 0,51 s (time limit exceeded)
+objective value: 6798.32 (not optimal)
+
+stacks (top to bottom):
+stack  0:    
+stack  1:    1 
+stack  2:    
+stack  3:    4 
+stack  4:    
+stack  5:    
+stack  6:    6 
+stack  7:    57 
+stack  8:    8 
+stack  9:    59 10 
+stack 10:    60 
+stack 11:    11 61 
+stack 12:    95 64 
+stack 13:    15 34 
+stack 14:    24 14 
+stack 15:    77 16 
+stack 16:    42 91 
+stack 17:    67 46 
+stack 18:    44 
+stack 19:    69 22 
+stack 20:    20 84 
+stack 21:    72 21 
+stack 22:    25 29 
+stack 23:    74 36 
+stack 24:    47 75 
+stack 25:    99 89 
+stack 26:    27 32 
+stack 27:    92 49 
+stack 28:    85 31 
+stack 29:    97 35 
+stack 30:    50 51 
+stack 31:    0 
+stack 32:    52 2 
+stack 33:    53 
+stack 34:    54 3 
+stack 35:    55 5 
+stack 36:    56 
+stack 37:    7 58 
+stack 38:    9 
+stack 39:    88 82 
+stack 40:    63 96 
+stack 41:    73 12 
+stack 42:    40 62 
+stack 43:    13 
+stack 44:    65 83 
+stack 45:    17 93 
+stack 46:    66 37 
+stack 47:    79 70 
+stack 48:    18 86 
+stack 49:    19 80 
+stack 50:    68 71 
+stack 51:    81 94 
+stack 52:    98 28 
+stack 53:    30 48 
+stack 54:    33 41 
+stack 55:    78 90 
+stack 56:    87 76 
+stack 57:    43 38 
+stack 58:    45 39 
+stack 59:    23 26 
+
+#####################################################
+
+solved with: SP.constructive_heuristics.TwoCapHeuristic
+time limit: 0.5 s
+time to solve: 0,03 s
+objective value: 6631.08
+
+stacks (top to bottom):
+stack  0:    
+stack  1:    1 
+stack  2:    
+stack  3:    4 
+stack  4:    
+stack  5:    
+stack  6:    6 
+stack  7:    57 
+stack  8:    8 
+stack  9:    59 58 
+stack 10:    60 
+stack 11:    11 14 
+stack 12:    19 20 
+stack 13:    63 64 
+stack 14:    29 28 
+stack 15:    17 18 
+stack 16:    23 21 
+stack 17:    73 72 
+stack 18:    45 44 
+stack 19:    25 24 
+stack 20:    27 26 
+stack 21:    86 89 
+stack 22:    39 34 
+stack 23:    88 85 
+stack 24:    35 36 
+stack 25:    42 37 
+stack 26:    81 83 
+stack 27:    33 32 
+stack 28:    30 31 
+stack 29:    87 84 
+stack 30:    50 51 
+stack 31:    0 
+stack 32:    52 2 
+stack 33:    53 
+stack 34:    54 3 
+stack 35:    55 5 
+stack 36:    56 
+stack 37:    7 10 
+stack 38:    9 
+stack 39:    12 
+stack 40:    62 
+stack 41:    66 69 
+stack 42:    13 22 
+stack 43:    65 61 
+stack 44:    15 16 
+stack 45:    68 67 
+stack 46:    71 70 
+stack 47:    78 79 
+stack 48:    95 96 
+stack 49:    80 82 
+stack 50:    76 74 
+stack 51:    77 75 
+stack 52:    98 99 
+stack 53:    49 48 
+stack 54:    90 91 
+stack 55:    41 38 
+stack 56:    92 93 
+stack 57:    43 40 
+stack 58:    97 94 
+stack 59:    47 46 

@@ -1,0 +1,149 @@
+solved with: SP.mip_formulations.BinPackingFormulation
+time limit: 30 s
+time to solve: 1.09 s
+objective value: 106.0
+
+stacks (top to bottom):
+stack  0:    28 
+stack  1:    33 68 98 
+stack  2:    67 55 62 
+stack  3:    24 46 77 
+stack  4:    8 78 83 
+stack  5:    64 75 58 
+stack  6:    0 90 27 
+stack  7:    99 
+stack  8:    76 69 2 
+stack  9:    7 39 79 
+stack 10:    50 51 10 
+stack 11:    17 88 37 
+stack 12:    12 40 
+stack 13:    38 82 
+stack 14:    87 
+stack 15:    86 81 70 
+stack 16:    13 65 41 
+stack 17:    95 34 
+stack 18:    45 6 
+stack 19:    57 53 48 
+stack 20:    61 96 63 
+stack 21:    85 5 22 
+stack 22:    36 60 59 
+stack 23:    29 56 
+stack 24:    14 31 42 
+stack 25:    21 26 3 
+stack 26:    4 89 20 
+stack 27:    11 74 
+stack 28:    44 16 
+stack 29:    93 32 80 
+stack 30:    97 9 
+stack 31:    19 23 
+stack 32:    54 25 47 
+stack 33:    49 84 
+stack 34:    18 71 30 
+stack 35:    92 1 15 
+stack 36:    72 94 66 
+stack 37:    91 43 
+stack 38:    35 
+stack 39:    73 52 
+
+#####################################################
+
+solved with: SP.mip_formulations.ThreeIndexFormulation
+time limit: 30 s
+time to solve: 7.73 s
+objective value: 106.0
+
+stacks (top to bottom):
+stack  0:    28 
+stack  1:    33 15 98 
+stack  2:    67 26 68 
+stack  3:    24 46 77 
+stack  4:    8 74 78 
+stack  5:    64 75 58 
+stack  6:    0 90 51 
+stack  7:    99 
+stack  8:    76 69 2 
+stack  9:    7 39 79 
+stack 10:    50 10 
+stack 11:    17 82 
+stack 12:    12 40 
+stack 13:    14 83 27 
+stack 14:    48 37 
+stack 15:    86 81 70 
+stack 16:    38 65 
+stack 17:    95 88 
+stack 18:    45 6 3 
+stack 19:    57 53 66 
+stack 20:    61 96 63 
+stack 21:    44 5 22 
+stack 22:    36 60 59 
+stack 23:    29 56 34 
+stack 24:    85 31 42 
+stack 25:    21 52 
+stack 26:    4 20 
+stack 27:    87 11 19 
+stack 28:    35 
+stack 29:    93 32 41 
+stack 30:    97 9 
+stack 31:    13 23 
+stack 32:    54 25 47 
+stack 33:    49 84 
+stack 34:    18 71 30 
+stack 35:    92 1 80 
+stack 36:    72 55 94 
+stack 37:    91 43 
+stack 38:    62 
+stack 39:    73 89 16 
+
+#####################################################
+
+solved with: SP.constructive_heuristics.deprecated.ThreeCapPermutationHeuristic
+Problem not solved.
+
+#####################################################
+
+solved with: SP.constructive_heuristics.deprecated.ThreeCapRecursiveMCMHeuristic
+time limit: 30 s
+time to solve: 0.00 s
+objective value: 491.0
+
+stacks (top to bottom):
+stack  0:    76 73 19 
+stack  1:    95 0 2 
+stack  2:    52 43 83 
+stack  3:    21 4 99 
+stack  4:    32 64 66 
+stack  5:    96 60 58 
+stack  6:    87 35 34 
+stack  7:    14 9 75 
+stack  8:    29 45 39 
+stack  9:    11 8 28 
+stack 10:    44 46 65 
+stack 11:    72 85 82 
+stack 12:    33 50 59 
+stack 13:    97 91 90 
+stack 14:    56 54 51 
+stack 15:    57 53 89 
+stack 16:    67 92 84 
+stack 17:    69 48 47 
+stack 18:    49 17 20 
+stack 19:    93 88 98 
+stack 20:    38 24 25 
+stack 21:    55 62 40 
+stack 22:    13 18 15 
+stack 23:    86 12 16 
+stack 24:    31 30 68 
+stack 25:    6 79 77 
+stack 26:    74 78 27 
+stack 27:    5 94 
+stack 28:    7 61 63 
+stack 29:    81 80 37 
+stack 30:    26 71 70 
+stack 31:    1 3 10 
+stack 32:    36 42 41 
+stack 33:    
+stack 34:    
+stack 35:    23 22 
+stack 36:    
+stack 37:    
+stack 38:    
+stack 39:    

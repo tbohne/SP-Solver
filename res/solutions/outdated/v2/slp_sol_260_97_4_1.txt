@@ -1,0 +1,207 @@
+solved with: BinPacking Formulation
+time to solve: 2.30 s
+objective value: 0.0
+
+stacks (top to bottom):
+stack  0:    200 143 196 232 
+stack  1:    33 43 50 172 
+stack  2:    118 13 19 69 
+stack  3:    22 54 144 215 
+stack  4:    136 20 210 248 
+stack  5:    191 94 164 128 
+stack  6:    48 91 171 182 
+stack  7:    14 111 112 125 
+stack  8:    35 206 212 134 
+stack  9:    11 160 188 234 
+stack 10:    36 6 21 116 
+stack 11:    130 193 198 256 
+stack 12:    12 131 224 153 
+stack 13:    157 174 205 229 
+stack 14:    73 159 179 213 
+stack 15:    75 97 141 220 
+stack 16:    39 80 85 238 
+stack 17:    76 40 127 178 
+stack 18:    114 197 
+stack 19:    95 221 
+stack 20:    67 107 217 176 
+stack 21:    26 58 64 170 
+stack 22:    142 192 237 230 
+stack 23:    23 25 46 208 
+stack 24:    7 3 123 173 
+stack 25:    49 108 253 150 
+stack 26:    2 
+stack 27:    27 139 189 258 
+stack 28:    257 59 138 
+stack 29:    32 129 
+stack 30:    98 104 16 
+stack 31:    102 
+stack 32:    5 169 186 243 
+stack 33:    252 185 218 88 
+stack 34:    155 135 
+stack 35:    4 34 103 133 
+stack 36:    187 
+stack 37:    30 74 90 207 
+stack 38:    61 121 247 
+stack 39:    100 148 
+stack 40:    146 167 254 
+stack 41:    84 151 233 8 
+stack 42:    
+stack 43:    161 62 109 
+stack 44:    51 199 
+stack 45:    1 140 
+stack 46:    244 
+stack 47:    195 79 166 250 
+stack 48:    117 53 
+stack 49:    231 
+stack 50:    38 71 204 
+stack 51:    
+stack 52:    203 
+stack 53:    145 183 251 
+stack 54:    78 222 246 226 
+stack 55:    181 15 
+stack 56:    211 115 249 
+stack 57:    24 
+stack 58:    93 
+stack 59:    96 119 158 236 
+stack 60:    56 154 255 
+stack 61:    63 184 
+stack 62:    0 31 77 
+stack 63:    65 17 
+stack 64:    82 223 
+stack 65:    259 235 81 
+stack 66:    66 
+stack 67:    
+stack 68:    44 37 105 190 
+stack 69:    242 
+stack 70:    177 
+stack 71:    122 216 
+stack 72:    149 
+stack 73:    10 28 240 
+stack 74:    41 137 
+stack 75:    86 219 
+stack 76:    214 225 
+stack 77:    209 
+stack 78:    126 165 239 
+stack 79:    60 
+stack 80:    29 87 156 
+stack 81:    68 
+stack 82:    110 163 202 228 
+stack 83:    201 
+stack 84:    83 
+stack 85:    47 162 
+stack 86:    132 
+stack 87:    57 
+stack 88:    45 42 70 
+stack 89:    147 241 
+stack 90:    9 99 106 168 
+stack 91:    72 245 152 
+stack 92:    113 18 194 227 
+stack 93:    92 124 
+stack 94:    52 101 
+stack 95:    175 
+stack 96:    55 89 120 180 
+
+#####################################################
+
+solved with: ThreeIndex Formulation
+time to solve: 37.74 s
+objective value: 0.0
+
+stacks (top to bottom):
+stack  0:    68 
+stack  1:    199 140 
+stack  2:    24 
+stack  3:    195 39 201 60 
+stack  4:    259 
+stack  5:    164 167 202 149 
+stack  6:    99 86 
+stack  7:    165 163 47 125 
+stack  8:    212 13 106 
+stack  9:    161 188 
+stack 10:    225 
+stack 11:    1 197 79 37 
+stack 12:    118 131 215 226 
+stack 13:    
+stack 14:    203 
+stack 15:    6 224 246 251 
+stack 16:    116 238 31 80 
+stack 17:    57 40 
+stack 18:    73 104 190 194 
+stack 19:    242 
+stack 20:    206 227 137 81 
+stack 21:    133 93 107 170 
+stack 22:    44 230 
+stack 23:    25 241 23 
+stack 24:    180 220 20 
+stack 25:    33 150 
+stack 26:    229 56 
+stack 27:    29 96 46 258 
+stack 28:    70 171 208 58 
+stack 29:    185 129 
+stack 30:    147 210 144 
+stack 31:    43 53 
+stack 32:    257 179 66 
+stack 33:    177 218 
+stack 34:    159 88 
+stack 35:    67 21 
+stack 36:    97 239 232 187 
+stack 37:    52 41 217 207 
+stack 38:    65 196 61 162 
+stack 39:    178 205 54 148 
+stack 40:    95 15 
+stack 41:    103 233 169 8 
+stack 42:    2 
+stack 43:    71 62 
+stack 44:    155 17 
+stack 45:    
+stack 46:    189 108 16 
+stack 47:    245 166 250 256 
+stack 48:    117 94 63 
+stack 49:    124 101 59 141 
+stack 50:    3 127 204 123 
+stack 51:    102 
+stack 52:    181 152 
+stack 53:    249 243 145 91 
+stack 54:    222 78 120 157 
+stack 55:    45 
+stack 56:    69 
+stack 57:    48 74 105 
+stack 58:    183 135 
+stack 59:    236 49 237 119 
+stack 60:    191 154 
+stack 61:    156 
+stack 62:    172 0 19 
+stack 63:    26 28 32 
+stack 64:    11 228 
+stack 65:    35 253 121 128 
+stack 66:    36 82 34 
+stack 67:    51 18 234 173 
+stack 68:    4 
+stack 69:    252 198 27 
+stack 70:    113 
+stack 71:    221 254 98 142 
+stack 72:    231 
+stack 73:    
+stack 74:    76 134 
+stack 75:    213 112 14 
+stack 76:    72 184 
+stack 77:    111 89 
+stack 78:    75 85 126 235 
+stack 79:    160 92 
+stack 80:    110 151 240 12 
+stack 81:    244 168 214 
+stack 82:    130 
+stack 83:    219 42 10 132 
+stack 84:    146 83 255 
+stack 85:    30 115 182 
+stack 86:    211 
+stack 87:    209 5 247 64 
+stack 88:    22 139 
+stack 89:    174 38 248 216 
+stack 90:    9 90 138 122 
+stack 91:    136 109 193 153 
+stack 92:    50 143 114 
+stack 93:    87 158 84 176 
+stack 94:    7 77 186 100 
+stack 95:    175 192 
+stack 96:    200 55 223 

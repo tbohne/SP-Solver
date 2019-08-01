@@ -1,0 +1,204 @@
+solved with: SP.mip_formulations.BinPackingFormulation
+time limit: 5 s
+time to solve: 3.12 s
+objective value: 2210.0
+
+stacks (top to bottom):
+stack  0:    1 
+stack  1:    0 
+stack  2:    3 
+stack  3:    2 
+stack  4:    4 
+stack  5:    5 
+stack  6:    6 
+stack  7:    7 
+stack  8:    8 
+stack  9:    9 
+stack 10:    10 
+stack 11:    11 
+stack 12:    12 
+stack 13:    13 
+stack 14:    15 
+stack 15:    14 
+stack 16:    16 
+stack 17:    17 
+stack 18:    18 22 
+stack 19:    19 
+stack 20:    25 
+stack 21:    21 20 
+stack 22:    60 49 
+stack 23:    68 23 
+stack 24:    88 24 
+stack 25:    86 81 
+stack 26:    26 63 
+stack 27:    27 29 
+stack 28:    71 28 
+stack 29:    33 38 
+stack 30:    30 32 
+stack 31:    65 31 
+stack 32:    97 83 
+stack 33:    34 53 
+stack 34:    56 91 
+stack 35:    35 47 
+stack 36:    36 37 
+stack 37:    45 39 
+stack 38:    95 93 
+stack 39:    75 52 
+stack 40:    67 40 
+stack 41:    99 41 
+stack 42:    44 42 
+stack 43:    43 50 
+stack 44:    54 58 
+stack 45:    98 46 
+stack 46:    87 76 
+stack 47:    77 80 
+stack 48:    48 96 
+stack 49:    57 61 
+stack 50:    70 84 
+stack 51:    94 51 
+stack 52:    82 62 
+stack 53:    78 55 
+stack 54:    90 85 
+stack 55:    64 73 
+stack 56:    66 79 
+stack 57:    59 89 
+stack 58:    72 69 
+stack 59:    92 74 
+
+#####################################################
+
+solved with: SP.mip_formulations.ThreeIndexFormulation
+time limit: 5 s
+time to solve: 1.02 s
+objective value: 2210.0
+
+stacks (top to bottom):
+stack  0:    1 
+stack  1:    0 
+stack  2:    3 
+stack  3:    2 
+stack  4:    4 
+stack  5:    5 
+stack  6:    6 
+stack  7:    7 
+stack  8:    8 
+stack  9:    9 
+stack 10:    10 
+stack 11:    11 
+stack 12:    12 
+stack 13:    13 
+stack 14:    15 
+stack 15:    14 
+stack 16:    16 
+stack 17:    17 
+stack 18:    18 22 
+stack 19:    19 
+stack 20:    25 
+stack 21:    21 20 
+stack 22:    28 30 
+stack 23:    94 23 
+stack 24:    24 38 
+stack 25:    36 27 
+stack 26:    82 26 
+stack 27:    29 91 
+stack 28:    44 34 
+stack 29:    48 33 
+stack 30:    58 32 
+stack 31:    31 37 
+stack 32:    51 63 
+stack 33:    68 39 
+stack 34:    35 93 
+stack 35:    88 70 
+stack 36:    60 42 
+stack 37:    75 55 
+stack 38:    66 83 
+stack 39:    81 40 
+stack 40:    43 50 
+stack 41:    78 41 
+stack 42:    57 53 
+stack 43:    45 73 
+stack 44:    86 47 
+stack 45:    96 46 
+stack 46:    62 89 
+stack 47:    99 61 
+stack 48:    56 49 
+stack 49:    87 76 
+stack 50:    98 52 
+stack 51:    92 74 
+stack 52:    97 80 
+stack 53:    54 85 
+stack 54:    64 84 
+stack 55:    67 65 
+stack 56:    72 59 
+stack 57:    77 71 
+stack 58:    90 79 
+stack 59:    95 69 
+
+#####################################################
+
+solved with: SP.constructive_heuristics.TwoCapHeuristic
+time limit: 5 s
+time to solve: 0.01 s
+objective value: 2242.0
+
+stacks (top to bottom):
+stack  0:    
+stack  1:    0 2 
+stack  2:    
+stack  3:    
+stack  4:    1 5 
+stack  5:    
+stack  6:    6 9 
+stack  7:    3 7 
+stack  8:    4 8 
+stack  9:    
+stack 10:    
+stack 11:    
+stack 12:    11 10 
+stack 13:    12 13 
+stack 14:    
+stack 15:    18 15 
+stack 16:    17 14 
+stack 17:    
+stack 18:    20 22 
+stack 19:    23 19 
+stack 20:    
+stack 21:    43 46 
+stack 22:    21 16 
+stack 23:    25 24 
+stack 24:    72 68 
+stack 25:    27 29 
+stack 26:    26 28 
+stack 27:    33 32 
+stack 28:    57 54 
+stack 29:    31 30 
+stack 30:    96 38 
+stack 31:    35 37 
+stack 32:    77 75 
+stack 33:    34 39 
+stack 34:    50 52 
+stack 35:    36 98 
+stack 36:    87 90 
+stack 37:    44 42 
+stack 38:    41 40 
+stack 39:    74 76 
+stack 40:    88 83 
+stack 41:    78 79 
+stack 42:    62 69 
+stack 43:    66 70 
+stack 44:    45 53 
+stack 45:    99 94 
+stack 46:    60 55 
+stack 47:    48 47 
+stack 48:    51 49 
+stack 49:    64 58 
+stack 50:    65 59 
+stack 51:    93 91 
+stack 52:    82 80 
+stack 53:    67 61 
+stack 54:    86 85 
+stack 55:    71 73 
+stack 56:    56 63 
+stack 57:    81 84 
+stack 58:    92 89 
+stack 59:    95 97 
