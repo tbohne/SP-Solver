@@ -64,33 +64,35 @@ public class SolverComparison3Cap extends SolverComparison {
 
         File dir = new File(this.instancePrefix);
         File[] directoryListing = dir.listFiles();
-        assert directoryListing != null;
-        Arrays.sort(directoryListing);
-        String allSol = HeuristicUtil.createStringContainingAllSolutionNames(this.solutionPrefix);
 
-        for (File file : directoryListing) {
-            if (file.toString().contains("slp_instance_") && !allSol.contains(file.toString().replace("res/instances/", ""))) {
+        if (directoryListing != null) {
+            Arrays.sort(directoryListing);
+            String allSol = HeuristicUtil.createStringContainingAllSolutionNames(this.solutionPrefix);
 
-                String instanceName = file.toString().replace("res/instances/", "").replace(".txt", "");
-                Instance instance = InstanceReader.readInstance(this.instancePrefix + instanceName + ".txt");
-                System.out.println("working on: " + instanceName);
-                String solutionName = instanceName.replace("instance", "sol");
+            for (File file : directoryListing) {
+                if (file.toString().contains("slp_instance_") && !allSol.contains(file.toString().replace("res/instances/", ""))) {
 
-                computeLowerBound(instance, solutionName);
+                    String instanceName = file.toString().replace("res/instances/", "").replace(".txt", "");
+                    Instance instance = InstanceReader.readInstance(this.instancePrefix + instanceName + ".txt");
+                    System.out.println("working on: " + instanceName);
+                    String solutionName = instanceName.replace("instance", "sol");
 
-                if (solversToBeCompared.contains(CompareSolvers.Solver.MIP_BINPACKING)) {
-                    System.out.println("solving with BinP..");
-                    solveWithBinPacking(instance, solutionName);
-                    instance.resetStacks();
-                }
-                if (solversToBeCompared.contains(CompareSolvers.Solver.MIP_THREEINDEX)) {
-                    System.out.println("solving with 3Idx..");
-                    solveWithThreeIdx(instance, solutionName);
-                    instance.resetStacks();
-                }
-                if (solversToBeCompared.contains(CompareSolvers.Solver.CONSTRUCTIVE_THREE_CAP)) {
-                    System.out.println("solving with 3Cap..");
-                    solveWithThreeCap(instance, solutionName);
+                    computeLowerBound(instance, solutionName);
+
+                    if (solversToBeCompared.contains(CompareSolvers.Solver.MIP_BINPACKING)) {
+                        System.out.println("solving with BinP..");
+                        solveWithBinPacking(instance, solutionName);
+                        instance.resetStacks();
+                    }
+                    if (solversToBeCompared.contains(CompareSolvers.Solver.MIP_THREEINDEX)) {
+                        System.out.println("solving with 3Idx..");
+                        solveWithThreeIdx(instance, solutionName);
+                        instance.resetStacks();
+                    }
+                    if (solversToBeCompared.contains(CompareSolvers.Solver.CONSTRUCTIVE_THREE_CAP)) {
+                        System.out.println("solving with 3Cap..");
+                        solveWithThreeCap(instance, solutionName);
+                    }
                 }
             }
         }
