@@ -231,6 +231,63 @@ public class HeuristicUtil {
         return costs[item][stack] < Integer.MAX_VALUE / costs.length;
     }
 
+    public static boolean stackHasFreePosition(int[] stack) {
+        for (int item : stack) {
+            if (item == -1) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean stackIsEmpty(int[] stack) {
+        for (int item : stack) {
+            if (item != -1) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    // Returns the item objects that are stored in the stack
+    public static List<Item> getItemObjectsFromIndices(int[] stack, Item[] itemObjects) {
+        List<Item> items = new ArrayList<>();
+        for (int itemIdx : stack) {
+            if (itemIdx == -1) { continue; }
+            items.add(itemObjects[itemIdx]);
+        }
+        return items;
+    }
+
+    public static boolean itemCompatibleWithAlreadyAssignedItems(int item, int[] stack, Item[] itemObjects, int[][] stackingConstraints) {
+
+        // no assigned items
+        if (stackIsEmpty(stack)) { return true; }
+
+        List<Item> items = getItemObjectsFromIndices(stack, itemObjects);
+        items.add(itemObjects[item]);
+        // sort items with regard to the transitive stacking constraints
+        Collections.sort(items);
+
+        for (int i = 0; i < items.size() - 1; i++) {
+            if (stackingConstraints[items.get(i).getIdx()][items.get(i + 1).getIdx()] != 1) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public static void assignItemToStack(int item, int[] stack, Item[] itemObjects) {
+        List<Item> items = getItemObjectsFromIndices(stack, itemObjects);
+        items.add(itemObjects[item]);
+        // sort items with regard to the transitive stacking constraints
+        Collections.sort(items);
+        for (int i = 0; i < items.size(); i++) {
+            stack[i] = items.get(i).getIdx();
+        }
+    }
+
     /**
      * Creates an item array from the given list of items.
      *
