@@ -23,13 +23,12 @@ import java.util.Set;
  */
 public class BranchAndBound {
 
-    private Solution initialSolution;
+    private final Solution initialSolution;
+    private final int numberOfItems;
+    private final double[][] costs;
+    private final int[][] stackingConstraints;
+    private final Item[] itemObjects;
     private Solution bestSol;
-    private double bestObjectiveValue;
-    private int numberOfItems;
-    private double[][] costs;
-    private int[][] stackingConstraints;
-    private Item[] itemObjects;
 
     /**
      * Constructor
@@ -38,7 +37,6 @@ public class BranchAndBound {
      */
     public BranchAndBound(Solution initialSolution) {
         this.initialSolution = initialSolution;
-        this.bestObjectiveValue = initialSolution.computeCosts();
         this.bestSol = new Solution(this.initialSolution);
         this.numberOfItems = initialSolution.getSolvedInstance().getItemObjects().length;
         this.costs = initialSolution.getSolvedInstance().getCosts();
@@ -52,7 +50,7 @@ public class BranchAndBound {
     public void solve() {
         Solution clearSol = new Solution(this.initialSolution);
         this.clearSolution(clearSol);
-        branchAndBound(clearSol, 0);
+        this.branchAndBound(clearSol);
         this.bestSol.lowerItemsThatAreStackedInTheAir();
         System.out.println("feasible: " + this.bestSol.isFeasible());
         System.out.println("costs: " + this.bestSol.computeCosts());
@@ -62,30 +60,30 @@ public class BranchAndBound {
      * Branch-and-Bound procedure that generates exact solutions for stacking problems.
      *
      * @param sol           - currently considered partial solution
-     * @param itemToBeAdded - item that gets added in the current step of the recursion
      */
-    private void branchAndBound(Solution sol, int itemToBeAdded) {
+    private void branchAndBound(Solution sol) {
+
+        System.out.println(sol.getAssignedItems().size());
 
         for (int stack = 0; stack < sol.getFilledStacks().length; stack++) {
 
             if (HeuristicUtil.stackHasFreePosition(sol.getFilledStacks()[stack])
-                && HeuristicUtil.itemCompatibleWithStack(this.costs, itemToBeAdded, stack)
+                && HeuristicUtil.itemCompatibleWithStack(this.costs, sol.getAssignedItems().size(), stack)
                 && HeuristicUtil.itemCompatibleWithAlreadyAssignedItems(
-                    itemToBeAdded, sol.getFilledStacks()[stack], this.itemObjects, this.stackingConstraints
+                    sol.getAssignedItems().size(), sol.getFilledStacks()[stack], this.itemObjects, this.stackingConstraints
             )) {
                 Solution tmpSol = new Solution(sol);
-                HeuristicUtil.assignItemToStack(itemToBeAdded, tmpSol.getFilledStacks()[stack], this.itemObjects);
+                HeuristicUtil.assignItemToStack(tmpSol.getAssignedItems().size(), tmpSol.getFilledStacks()[stack], this.itemObjects);
 
-                if (itemToBeAdded == this.numberOfItems - 1) {
-                    if (tmpSol.computeCosts() < this.bestObjectiveValue) {
+                if (tmpSol.getAssignedItems().size() == this.numberOfItems - 1) {
+                    if (tmpSol.computeCosts() < this.bestSol.computeCosts()) {
                         this.bestSol = tmpSol;
-                        this.bestObjectiveValue = tmpSol.computeCosts();
-                        System.out.println(this.bestObjectiveValue);
+                        System.out.println(this.bestSol.computeCosts());
                     }
                 } else {
                     double LB = this.computeLowerBound(tmpSol);
-                    if (LB < this.bestObjectiveValue) {
-                        this.branchAndBound(tmpSol, itemToBeAdded + 1);
+                    if (LB < this.bestSol.computeCosts()) {
+                        this.branchAndBound(tmpSol);
                     }
                 }
             }
