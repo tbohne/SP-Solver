@@ -113,6 +113,24 @@ public class GraphUtil {
     }
 
     /**
+     * Adds edges to the bipartite graph that connect dummy items with stack positions.
+     *
+     * @param bipartiteGraph - bipartite graph to add the edges to
+     * @param dummyItems     - dummy items to be connected to positions
+     * @param positions      - positions the dummy items get connected to
+     */
+    public static void addEdgesBetweenDummyItemsAndStackPositions(
+        Graph<String, DefaultWeightedEdge> bipartiteGraph, List<Integer> dummyItems, List<StackPosition> positions
+    ) {
+        for (int item : dummyItems) {
+            for (StackPosition pos : positions) {
+                DefaultWeightedEdge edge = bipartiteGraph.addEdge("dummy" + item, "pos" + pos);
+                bipartiteGraph.setEdgeWeight(edge, 0);
+            }
+        }
+    }
+
+    /**
      * Introduces dummy vertices to the given bipartite graph.
      *
      * @param bipartiteGraph - given bipartite graph consisting of items and stacks

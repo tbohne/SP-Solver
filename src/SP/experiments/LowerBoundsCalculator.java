@@ -74,24 +74,6 @@ public class LowerBoundsCalculator {
     }
 
     /**
-     * Adds edges to the bipartite graph that connect dummy items with stack positions.
-     *
-     * @param bipartiteGraph - bipartite graph to add the edges to
-     * @param dummyItems     - dummy items to be connected to positions
-     * @param positions      - positions the dummy items get connected to
-     */
-    private void addEdgesBetweenDummyItemsAndStackPositions(
-        Graph<String, DefaultWeightedEdge> bipartiteGraph, List<Integer> dummyItems, List<StackPosition> positions
-    ) {
-        for (int item : dummyItems) {
-            for (StackPosition pos : positions) {
-                DefaultWeightedEdge edge = bipartiteGraph.addEdge("dummy" + item, "pos" + pos);
-                bipartiteGraph.setEdgeWeight(edge, 0);
-            }
-        }
-    }
-
-    /**
      * Generates the bipartite graph between items and stack positions.
      *
      * @return generated bipartite graph
@@ -116,7 +98,7 @@ public class LowerBoundsCalculator {
         GraphUtil.addVerticesForUnmatchedItems(itemList, graph, partitionOne);
         GraphUtil.addVerticesForEmptyPositions(positions, graph, partitionTwo);
         List<Integer> dummyItems = GraphUtil.introduceDummyVerticesToBipartiteGraph(graph, partitionOne, partitionTwo);
-        this.addEdgesBetweenDummyItemsAndStackPositions(graph, dummyItems, positions);
+        GraphUtil.addEdgesBetweenDummyItemsAndStackPositions(graph, dummyItems, positions);
         this.addEdgesBetweenItemsAndStackPositions(graph, itemList, positions);
 
         return new BipartiteGraph(partitionOne, partitionTwo, graph);
