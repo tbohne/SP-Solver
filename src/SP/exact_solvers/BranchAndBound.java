@@ -15,10 +15,15 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Exact branch-and-bound solver to generate feasible solutions to stacking problems.
+ * The goal is to minimize the transport costs while respecting all given constraints.
+ *
+ * @author Tim Bohne
+ */
 public class BranchAndBound {
 
     private Solution initialSolution;
-    private double startTime;
     private Solution bestSol;
     private double bestObjectiveValue;
     private int numberOfItems;
@@ -26,6 +31,11 @@ public class BranchAndBound {
     private int[][] stackingConstraints;
     private Item[] itemObjects;
 
+    /**
+     * Constructor
+     *
+     * @param initialSolution - solution to be used as reference in branch-and-bound procedure
+     */
     public BranchAndBound(Solution initialSolution) {
         this.initialSolution = initialSolution;
         this.bestObjectiveValue = initialSolution.computeCosts();
@@ -36,14 +46,9 @@ public class BranchAndBound {
         this.itemObjects = initialSolution.getSolvedInstance().getItemObjects();
     }
 
-    private void clearSolution(Solution sol) {
-        for (int i = 0; i < sol.getFilledStacks().length; i++) {
-            for (int j = 0; j < sol.getFilledStacks()[0].length; j++) {
-                sol.getFilledStacks()[i][j] = -1;
-            }
-        }
-    }
-
+    /**
+     * Starts the branch-and-bound procedure for the given instance.
+     */
     public void solve() {
         Solution clearSol = new Solution(this.initialSolution);
         this.clearSolution(clearSol);
@@ -54,51 +59,88 @@ public class BranchAndBound {
     }
 
     /**
-     * Adds edges to the bipartite graph that connect items with stack positions.
+     * Branch-and-Bound procedure that generates exact solutions for stacking problems.
      *
-     * @param bipartiteGraph - bipartite graph to add the edges to
-     * @param items          - items to be connected to positions
-     * @param positions      - positions the items get connected to
+     * @param sol           - currently considered partial solution
+     * @param itemToBeAdded - item that gets added in the current step of the recursion
      */
-    private void addEdgesBetweenItemsAndStackPositions(
-            Solution sol, Graph<String, DefaultWeightedEdge> bipartiteGraph, List<Integer> items, List<StackPosition> positions
-    ) {
-        for (int item : items) {
-            for (StackPosition pos : positions) {
+    private void branchAndBound(Solution sol, int itemToBeAdded) {
 
-                // stack incompatibility is realized indirectly via high costs to keep the graph complete bipartite
-                // the stacking constraints should also be respected, therefore they're realized indirectly as well
-                if (HeuristicUtil.itemCompatibleWithAlreadyAssignedItems(item, sol.getFilledStacks()[pos.getStackIdx()], this.itemObjects, this.stackingConstraints)) {
-                        DefaultWeightedEdge edge = bipartiteGraph.addEdge("item" + item, "pos" + pos);
-                        double costs = this.costs[item][pos.getStackIdx()];
-                        bipartiteGraph.setEdgeWeight(edge, costs);
+        for (int stack = 0; stack < sol.getFilledStacks().length; stack++) {
+
+            if (HeuristicUtil.stackHasFreePosition(sol.getFilledStacks()[stack])
+                && HeuristicUtil.itemCompatibleWithStack(this.costs, itemToBeAdded, stack)
+                && HeuristicUtil.itemCompatibleWithAlreadyAssignedItems(
+                    itemToBeAdded, sol.getFilledStacks()[stack], this.itemObjects, this.stackingConstraints
+            )) {
+                Solution tmpSol = new Solution(sol);
+                HeuristicUtil.assignItemToStack(itemToBeAdded, tmpSol.getFilledStacks()[stack], this.itemObjects);
+
+                if (itemToBeAdded == this.numberOfItems - 1) {
+                    if (tmpSol.computeCosts() < this.bestObjectiveValue) {
+                        this.bestSol = tmpSol;
+                        this.bestObjectiveValue = tmpSol.computeCosts();
+                        System.out.println(this.bestObjectiveValue);
+                    }
                 } else {
-                    DefaultWeightedEdge edge = bipartiteGraph.addEdge("item" + item, "pos" + pos);
-                    double costs = Integer.MAX_VALUE / this.numberOfItems;
-                    bipartiteGraph.setEdgeWeight(edge, costs);
+                    double LB = this.computeLowerBound(tmpSol);
+                    if (LB < this.bestObjectiveValue) {
+                        this.branchAndBound(tmpSol, itemToBeAdded + 1);
+                    }
                 }
             }
         }
     }
 
     /**
-     * Adds edges to the bipartite graph that connect dummy items with stack positions.
+     * Clears the stacks of the specified solution.
      *
-     * @param bipartiteGraph - bipartite graph to add the edges to
-     * @param dummyItems     - dummy items to be connected to positions
-     * @param positions      - positions the dummy items get connected to
+     * @param sol - solution to clear the stacks for
      */
-    private void addEdgesBetweenDummyItemsAndStackPositions(
-            Graph<String, DefaultWeightedEdge> bipartiteGraph, List<Integer> dummyItems, List<StackPosition> positions
-    ) {
-        for (int item : dummyItems) {
-            for (StackPosition pos : positions) {
-                DefaultWeightedEdge edge = bipartiteGraph.addEdge("dummy" + item, "pos" + pos);
-                bipartiteGraph.setEdgeWeight(edge, 0);
+    private void clearSolution(Solution sol) {
+        for (int i = 0; i < sol.getFilledStacks().length; i++) {
+            for (int j = 0; j < sol.getFilledStacks()[0].length; j++) {
+                sol.getFilledStacks()[i][j] = -1;
             }
         }
     }
 
+    /**
+     * Adds edges to the bipartite graph that connect unassigned items with compatible free stack positions.
+     *
+     * @param bipartiteGraph - bipartite graph to add the edges to
+     * @param items          - unassigned items to be connected to compatible free positions
+     * @param positions      - free positions the items get connected to
+     */
+    private void addEdgesBetweenItemsAndStackPositions(
+        Solution sol, Graph<String, DefaultWeightedEdge> bipartiteGraph, List<Integer> items, List<StackPosition> positions
+    ) {
+        for (int item : items) {
+            for (StackPosition pos : positions) {
+
+                DefaultWeightedEdge edge = bipartiteGraph.addEdge("item" + item, "pos" + pos);
+                double costs = this.costs[item][pos.getStackIdx()];
+
+                // Stack incompatibility is realized indirectly via high costs (in costs matrix) to keep the graph
+                // complete bipartite. The stacking constraints should also be respected, therefore violated stacking
+                // constraints are realized via high costs as well.
+                if (!HeuristicUtil.itemCompatibleWithAlreadyAssignedItems(
+                    item, sol.getFilledStacks()[pos.getStackIdx()], this.itemObjects, this.stackingConstraints)
+                ) {
+                    costs = Integer.MAX_VALUE / this.numberOfItems;
+                }
+                bipartiteGraph.setEdgeWeight(edge, costs);
+            }
+        }
+    }
+
+    /**
+     * Constructs the bipartite graph between unassigned items and free stack positions to be
+     * used in the lower bound computation.
+     *
+     * @param sol - partial solution to compute a lower bound for
+     * @return bipartite graph between unassigned items and free stack positions
+     */
     private BipartiteGraph constructBipartiteGraph(Solution sol) {
         List<Integer> unassignedItems = sol.getUnassignedItems();
         List<StackPosition> freePositions = HeuristicUtil.retrieveEmptyPositions(sol);
@@ -109,50 +151,26 @@ public class BranchAndBound {
 
         GraphUtil.addVerticesForUnmatchedItems(unassignedItems, graph, partitionOne);
         GraphUtil.addVerticesForEmptyPositions(freePositions, graph, partitionTwo);
-
         List<Integer> dummyItems = GraphUtil.introduceDummyVerticesToBipartiteGraph(graph, partitionOne, partitionTwo);
 
-        this.addEdgesBetweenDummyItemsAndStackPositions(graph, dummyItems, freePositions);
+        GraphUtil.addEdgesBetweenDummyItemsAndStackPositions(graph, dummyItems, freePositions);
         this.addEdgesBetweenItemsAndStackPositions(sol, graph, unassignedItems, freePositions);
 
         return new BipartiteGraph(partitionOne, partitionTwo, graph);
     }
 
-    private double computeLB(Solution sol) {
+    /**
+     * Computes a lower bound for the solution to be used in the branch and bound procedure.
+     * A minimum-weight-perfect-matching gets computed between unassigned items and compatible free stack positions.
+     * Then a lower bound gets obtained by adding the matching costs to the total costs of all fixed assignments.
+     *
+     * @param sol - partial solution to compute a lower bound for
+     * @return computed lower bound
+     */
+    private double computeLowerBound(Solution sol) {
         BipartiteGraph graph = this.constructBipartiteGraph(sol);
-
         KuhnMunkresMinimalWeightBipartitePerfectMatching<String, DefaultWeightedEdge> minCostPerfectMatching =
-            new KuhnMunkresMinimalWeightBipartitePerfectMatching<>(
-                graph.getGraph(), graph.getPartitionOne(), graph.getPartitionTwo()
-            )
-        ;
+            new KuhnMunkresMinimalWeightBipartitePerfectMatching<>(graph.getGraph(), graph.getPartitionOne(), graph.getPartitionTwo());
         return minCostPerfectMatching.getMatching().getWeight() + sol.computeCosts();
-    }
-
-    private void branchAndBound(Solution sol, int itemToBeAdded) {
-
-        for (int stack = 0; stack < sol.getFilledStacks().length; stack++) {
-
-            if (HeuristicUtil.stackHasFreePosition(sol.getFilledStacks()[stack])
-                && HeuristicUtil.itemCompatibleWithStack(this.costs, itemToBeAdded, stack)
-                && HeuristicUtil.itemCompatibleWithAlreadyAssignedItems(itemToBeAdded, sol.getFilledStacks()[stack], this.itemObjects, this.stackingConstraints)) {
-
-                    Solution tmpSol = new Solution(sol);
-                    HeuristicUtil.assignItemToStack(itemToBeAdded, tmpSol.getFilledStacks()[stack], this.itemObjects);
-
-                    if (itemToBeAdded == this.numberOfItems - 1) {
-                        if (tmpSol.computeCosts() < this.bestObjectiveValue) {
-                            this.bestSol = tmpSol;
-                            this.bestObjectiveValue = tmpSol.computeCosts();
-                            System.out.println(this.bestObjectiveValue);
-                        }
-                    } else {
-                        double LB = this.computeLB(tmpSol);
-                        if (LB < this.bestObjectiveValue) {
-                            this.branchAndBound(tmpSol, itemToBeAdded + 1);
-                        }
-                    }
-            }
-        }
     }
 }
