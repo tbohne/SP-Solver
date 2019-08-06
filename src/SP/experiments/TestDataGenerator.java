@@ -19,9 +19,9 @@ public class TestDataGenerator {
     private static final String INSTANCE_PREFIX = "res/instances/";
 
     /******************************* CONFIGURATION *************************************/
-    private static final int NUMBER_OF_INSTANCES = 20;
-    private static final int NUMBER_OF_ITEMS = 100;
-    private static final int STACK_CAPACITY = 3;
+    private static final int NUMBER_OF_INSTANCES = 1;
+    private static final int NUMBER_OF_ITEMS = 20;
+    private static final int STACK_CAPACITY = 2;
 
     // The number of stacks m is initially m = n / b,
     // this number specifies the percentage by which the initial m gets increased.

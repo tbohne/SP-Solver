@@ -371,6 +371,27 @@ public class Solution implements Comparable<Solution> {
     }
 
     /**
+     * Returns the items that are not yet assigned to a stack position.
+     *
+     * @return list of unassigned items
+     */
+    public List<Integer> getUnassignedItems() {
+        List<Integer> assigned = new ArrayList<>();
+        for (int[] filledStack : this.filledStacks) {
+            for (int item : filledStack) {
+                if (item != -1) { assigned.add(item); }
+            }
+        }
+        List<Integer> unassigned = new ArrayList<>();
+        for (int item = 0; item < this.solvedInstance.getItems().length; item++) {
+            if (!assigned.contains(item)) {
+                unassigned.add(item);
+            }
+        }
+        return unassigned;
+    }
+
+    /**
      * Returns whether the stacking constraints are respected by the solution's stack assignments.
      *
      * @return whether the solution is respecting the stacking constraints

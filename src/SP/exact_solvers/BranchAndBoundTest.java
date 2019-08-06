@@ -3,6 +3,7 @@ package SP.exact_solvers;
 import SP.experiments.CompareSolvers;
 import SP.io.SolutionReader;
 import SP.representations.OptimizableSolution;
+import SP.representations.Solution;
 import SP.util.RepresentationUtil;
 
 import java.util.List;
