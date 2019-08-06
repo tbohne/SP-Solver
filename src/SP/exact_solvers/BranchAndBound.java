@@ -59,12 +59,9 @@ public class BranchAndBound {
     /**
      * Branch-and-Bound procedure that generates exact solutions for stacking problems.
      *
-     * @param sol           - currently considered partial solution
+     * @param sol - currently considered partial solution
      */
     private void branchAndBound(Solution sol) {
-
-        System.out.println(sol.getAssignedItems().size());
-
         for (int stack = 0; stack < sol.getFilledStacks().length; stack++) {
 
             if (HeuristicUtil.stackHasFreePosition(sol.getFilledStacks()[stack])
@@ -75,10 +72,9 @@ public class BranchAndBound {
                 Solution tmpSol = new Solution(sol);
                 HeuristicUtil.assignItemToStack(tmpSol.getAssignedItems().size(), tmpSol.getFilledStacks()[stack], this.itemObjects);
 
-                if (tmpSol.getAssignedItems().size() == this.numberOfItems - 1) {
+                if (tmpSol.getAssignedItems().size() == this.numberOfItems) {
                     if (tmpSol.computeCosts() < this.bestSol.computeCosts()) {
                         this.bestSol = tmpSol;
-                        System.out.println(this.bestSol.computeCosts());
                     }
                 } else {
                     double LB = this.computeLowerBound(tmpSol);
@@ -161,6 +157,8 @@ public class BranchAndBound {
      * Computes a lower bound for the solution to be used in the branch and bound procedure.
      * A minimum-weight-perfect-matching gets computed between unassigned items and compatible free stack positions.
      * Then a lower bound gets obtained by adding the matching costs to the total costs of all fixed assignments.
+     * It's a LB, because only stacking constraints between unassigned items and already assigned items are considered
+     * and not stacking constraints between items that are going to be assigned.
      *
      * @param sol - partial solution to compute a lower bound for
      * @return computed lower bound
