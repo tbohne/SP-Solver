@@ -1,20 +1,11 @@
 package SP.exact_solvers;
 
-import SP.representations.BipartiteGraph;
 import SP.representations.Item;
 import SP.representations.Solution;
-import SP.representations.StackPosition;
-import SP.util.GraphUtil;
 import SP.util.HeuristicUtil;
-import org.jgrapht.Graph;
-import org.jgrapht.alg.matching.KuhnMunkresMinimalWeightBipartitePerfectMatching;
-import org.jgrapht.graph.DefaultUndirectedWeightedGraph;
-import org.jgrapht.graph.DefaultWeightedEdge;
+import SP.util.LowerBoundsUtil;
 
-import java.util.HashSet;
-import java.util.List;
 import java.util.PriorityQueue;
-import java.util.Set;
 
 /**
  * Exact branch-and-bound solver to generate feasible solutions to stacking problems.
@@ -86,7 +77,7 @@ public class BranchAndBound {
                             this.bestSol = tmpSol;
                         }
                     } else {
-                        double LB = this.computeLowerBound(tmpSol);
+                        double LB = LowerBoundsUtil.computeLowerBound(tmpSol, this.costs, this.itemObjects, this.stackingConstraints, this.numberOfItems);
                         if (LB < this.bestSol.computeCosts()) {
                             unexploredNodes.add(new Solution(tmpSol));
                         }
@@ -107,76 +98,5 @@ public class BranchAndBound {
                 sol.getFilledStacks()[i][j] = -1;
             }
         }
-    }
-
-    /**
-     * Adds edges to the bipartite graph that connect unassigned items with compatible free stack positions.
-     *
-     * @param bipartiteGraph - bipartite graph to add the edges to
-     * @param items          - unassigned items to be connected to compatible free positions
-     * @param positions      - free positions the items get connected to
-     */
-    private void addEdgesBetweenItemsAndStackPositions(
-        Solution sol, Graph<String, DefaultWeightedEdge> bipartiteGraph, List<Integer> items, List<StackPosition> positions
-    ) {
-        for (int item : items) {
-            for (StackPosition pos : positions) {
-
-                DefaultWeightedEdge edge = bipartiteGraph.addEdge("item" + item, "pos" + pos);
-                double costs = this.costs[item][pos.getStackIdx()];
-
-                // Stack incompatibility is realized indirectly via high costs (in costs matrix) to keep the graph
-                // complete bipartite. The stacking constraints should also be respected, therefore violated stacking
-                // constraints are realized via high costs as well.
-                if (!HeuristicUtil.itemCompatibleWithAlreadyAssignedItems(
-                    item, sol.getFilledStacks()[pos.getStackIdx()], this.itemObjects, this.stackingConstraints)
-                ) {
-                    costs = Integer.MAX_VALUE / this.numberOfItems;
-                }
-                bipartiteGraph.setEdgeWeight(edge, costs);
-            }
-        }
-    }
-
-    /**
-     * Constructs the bipartite graph between unassigned items and free stack positions to be
-     * used in the lower bound computation.
-     *
-     * @param sol - partial solution to compute a lower bound for
-     * @return bipartite graph between unassigned items and free stack positions
-     */
-    private BipartiteGraph constructBipartiteGraph(Solution sol) {
-        List<Integer> unassignedItems = sol.getUnassignedItems();
-        List<StackPosition> freePositions = HeuristicUtil.retrieveEmptyPositions(sol);
-
-        Graph<String, DefaultWeightedEdge> graph = new DefaultUndirectedWeightedGraph<>(DefaultWeightedEdge.class);
-        Set<String> partitionOne = new HashSet<>();
-        Set<String> partitionTwo = new HashSet<>();
-
-        GraphUtil.addVerticesForUnmatchedItems(unassignedItems, graph, partitionOne);
-        GraphUtil.addVerticesForEmptyPositions(freePositions, graph, partitionTwo);
-        List<Integer> dummyItems = GraphUtil.introduceDummyVerticesToBipartiteGraph(graph, partitionOne, partitionTwo);
-
-        GraphUtil.addEdgesBetweenDummyItemsAndStackPositions(graph, dummyItems, freePositions);
-        this.addEdgesBetweenItemsAndStackPositions(sol, graph, unassignedItems, freePositions);
-
-        return new BipartiteGraph(partitionOne, partitionTwo, graph);
-    }
-
-    /**
-     * Computes a lower bound for the solution to be used in the branch and bound procedure.
-     * A minimum-weight-perfect-matching gets computed between unassigned items and compatible free stack positions.
-     * Then a lower bound gets obtained by adding the matching costs to the total costs of all fixed assignments.
-     * It's a LB, because only stacking constraints between unassigned items and already assigned items are considered
-     * and not stacking constraints between items that are going to be assigned.
-     *
-     * @param sol - partial solution to compute a lower bound for
-     * @return computed lower bound
-     */
-    private double computeLowerBound(Solution sol) {
-        BipartiteGraph graph = this.constructBipartiteGraph(sol);
-        KuhnMunkresMinimalWeightBipartitePerfectMatching<String, DefaultWeightedEdge> minCostPerfectMatching =
-            new KuhnMunkresMinimalWeightBipartitePerfectMatching<>(graph.getGraph(), graph.getPartitionOne(), graph.getPartitionTwo());
-        return minCostPerfectMatching.getMatching().getWeight() + sol.computeCosts();
     }
 }
