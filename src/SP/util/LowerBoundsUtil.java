@@ -1,7 +1,6 @@
 package SP.util;
 
 import SP.representations.BipartiteGraph;
-import SP.representations.Item;
 import SP.representations.Solution;
 import SP.representations.StackPosition;
 import org.jgrapht.Graph;
@@ -27,58 +26,40 @@ public class LowerBoundsUtil {
      * It's a LB, because only stacking constraints between unassigned items and already assigned items are considered
      * and not stacking constraints between items that are going to be assigned.
      *
-     * @param sol                 - partial solution to compute a lower bound for
-     * @param costs               - costs for item-stack-assignments
-     * @param itemObjects         - items to be assigned together with their width and length dimensions
-     * @param stackingConstraints - stacking constraints to be respected
-     * @param numberOfItems       - number of items to be assigned
+     * @param sol - partial solution to compute a lower bound for
      * @return computed lower bound
      */
-    public static double computeLowerBound(Solution sol, double[][] costs, Item[] itemObjects, int[][] stackingConstraints, int numberOfItems) {
-        BipartiteGraph graph = constructBipartiteGraph(sol, costs, itemObjects, stackingConstraints, numberOfItems);
+    public static double computeLowerBound(Solution sol) {
+        BipartiteGraph graph = constructBipartiteGraph(sol);
         KuhnMunkresMinimalWeightBipartitePerfectMatching<String, DefaultWeightedEdge> minCostPerfectMatching =
             new KuhnMunkresMinimalWeightBipartitePerfectMatching<>(graph.getGraph(), graph.getPartitionOne(), graph.getPartitionTwo());
         return minCostPerfectMatching.getMatching().getWeight() + sol.computeCosts();
     }
 
     /**
-     *
-     *
-     * @param bipartiteGraph - bipartite graph to add the edges to
-     * @param items          - unassigned items to be connected to compatible free positions
-     * @param positions      - free positions the items get connected to
-     */
-
-
-    /**
      * Adds edges to the bipartite graph that connect unassigned items with compatible free stack positions.
      *
-     * @param sol                 - partial solution to compute a lower bound for
-     * @param bipartiteGraph      - bipartite graph to add edges to
-     * @param items               - items to be assigned to stacks
-     * @param positions           - positions in stacks the items could be assigned to
-     * @param costMatrix          - costs for item-stack-assignments
-     * @param itemObjects         - items to be assigned together with their width and length dimensions
-     * @param stackingConstraints - stacking constraints to be respected
-     * @param numberOfItems       - number of items to be assigned
+     * @param sol            - partial solution to compute a lower bound for
+     * @param bipartiteGraph - bipartite graph to add edges to
+     * @param items          - items to be assigned to stacks
+     * @param positions      - positions in stacks the items could be assigned to
      */
     private static void addEdgesBetweenItemsAndStackPositions(
-        Solution sol, Graph<String, DefaultWeightedEdge> bipartiteGraph, List<Integer> items, List<StackPosition> positions,
-        double[][] costMatrix, Item[] itemObjects, int[][] stackingConstraints, int numberOfItems
+        Solution sol, Graph<String, DefaultWeightedEdge> bipartiteGraph, List<Integer> items, List<StackPosition> positions
     ) {
         for (int item : items) {
             for (StackPosition pos : positions) {
 
                 DefaultWeightedEdge edge = bipartiteGraph.addEdge("item" + item, "pos" + pos);
-                double costs = costMatrix[item][pos.getStackIdx()];
+                double costs = sol.getSolvedInstance().getCosts()[item][pos.getStackIdx()];
 
                 // Stack incompatibility is realized indirectly via high costs (in costs matrix) to keep the graph
                 // complete bipartite. The stacking constraints should also be respected, therefore violated stacking
                 // constraints are realized via high costs as well.
                 if (!HeuristicUtil.itemCompatibleWithAlreadyAssignedItems(
-                        item, sol.getFilledStacks()[pos.getStackIdx()], itemObjects, stackingConstraints)
+                        item, sol.getFilledStacks()[pos.getStackIdx()], sol.getSolvedInstance().getItemObjects(), sol.getSolvedInstance().getStackingConstraints())
                         ) {
-                    costs = Integer.MAX_VALUE / numberOfItems;
+                    costs = Integer.MAX_VALUE / sol.getSolvedInstance().getItems().length;
                 }
                 bipartiteGraph.setEdgeWeight(edge, costs);
             }
@@ -89,16 +70,10 @@ public class LowerBoundsUtil {
      * Constructs the bipartite graph between unassigned items and free stack positions to be
      * used in the lower bound computation.
      *
-     * @param sol                 - partial solution to compute a lower bound for
-     * @param costs               - costs for item-stack-assignments
-     * @param itemObjects         - items to be assigned together with their width and length dimensions
-     * @param stackingConstraints - stacking constraints to be respected
-     * @param numberOfItems       - number of items to be assigned
+     * @param sol - partial solution to compute a lower bound for
      * @return bipartite graph between unassigned items and free stack positions
      */
-    private static BipartiteGraph constructBipartiteGraph(
-        Solution sol, double[][] costs, Item[] itemObjects, int[][] stackingConstraints, int numberOfItems
-    ) {
+    private static BipartiteGraph constructBipartiteGraph(Solution sol) {
         List<Integer> unassignedItems = sol.getUnassignedItems();
         List<StackPosition> freePositions = HeuristicUtil.retrieveEmptyPositions(sol);
 
@@ -111,7 +86,7 @@ public class LowerBoundsUtil {
         List<Integer> dummyItems = GraphUtil.introduceDummyVerticesToBipartiteGraph(graph, partitionOne, partitionTwo);
 
         GraphUtil.addEdgesBetweenDummyItemsAndStackPositions(graph, dummyItems, freePositions);
-        addEdgesBetweenItemsAndStackPositions(sol, graph, unassignedItems, freePositions, costs, itemObjects, stackingConstraints, numberOfItems);
+        addEdgesBetweenItemsAndStackPositions(sol, graph, unassignedItems, freePositions);
 
         return new BipartiteGraph(partitionOne, partitionTwo, graph);
     }

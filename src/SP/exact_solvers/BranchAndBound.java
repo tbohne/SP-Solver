@@ -77,7 +77,7 @@ public class BranchAndBound {
                             this.bestSol = tmpSol;
                         }
                     } else {
-                        double LB = LowerBoundsUtil.computeLowerBound(tmpSol, this.costs, this.itemObjects, this.stackingConstraints, this.numberOfItems);
+                        double LB = LowerBoundsUtil.computeLowerBound(tmpSol);
                         if (LB < this.bestSol.computeCosts()) {
                             unexploredNodes.add(new Solution(tmpSol));
                         }
