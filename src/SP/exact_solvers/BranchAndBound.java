@@ -13,6 +13,7 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.PriorityQueue;
 import java.util.Set;
 
 /**
@@ -62,24 +63,33 @@ public class BranchAndBound {
      * @param sol - currently considered partial solution
      */
     private void branchAndBound(Solution sol) {
-        for (int stack = 0; stack < sol.getFilledStacks().length; stack++) {
 
-            if (HeuristicUtil.stackHasFreePosition(sol.getFilledStacks()[stack])
-                && HeuristicUtil.itemCompatibleWithStack(this.costs, sol.getAssignedItems().size(), stack)
-                && HeuristicUtil.itemCompatibleWithAlreadyAssignedItems(
-                    sol.getAssignedItems().size(), sol.getFilledStacks()[stack], this.itemObjects, this.stackingConstraints
-            )) {
-                Solution tmpSol = new Solution(sol);
-                HeuristicUtil.assignItemToStack(tmpSol.getAssignedItems().size(), tmpSol.getFilledStacks()[stack], this.itemObjects);
+        PriorityQueue<Solution> unexploredNodes = new PriorityQueue<>();
+        unexploredNodes.add(new Solution(sol));
 
-                if (tmpSol.getAssignedItems().size() == this.numberOfItems) {
-                    if (tmpSol.computeCosts() < this.bestSol.computeCosts()) {
-                        this.bestSol = tmpSol;
-                    }
-                } else {
-                    double LB = this.computeLowerBound(tmpSol);
-                    if (LB < this.bestSol.computeCosts()) {
-                        this.branchAndBound(tmpSol);
+        while (!unexploredNodes.isEmpty()) {
+
+            Solution currSol = unexploredNodes.poll();
+
+            for (int stack = 0; stack < currSol.getFilledStacks().length; stack++) {
+
+                if (HeuristicUtil.stackHasFreePosition(currSol.getFilledStacks()[stack])
+                    && HeuristicUtil.itemCompatibleWithStack(this.costs, currSol.getAssignedItems().size(), stack)
+                    && HeuristicUtil.itemCompatibleWithAlreadyAssignedItems(
+                    currSol.getAssignedItems().size(), currSol.getFilledStacks()[stack], this.itemObjects, this.stackingConstraints
+                )) {
+                    Solution tmpSol = new Solution(currSol);
+                    HeuristicUtil.assignItemToStack(tmpSol.getAssignedItems().size(), tmpSol.getFilledStacks()[stack], this.itemObjects);
+
+                    if (tmpSol.getAssignedItems().size() == this.numberOfItems) {
+                        if (tmpSol.computeCosts() < this.bestSol.computeCosts()) {
+                            this.bestSol = tmpSol;
+                        }
+                    } else {
+                        double LB = this.computeLowerBound(tmpSol);
+                        if (LB < this.bestSol.computeCosts()) {
+                            unexploredNodes.add(new Solution(tmpSol));
+                        }
                     }
                 }
             }
