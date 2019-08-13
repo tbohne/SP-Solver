@@ -55,7 +55,7 @@ public class BranchAndBound {
      */
     private void branchAndBound(Solution sol) {
 
-        PriorityQueue<Solution> unexploredNodes = new PriorityQueue<>();
+        PriorityQueue<Solution> unexploredNodes = new PriorityQueue<>(1, new BestFirstComparator());
         unexploredNodes.add(new Solution(sol));
 
         while (!unexploredNodes.isEmpty()) {
