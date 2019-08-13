@@ -55,12 +55,15 @@ public class BranchAndBound {
      */
     private void branchAndBound(Solution sol) {
 
-        PriorityQueue<Solution> unexploredNodes = new PriorityQueue<>(1, new BestFirstComparator());
+        PriorityQueue<Solution> unexploredNodes = new PriorityQueue<>(1, new DepthFirstComparator());
         unexploredNodes.add(new Solution(sol));
 
         while (!unexploredNodes.isEmpty()) {
 
             Solution currSol = unexploredNodes.poll();
+
+            System.out.println("number of assigned items: " + currSol.getNumberOfAssignedItems());
+            System.out.println("prio queue size: " + unexploredNodes.size());
 
             for (int stack = 0; stack < currSol.getFilledStacks().length; stack++) {
 
