@@ -19,8 +19,8 @@ public class TestDataGenerator {
     private static final String INSTANCE_PREFIX = "res/instances/";
 
     /******************************* CONFIGURATION *************************************/
-    private static final int NUMBER_OF_INSTANCES = 1;
-    private static final int NUMBER_OF_ITEMS = 20;
+    private static final int NUMBER_OF_INSTANCES = 20;
+    private static final int NUMBER_OF_ITEMS = 500;
     private static final int STACK_CAPACITY = 2;
 
     // The number of stacks m is initially m = n / b,
@@ -40,9 +40,7 @@ public class TestDataGenerator {
 
     private static final float STORAGE_AREA_SLOT_LENGTH = 6.06F;
     private static final float STORAGE_AREA_SLOT_WIDTH = 2.44F;
-
     private static final float STORAGE_AREA_VEHICLE_DISTANCE_FACTOR = 5.0F;
-
     private static final int NUMBER_OF_ROWS_IN_STORAGE_AREA = 2;
     /***********************************************************************************/
 
@@ -304,7 +302,9 @@ public class TestDataGenerator {
             INSTANCE_PREFIX + "instance_set_config.csv", NUMBER_OF_INSTANCES, NUMBER_OF_ITEMS,
             STACK_CAPACITY, ADDITIONAL_STACK_PERCENTAGE, CHANCE_FOR_ONE_IN_STACKING_CONSTRAINTS,
             CHANCE_FOR_ONE_IN_PLACEMENT_CONSTRAINTS, USING_STACKING_CONSTRAINT_GENERATION_APPROACH_ONE,
-            ITEM_LENGTH_LB, ITEM_LENGTH_UB, ITEM_WIDTH_LB, ITEM_WIDTH_UB
+            TRANSITIVE_STACKING_CONSTRAINTS, ITEM_LENGTH_LB, ITEM_LENGTH_UB, ITEM_WIDTH_LB, ITEM_WIDTH_UB,
+            STORAGE_AREA_SLOT_LENGTH, STORAGE_AREA_SLOT_WIDTH, STORAGE_AREA_VEHICLE_DISTANCE_FACTOR,
+            NUMBER_OF_ROWS_IN_STORAGE_AREA
         );
     }
 

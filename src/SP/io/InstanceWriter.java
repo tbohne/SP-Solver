@@ -66,8 +66,9 @@ public class InstanceWriter {
     public static void writeConfig(
         String filename, int numOfInstances, int numOfItems, int stackCapacity, int additionalStackPercentage,
         float chanceForOneInStackingConstraints, float chanceForOneInPlacementConstraints,
-        boolean usingStackingConstraintGenerationApproachOne, float itemLengthLB, float itemLengthUB, float itemWidthLB,
-        float itemWidthUB
+        boolean usingStackingConstraintGenerationApproachOne, boolean transitiveStackingConstraints,
+        float itemLengthLB, float itemLengthUB, float itemWidthLB, float itemWidthUB, float storageAreaSlotLength,
+        float storageAreaSlotWidth, float storageAreaVehicleDistanceFactor, int numberOfRowsInStorageArea
     ) {
 
         File file = new File(filename);
@@ -78,15 +79,17 @@ public class InstanceWriter {
 
             bw.write(
                 "numOfInstances,numOfItems,stackCapacity,additionalStackPercentage,"
-                + "chanceForOneInStackingConstraints,chanceForOneInStackConstraints,"
-                + "usingStackingConstraintGenerationApproachOne,itemLengthLB,itemLengthUB,"
-                + "itemWidthLB,itemWidthUB\n"
+                + "chanceForOneInStackingConstraints,chanceForOneInPlacementConstraints,"
+                + "usingStackingConstraintGenerationApproachOne,transitiveStackingConstraints,"
+                + "itemLengthLB,itemLengthUB,itemWidthLB,itemWidthUB,storageAreaSlotLength,"
+                + "storageAreaSlotWidth,storageAreaVehicleDistanceFactor,numberOfRowsInStorageArea\n"
             );
             bw.write(
                 numOfInstances + "," + numOfItems + "," + stackCapacity + "," + additionalStackPercentage + ","
                 + chanceForOneInStackingConstraints + "," + chanceForOneInPlacementConstraints + ","
-                + usingStackingConstraintGenerationApproachOne + "," + itemLengthLB + "," + itemLengthUB + ","
-                + itemWidthLB + "," + itemWidthUB
+                + usingStackingConstraintGenerationApproachOne + "," + transitiveStackingConstraints + ","
+                + itemLengthLB + "," + itemLengthUB + "," + itemWidthLB + "," + itemWidthUB + "," + storageAreaSlotLength
+                + "," + storageAreaSlotWidth + "," + storageAreaVehicleDistanceFactor + "," + numberOfRowsInStorageArea
             );
 
             bw.close();
