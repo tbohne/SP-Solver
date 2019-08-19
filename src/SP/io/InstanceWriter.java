@@ -68,9 +68,9 @@ public class InstanceWriter {
         String filename, int numOfInstances, int numOfItems, int stackCapacity, int additionalStackPercentage,
         float chanceForOneInStackingConstraints, float chanceForOneInPlacementConstraints,
         boolean usingStackingConstraintGenerationApproachOne, boolean transitiveStackingConstraints,
-        TestDataGenerator.costGenerationApproaches costGenerationApproach, float itemLengthLB, float itemLengthUB,
-        float itemWidthLB, float itemWidthUB, float storageAreaSlotLength, float storageAreaSlotWidth,
-        float storageAreaVehicleDistanceFactor, int numberOfRowsInStorageArea
+        TestDataGenerator.costGenerationApproaches costGenerationApproach, float minCost, float maxCost,
+        float itemLengthLB, float itemLengthUB, float itemWidthLB, float itemWidthUB, float storageAreaSlotLength,
+        float storageAreaSlotWidth, float storageAreaVehicleDistanceFactor, int numberOfRowsInStorageArea
     ) {
 
         File file = new File(filename);
@@ -83,15 +83,15 @@ public class InstanceWriter {
                 "numOfInstances,numOfItems,stackCapacity,additionalStackPercentage,"
                 + "chanceForOneInStackingConstraints,chanceForOneInPlacementConstraints,"
                 + "usingStackingConstraintGenerationApproachOne,transitiveStackingConstraints,"
-                + "costGenerationApproach,itemLengthLB,itemLengthUB,itemWidthLB,itemWidthUB,storageAreaSlotLength,"
-                + "storageAreaSlotWidth,storageAreaVehicleDistanceFactor,numberOfRowsInStorageArea\n"
+                + "costGenerationApproach,minCost, maxCost,itemLengthLB,itemLengthUB,itemWidthLB,itemWidthUB,"
+                + "storageAreaSlotLength,storageAreaSlotWidth,storageAreaVehicleDistanceFactor,numberOfRowsInStorageArea\n"
             );
             bw.write(
                 numOfInstances + "," + numOfItems + "," + stackCapacity + "," + additionalStackPercentage + ","
                 + chanceForOneInStackingConstraints + "," + chanceForOneInPlacementConstraints + ","
                 + usingStackingConstraintGenerationApproachOne + "," + transitiveStackingConstraints + ","
-                + costGenerationApproach + "," + itemLengthLB + "," + itemLengthUB + "," + itemWidthLB + ","
-                + itemWidthUB + "," + storageAreaSlotLength + "," + storageAreaSlotWidth + ","
+                + costGenerationApproach + "," + minCost + "," + maxCost + "," + itemLengthLB + "," + itemLengthUB + ","
+                + itemWidthLB + "," + itemWidthUB + "," + storageAreaSlotLength + "," + storageAreaSlotWidth + ","
                 + storageAreaVehicleDistanceFactor + "," + numberOfRowsInStorageArea
             );
 
