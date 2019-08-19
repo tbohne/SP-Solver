@@ -235,6 +235,26 @@ public class Solution implements Comparable<Solution> {
         }
     }
 
+    public boolean soFarFeasible() {
+
+        this.lowerItemsThatAreStackedInTheAir();
+
+        if (!this.stackingConstraintsRespected()) {
+            System.out.println("infeasible solution - the stacking constraints are violated");
+            return false;
+        } else if (!this.placementConstraintsRespected()) {
+            System.out.println("infeasible solution - the placement constraints are violated");
+            return false;
+        } else if (this.containsDuplicates()) {
+            System.out.println("infeasible solution - there are items that are assigned more than once");
+            return false;
+        } else if (containsGaps()) {
+            System.out.println("infeasible solution - there are gaps in the filled stacks");
+            return false;
+        }
+        return true;
+    }
+
     /**
      * Returns whether the solution is feasible which means that all items have been
      * assigned to a position in a stack in a way that respects the stacking- and

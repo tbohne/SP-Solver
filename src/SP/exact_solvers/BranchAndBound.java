@@ -5,6 +5,8 @@ import SP.representations.Solution;
 import SP.util.HeuristicUtil;
 import SP.util.LowerBoundsUtil;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.PriorityQueue;
 
 /**
@@ -21,6 +23,7 @@ public class BranchAndBound {
     private final int[][] stackingConstraints;
     private final Item[] itemObjects;
     private Solution bestSol;
+    private Map<Solution, Double> computedLowerBounds;
 
     /**
      * Constructor
@@ -34,6 +37,7 @@ public class BranchAndBound {
         this.costs = initialSolution.getSolvedInstance().getCosts();
         this.stackingConstraints = initialSolution.getSolvedInstance().getStackingConstraints();
         this.itemObjects = initialSolution.getSolvedInstance().getItemObjects();
+        this.computedLowerBounds = new HashMap<>();
     }
 
     /**
@@ -55,34 +59,40 @@ public class BranchAndBound {
      */
     private void branchAndBound(Solution sol) {
 
-        PriorityQueue<Solution> unexploredNodes = new PriorityQueue<>(1, new BreadthFirstComparator());
+        PriorityQueue<Solution> unexploredNodes = new PriorityQueue<>(1, new DepthFirstComparator());
         unexploredNodes.add(new Solution(sol));
 
         while (!unexploredNodes.isEmpty()) {
 
             Solution currSol = unexploredNodes.poll();
+            System.out.println(currSol.getNumberOfAssignedItems());
 
-//            System.out.println("number of assigned items: " + currSol.getNumberOfAssignedItems());
-//            System.out.println("prio queue size: " + unexploredNodes.size());
+            // the best sol could have been updated since this solution was added - check again
+            if (!currSol.soFarFeasible() || (this.computedLowerBounds.containsKey(currSol)
+                && this.computedLowerBounds.get(currSol) >= this.bestSol.computeCosts())) {
+                    continue;
+            }
 
             for (int stack = 0; stack < currSol.getFilledStacks().length; stack++) {
 
                 if (HeuristicUtil.stackHasFreePosition(currSol.getFilledStacks()[stack])
                     && HeuristicUtil.itemCompatibleWithStack(this.costs, currSol.getAssignedItems().size(), stack)
                     && HeuristicUtil.itemCompatibleWithAlreadyAssignedItems(
-                    currSol.getAssignedItems().size(), currSol.getFilledStacks()[stack], this.itemObjects, this.stackingConstraints
+                        currSol.getAssignedItems().size(), currSol.getFilledStacks()[stack], this.itemObjects, this.stackingConstraints
                 )) {
                     Solution tmpSol = new Solution(currSol);
                     HeuristicUtil.assignItemToStack(tmpSol.getAssignedItems().size(), tmpSol.getFilledStacks()[stack], this.itemObjects);
 
                     if (tmpSol.getAssignedItems().size() == this.numberOfItems) {
                         if (tmpSol.computeCosts() < this.bestSol.computeCosts()) {
-                            this.bestSol = tmpSol;
+                            System.out.println("best sol updated..");
+                            this.bestSol = new Solution(tmpSol);
                         }
                     } else {
                         double LB = LowerBoundsUtil.computeLowerBound(tmpSol);
                         if (LB < this.bestSol.computeCosts()) {
-                            unexploredNodes.add(new Solution(tmpSol));
+                            unexploredNodes.add(tmpSol);
+                            this.computedLowerBounds.put(tmpSol, LB);
                         }
                     }
                 }
