@@ -8,6 +8,7 @@ import SP.util.HeuristicUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Provides functionalities to configure and generate test instances for stacking problems.
@@ -38,7 +39,9 @@ public class TestDataGenerator {
     private static final boolean USING_STACKING_CONSTRAINT_GENERATION_APPROACH_ONE = false;
     private static final boolean TRANSITIVE_STACKING_CONSTRAINTS = true;
 
-    private static final costGenerationApproaches COST_GENERATION_APPROACH = costGenerationApproaches.MANHATTAN;
+    private static final costGenerationApproaches COST_GENERATION_APPROACH = costGenerationApproaches.RANDOM;
+    private static final float MIN_COST = 1.0F;
+    private static final float MAX_COST = 10.0F;
 
     private static final float ITEM_LENGTH_LB = 1.0F;
     private static final float ITEM_LENGTH_UB = 6.0F;
@@ -71,7 +74,7 @@ public class TestDataGenerator {
             if (COST_GENERATION_APPROACH == costGenerationApproaches.MANHATTAN) {
                 generateManhattanCosts(costs, numOfStacks, items, stackPositions);
             } else if (COST_GENERATION_APPROACH == costGenerationApproaches.RANDOM) {
-                // TODO: implement random cost generation
+                generateRandomCosts(costs, numOfStacks, items, stackPositions);
             }
             generateInstance(idx, numOfStacks, items, stackPositions, stackingConstraintMatrix, costs);
         }
@@ -291,9 +294,19 @@ public class TestDataGenerator {
      * @param stackPositions - positions of the stacks in the storage area
      */
     private static void generateManhattanCosts(double[][] costs, int numOfStacks, Item[] items, List<GridPosition> stackPositions) {
-        for (int i = 0; i < NUMBER_OF_ITEMS; i++) {
-            for (int j = 0; j < numOfStacks; j++) {
-                costs[i][j] = HeuristicUtil.computeManhattanDist(i, j, items, stackPositions);
+        for (int item = 0; item < NUMBER_OF_ITEMS; item++) {
+            for (int stack = 0; stack < numOfStacks; stack++) {
+                costs[item][stack] = HeuristicUtil.computeManhattanDist(item, stack, items, stackPositions);
+            }
+        }
+        addPlacementConstraintsViaHighCostEntries(numOfStacks, costs);
+    }
+
+    private static void generateRandomCosts(double[][] costs, int numOfStacks, Item[] items, List<GridPosition> stackPositions) {
+        for (int item = 0; item < NUMBER_OF_ITEMS; item++) {
+            for (int stack = 0; stack < numOfStacks; stack++) {
+                Random r = new Random();
+                costs[item][stack] = MIN_COST + r.nextFloat() * (MAX_COST - MIN_COST);
             }
         }
         addPlacementConstraintsViaHighCostEntries(numOfStacks, costs);
