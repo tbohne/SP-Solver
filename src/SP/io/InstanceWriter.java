@@ -1,5 +1,6 @@
 package SP.io;
 
+import SP.experiments.TestDataGenerator;
 import SP.representations.Instance;
 import SP.representations.Item;
 import SP.representations.GridPosition;
@@ -67,8 +68,9 @@ public class InstanceWriter {
         String filename, int numOfInstances, int numOfItems, int stackCapacity, int additionalStackPercentage,
         float chanceForOneInStackingConstraints, float chanceForOneInPlacementConstraints,
         boolean usingStackingConstraintGenerationApproachOne, boolean transitiveStackingConstraints,
-        float itemLengthLB, float itemLengthUB, float itemWidthLB, float itemWidthUB, float storageAreaSlotLength,
-        float storageAreaSlotWidth, float storageAreaVehicleDistanceFactor, int numberOfRowsInStorageArea
+        TestDataGenerator.costGenerationApproaches costGenerationApproach, float itemLengthLB, float itemLengthUB,
+        float itemWidthLB, float itemWidthUB, float storageAreaSlotLength, float storageAreaSlotWidth,
+        float storageAreaVehicleDistanceFactor, int numberOfRowsInStorageArea
     ) {
 
         File file = new File(filename);
@@ -81,15 +83,16 @@ public class InstanceWriter {
                 "numOfInstances,numOfItems,stackCapacity,additionalStackPercentage,"
                 + "chanceForOneInStackingConstraints,chanceForOneInPlacementConstraints,"
                 + "usingStackingConstraintGenerationApproachOne,transitiveStackingConstraints,"
-                + "itemLengthLB,itemLengthUB,itemWidthLB,itemWidthUB,storageAreaSlotLength,"
+                + "costGenerationApproach,itemLengthLB,itemLengthUB,itemWidthLB,itemWidthUB,storageAreaSlotLength,"
                 + "storageAreaSlotWidth,storageAreaVehicleDistanceFactor,numberOfRowsInStorageArea\n"
             );
             bw.write(
                 numOfInstances + "," + numOfItems + "," + stackCapacity + "," + additionalStackPercentage + ","
                 + chanceForOneInStackingConstraints + "," + chanceForOneInPlacementConstraints + ","
                 + usingStackingConstraintGenerationApproachOne + "," + transitiveStackingConstraints + ","
-                + itemLengthLB + "," + itemLengthUB + "," + itemWidthLB + "," + itemWidthUB + "," + storageAreaSlotLength
-                + "," + storageAreaSlotWidth + "," + storageAreaVehicleDistanceFactor + "," + numberOfRowsInStorageArea
+                + costGenerationApproach + "," + itemLengthLB + "," + itemLengthUB + "," + itemWidthLB + ","
+                + itemWidthUB + "," + storageAreaSlotLength + "," + storageAreaSlotWidth + ","
+                + storageAreaVehicleDistanceFactor + "," + numberOfRowsInStorageArea
             );
 
             bw.close();

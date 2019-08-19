@@ -18,6 +18,11 @@ public class TestDataGenerator {
 
     private static final String INSTANCE_PREFIX = "res/instances/";
 
+    public enum costGenerationApproaches {
+        RANDOM,
+        MANHATTAN
+    }
+
     /******************************* CONFIGURATION *************************************/
     private static final int NUMBER_OF_INSTANCES = 20;
     private static final int NUMBER_OF_ITEMS = 500;
@@ -32,6 +37,8 @@ public class TestDataGenerator {
 
     private static final boolean USING_STACKING_CONSTRAINT_GENERATION_APPROACH_ONE = false;
     private static final boolean TRANSITIVE_STACKING_CONSTRAINTS = true;
+
+    private static final costGenerationApproaches COST_GENERATION_APPROACH = costGenerationApproaches.MANHATTAN;
 
     private static final float ITEM_LENGTH_LB = 1.0F;
     private static final float ITEM_LENGTH_UB = 6.0F;
@@ -61,7 +68,11 @@ public class TestDataGenerator {
             }
 
             double[][] costs = new double[NUMBER_OF_ITEMS][numOfStacks];
-            generateCosts(costs, numOfStacks, items, stackPositions);
+            if (COST_GENERATION_APPROACH == costGenerationApproaches.MANHATTAN) {
+                generateManhattanCosts(costs, numOfStacks, items, stackPositions);
+            } else if (COST_GENERATION_APPROACH == costGenerationApproaches.RANDOM) {
+                // TODO: implement random cost generation
+            }
             generateInstance(idx, numOfStacks, items, stackPositions, stackingConstraintMatrix, costs);
         }
     }
@@ -271,20 +282,30 @@ public class TestDataGenerator {
 
     /**
      * Generates the matrix containing the transport costs for item-stack-assignments.
-     * The placement constraint that forbid certain item-stack-assignments are indirectly implemented
-     * via high cost entries.
+     * The cost generation is based on the manhattan distance between an item and a stack position
+     * in this approach. The placement constraint that forbid certain item-stack-assignments are
+     * indirectly implemented via high cost entries.
      *
      * @param costs          - matrix of costs to be filled
      * @param numOfStacks    - number of available stacks
      * @param stackPositions - positions of the stacks in the storage area
      */
-    private static void generateCosts(double[][] costs, int numOfStacks, Item[] items, List<GridPosition> stackPositions) {
+    private static void generateManhattanCosts(double[][] costs, int numOfStacks, Item[] items, List<GridPosition> stackPositions) {
         for (int i = 0; i < NUMBER_OF_ITEMS; i++) {
             for (int j = 0; j < numOfStacks; j++) {
                 costs[i][j] = HeuristicUtil.computeManhattanDist(i, j, items, stackPositions);
             }
         }
-        // Implements the placement constraints via high cost entries.
+        addPlacementConstraintsViaHighCostEntries(numOfStacks, costs);
+    }
+
+    /**
+     * Implements the placement constraints via high cost entries.
+     *
+     * @param numOfStacks - number of available stacks
+     * @param costs       - matrix of costs to add placement constraints to
+     */
+    private static void addPlacementConstraintsViaHighCostEntries(int numOfStacks, double[][] costs) {
         for (int i = 0; i < NUMBER_OF_ITEMS; i++) {
             for (int j = 0; j < numOfStacks; j++) {
                 if (Math.random() >= CHANCE_FOR_ONE_IN_PLACEMENT_CONSTRAINTS) {
@@ -302,8 +323,8 @@ public class TestDataGenerator {
             INSTANCE_PREFIX + "instance_set_config.csv", NUMBER_OF_INSTANCES, NUMBER_OF_ITEMS,
             STACK_CAPACITY, ADDITIONAL_STACK_PERCENTAGE, CHANCE_FOR_ONE_IN_STACKING_CONSTRAINTS,
             CHANCE_FOR_ONE_IN_PLACEMENT_CONSTRAINTS, USING_STACKING_CONSTRAINT_GENERATION_APPROACH_ONE,
-            TRANSITIVE_STACKING_CONSTRAINTS, ITEM_LENGTH_LB, ITEM_LENGTH_UB, ITEM_WIDTH_LB, ITEM_WIDTH_UB,
-            STORAGE_AREA_SLOT_LENGTH, STORAGE_AREA_SLOT_WIDTH, STORAGE_AREA_VEHICLE_DISTANCE_FACTOR,
+            TRANSITIVE_STACKING_CONSTRAINTS, COST_GENERATION_APPROACH, ITEM_LENGTH_LB, ITEM_LENGTH_UB, ITEM_WIDTH_LB,
+            ITEM_WIDTH_UB, STORAGE_AREA_SLOT_LENGTH, STORAGE_AREA_SLOT_WIDTH, STORAGE_AREA_VEHICLE_DISTANCE_FACTOR,
             NUMBER_OF_ROWS_IN_STORAGE_AREA
         );
     }
