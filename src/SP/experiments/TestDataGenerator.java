@@ -25,23 +25,23 @@ public class TestDataGenerator {
     }
 
     /******************************* CONFIGURATION *************************************/
-    private static final int NUMBER_OF_INSTANCES = 20;
-    private static final int NUMBER_OF_ITEMS = 500;
+    private static final int NUMBER_OF_INSTANCES = 3;
+    private static final int NUMBER_OF_ITEMS = 50;
     private static final int STACK_CAPACITY = 2;
 
     // The number of stacks m is initially m = n / b,
     // this number specifies the percentage by which the initial m gets increased.
     private static final int ADDITIONAL_STACK_PERCENTAGE = 20;
 
-    private static final float CHANCE_FOR_ONE_IN_STACKING_CONSTRAINTS = 0.0159F;
+    private static final float CHANCE_FOR_ONE_IN_STACKING_CONSTRAINTS = 0.0259F;
     private static final float CHANCE_FOR_ONE_IN_PLACEMENT_CONSTRAINTS = 0.7F;
 
-    private static final boolean USING_STACKING_CONSTRAINT_GENERATION_APPROACH_ONE = false;
+    private static final boolean USING_STACKING_CONSTRAINT_GENERATION_APPROACH_ONE = true;
     private static final boolean TRANSITIVE_STACKING_CONSTRAINTS = true;
 
-    private static final costGenerationApproaches COST_GENERATION_APPROACH = costGenerationApproaches.RANDOM;
-    private static final float MIN_COST = 1.0F;
-    private static final float MAX_COST = 10.0F;
+    private static final costGenerationApproaches COST_GENERATION_APPROACH = costGenerationApproaches.MANHATTAN;
+    private static final float MIN_COST = 90.0F;
+    private static final float MAX_COST = 100.0F;
 
     private static final float ITEM_LENGTH_LB = 1.0F;
     private static final float ITEM_LENGTH_UB = 6.0F;
@@ -210,6 +210,7 @@ public class TestDataGenerator {
                 }
             }
         }
+        printPercentageOfOneEntries(stackingConstraintMatrix);
         return stackingConstraintMatrix;
     }
 
@@ -236,7 +237,18 @@ public class TestDataGenerator {
         if (TRANSITIVE_STACKING_CONSTRAINTS) {
             stackingConstraintMatrix = makeMatrixTransitive(stackingConstraintMatrix);
         }
+        printPercentageOfOneEntries(stackingConstraintMatrix);
         return stackingConstraintMatrix;
+    }
+
+    private static void printPercentageOfOneEntries(int[][] stackingConstraints) {
+        float sum = 0;
+        for (int i = 0; i < stackingConstraints.length; i++) {
+            for (int j = 0; j < stackingConstraints[i].length; j++) {
+                sum += stackingConstraints[i][j];
+            }
+        }
+        System.out.println("percentage of one entries: " + sum / (stackingConstraints[0].length * stackingConstraints.length) * 100);
     }
 
     /**
