@@ -65,8 +65,8 @@ public class BranchAndBound {
         while (!unexploredNodes.isEmpty()) {
 
             Solution currSol = unexploredNodes.poll();
-            System.out.println("number of assigned items: " + currSol.getNumberOfAssignedItems());
-            System.out.println("unexplored nodes: " + unexploredNodes.size());
+//            System.out.println("number of assigned items: " + currSol.getNumberOfAssignedItems());
+//            System.out.println("unexplored nodes: " + unexploredNodes.size());
 
             // the best sol could have been updated since this solution was added - check again
             if (!currSol.soFarFeasible() || (this.computedLowerBounds.containsKey(currSol)
@@ -90,10 +90,11 @@ public class BranchAndBound {
                             this.bestSol = new Solution(tmpSol);
                         }
                     } else {
-                        double LB = LowerBoundsUtil.computeLowerBound(tmpSol);
-                        if (LB < this.bestSol.computeCosts()) {
+//                        double LB = LowerBoundsUtil.computeLowerBound(tmpSol);
+                        Solution solutionLB = LowerBoundsUtil.computeLowerBound(tmpSol);
+                        if (solutionLB.computeCosts() < this.bestSol.computeCosts()) {
                             unexploredNodes.add(tmpSol);
-                            this.computedLowerBounds.put(tmpSol, LB);
+                            this.computedLowerBounds.put(tmpSol, solutionLB.computeCosts());
                         }
                     }
                 }

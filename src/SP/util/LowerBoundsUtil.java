@@ -29,11 +29,32 @@ public class LowerBoundsUtil {
      * @param sol - partial solution to compute a lower bound for
      * @return computed lower bound
      */
-    public static double computeLowerBound(Solution sol) {
+    public static Solution computeLowerBound(Solution sol) {
         BipartiteGraph graph = constructBipartiteGraph(sol);
         KuhnMunkresMinimalWeightBipartitePerfectMatching<String, DefaultWeightedEdge> minCostPerfectMatching =
             new KuhnMunkresMinimalWeightBipartitePerfectMatching<>(graph.getGraph(), graph.getPartitionOne(), graph.getPartitionTwo());
-        return minCostPerfectMatching.getMatching().getWeight() + sol.computeCosts();
+
+        Solution tmpSol = new Solution(sol);
+
+        for (Object o : minCostPerfectMatching.getMatching()) {
+            if (!o.toString().contains("dummy")) {
+                int item = Integer.parseInt(o.toString().split("pos")[0].replace(" :", "").replace("(item", "").trim());
+                int stack = Integer.parseInt(o.toString().split("pos")[1].split(",")[0].replace("(stack: ", "").trim());
+                int level = Integer.parseInt(o.toString().split("pos")[1].split(",")[1].replace("level: ", "").replace("))", "").trim());
+
+                if (tmpSol.getFilledStacks()[stack][level] == -1) {
+                    tmpSol.getFilledStacks()[stack][level] = item;
+                } else {
+                    System.out.println("PROBLEM: position already allocated");
+                }
+            }
+        }
+
+        System.out.println("expected: " + (minCostPerfectMatching.getMatching().getWeight() + sol.computeCosts()));
+        System.out.println("actual: " + tmpSol.computeCosts());
+        return tmpSol;
+
+//        return minCostPerfectMatching.getMatching().getWeight() + sol.computeCosts();
     }
 
     /**

@@ -10,8 +10,8 @@ public class BestFirstComparator implements Comparator<Solution> {
     @Override
     public int compare(Solution solOne, Solution solTwo) {
 
-        double lowerBoundSolOne = LowerBoundsUtil.computeLowerBound(solOne);
-        double lowerBoundSolTwo = LowerBoundsUtil.computeLowerBound(solTwo);
+        double lowerBoundSolOne = LowerBoundsUtil.computeLowerBound(solOne).computeCosts();
+        double lowerBoundSolTwo = LowerBoundsUtil.computeLowerBound(solTwo).computeCosts();
 
         if (lowerBoundSolOne < lowerBoundSolTwo) {
             return -1;

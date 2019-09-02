@@ -27,10 +27,10 @@ public class CompareSolvers {
 
     // solvers to be used
     private static final List<Solver> SOLVERS = Lists.newArrayList(
-        Solver.MIP_BINPACKING,
-        Solver.MIP_THREEINDEX,
-        Solver.CONSTRUCTIVE_TWO_CAP,
-        Solver.CONSTRUCTIVE_THREE_CAP
+//        Solver.MIP_BINPACKING,
+        Solver.MIP_THREEINDEX
+//        Solver.CONSTRUCTIVE_TWO_CAP,
+//        Solver.CONSTRUCTIVE_THREE_CAP
     );
 
     /********************** CPLEX CONFIG **********************/
