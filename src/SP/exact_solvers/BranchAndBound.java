@@ -59,12 +59,16 @@ public class BranchAndBound {
      */
     private void branchAndBound(Solution sol) {
 
-        PriorityQueue<Solution> unexploredNodes = new PriorityQueue<>(1, new DepthFirstComparator());
+        PriorityQueue<Solution> unexploredNodes = new PriorityQueue<>(1, new CombinedComparator());
         unexploredNodes.add(new Solution(sol));
+
+        int consideredNodes = 0;
 
         while (!unexploredNodes.isEmpty()) {
 
             Solution currSol = unexploredNodes.poll();
+            consideredNodes++;
+            System.out.println(consideredNodes);
 //            System.out.println("number of assigned items: " + currSol.getNumberOfAssignedItems());
 //            System.out.println("unexplored nodes: " + unexploredNodes.size());
 
@@ -110,6 +114,7 @@ public class BranchAndBound {
                 }
             }
         }
+        System.out.println("considered nodes: " + consideredNodes);
     }
 
     /**
