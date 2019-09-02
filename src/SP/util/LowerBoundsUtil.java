@@ -50,8 +50,8 @@ public class LowerBoundsUtil {
             }
         }
 
-        System.out.println("expected: " + (minCostPerfectMatching.getMatching().getWeight() + sol.computeCosts()));
-        System.out.println("actual: " + tmpSol.computeCosts());
+//        System.out.println("expected: " + (minCostPerfectMatching.getMatching().getWeight() + sol.computeCosts()));
+//        System.out.println("actual: " + tmpSol.computeCosts());
         return tmpSol;
 
 //        return minCostPerfectMatching.getMatching().getWeight() + sol.computeCosts();

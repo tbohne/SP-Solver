@@ -90,11 +90,21 @@ public class BranchAndBound {
                             this.bestSol = new Solution(tmpSol);
                         }
                     } else {
-//                        double LB = LowerBoundsUtil.computeLowerBound(tmpSol);
+
                         Solution solutionLB = LowerBoundsUtil.computeLowerBound(tmpSol);
-                        if (solutionLB.computeCosts() < this.bestSol.computeCosts()) {
-                            unexploredNodes.add(tmpSol);
-                            this.computedLowerBounds.put(tmpSol, solutionLB.computeCosts());
+                        solutionLB.sortItemsInStacksBasedOnTransitiveStackingConstraints();
+
+                        // rest can be cut off
+                        if (solutionLB.isFeasible()) {
+                            if (solutionLB.computeCosts() < this.bestSol.computeCosts()) {
+                                System.out.println("best sol updated BY LB..");
+                                this.bestSol = new Solution(solutionLB);
+                            }
+                        } else {
+                            if (solutionLB.computeCosts() < this.bestSol.computeCosts()) {
+                                unexploredNodes.add(tmpSol);
+                                this.computedLowerBounds.put(tmpSol, solutionLB.computeCosts());
+                            }
                         }
                     }
                 }

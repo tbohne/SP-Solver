@@ -270,7 +270,7 @@ public class Solution implements Comparable<Solution> {
             System.out.println("infeasible solution - not all items have been assigned");
             return false;
         } else if (!this.stackingConstraintsRespected()) {
-            System.out.println("infeasible solution - the stacking constraints are violated");
+//            System.out.println("infeasible solution - the stacking constraints are violated");
             return false;
         } else if (!this.placementConstraintsRespected()) {
             System.out.println("infeasible solution - the placement constraints are violated");
