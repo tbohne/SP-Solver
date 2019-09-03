@@ -1,10 +1,9 @@
 package SP.representations;
 
+import SP.util.HeuristicUtil;
 import SP.util.RepresentationUtil;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * Represents a solution of a stacking problem.
@@ -235,26 +234,6 @@ public class Solution implements Comparable<Solution> {
         }
     }
 
-    public boolean soFarFeasible() {
-
-        this.lowerItemsThatAreStackedInTheAir();
-
-        if (!this.stackingConstraintsRespected()) {
-            System.out.println("infeasible solution - the stacking constraints are violated");
-            return false;
-        } else if (!this.placementConstraintsRespected()) {
-            System.out.println("infeasible solution - the placement constraints are violated");
-            return false;
-        } else if (this.containsDuplicates()) {
-            System.out.println("infeasible solution - there are items that are assigned more than once");
-            return false;
-        } else if (containsGaps()) {
-            System.out.println("infeasible solution - there are gaps in the filled stacks");
-            return false;
-        }
-        return true;
-    }
-
     /**
      * Returns whether the solution is feasible which means that all items have been
      * assigned to a position in a stack in a way that respects the stacking- and
@@ -283,6 +262,39 @@ public class Solution implements Comparable<Solution> {
             return false;
         }
         return true;
+    }
+
+    public List<ItemConflict> getNumberOfConflictsForEachItem() {
+
+        List<ItemConflict> itemConflicts = new ArrayList<>();
+        for (int item = 0; item < this.solvedInstance.getItems().length; item++) {
+            itemConflicts.add(new ItemConflict(item, 0));
+        }
+
+        for (int[] filledStack : this.filledStacks) {
+            for (int item : filledStack) {
+
+                int conflicts = 0;
+
+                if (item != -1) {
+                    for (int otherItem : filledStack) {
+                        if (otherItem != item && otherItem != -1) {
+                            if (!HeuristicUtil.pairStackableInAtLeastOneDirection(
+                                this.getSolvedInstance().getStackingConstraints(), item, otherItem)
+                            ) {
+                                conflicts++;
+                            }
+                        }
+                    }
+                }
+                if (conflicts > 0) {
+                    itemConflicts.get(item).setNumberOfConflicts(conflicts);
+                }
+            }
+        }
+        Collections.sort(itemConflicts);
+        Collections.reverse(itemConflicts);
+        return itemConflicts;
     }
 
     /**
