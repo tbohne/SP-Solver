@@ -17,7 +17,7 @@ public class BranchAndBoundTest {
 
         List<OptimizableSolution> solutions;
         solutions = SolutionReader.readSolutionsFromDir(
-            SOLUTION_PREFIX, INSTANCE_PREFIX, RepresentationUtil.getNameOfSolver(CompareSolvers.Solver.CONSTRUCTIVE_TWO_CAP)
+            SOLUTION_PREFIX, INSTANCE_PREFIX, RepresentationUtil.getNameOfSolver(CompareSolvers.Solver.MIP_BINPACKING)
         );
 
         if (solutions.size() == 0) {

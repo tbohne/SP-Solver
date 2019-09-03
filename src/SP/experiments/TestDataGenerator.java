@@ -25,9 +25,9 @@ public class TestDataGenerator {
     }
 
     /******************************* CONFIGURATION *************************************/
-    private static final int NUMBER_OF_INSTANCES = 3;
-    private static final int NUMBER_OF_ITEMS = 50;
-    private static final int STACK_CAPACITY = 2;
+    private static final int NUMBER_OF_INSTANCES = 1;
+    private static final int NUMBER_OF_ITEMS = 80;
+    private static final int STACK_CAPACITY = 3;
 
     // The number of stacks m is initially m = n / b,
     // this number specifies the percentage by which the initial m gets increased.
@@ -36,7 +36,7 @@ public class TestDataGenerator {
     private static final float CHANCE_FOR_ONE_IN_STACKING_CONSTRAINTS = 0.0259F;
     private static final float CHANCE_FOR_ONE_IN_PLACEMENT_CONSTRAINTS = 0.7F;
 
-    private static final boolean USING_STACKING_CONSTRAINT_GENERATION_APPROACH_ONE = true;
+    private static final boolean USING_STACKING_CONSTRAINT_GENERATION_APPROACH_ONE = false;
     private static final boolean TRANSITIVE_STACKING_CONSTRAINTS = true;
 
     private static final costGenerationApproaches COST_GENERATION_APPROACH = costGenerationApproaches.MANHATTAN;

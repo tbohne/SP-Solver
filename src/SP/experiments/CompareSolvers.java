@@ -27,10 +27,10 @@ public class CompareSolvers {
 
     // solvers to be used
     private static final List<Solver> SOLVERS = Lists.newArrayList(
-//        Solver.MIP_BINPACKING,
-        Solver.MIP_THREEINDEX
+        Solver.MIP_BINPACKING,
+        Solver.MIP_THREEINDEX,
 //        Solver.CONSTRUCTIVE_TWO_CAP,
-//        Solver.CONSTRUCTIVE_THREE_CAP
+        Solver.CONSTRUCTIVE_THREE_CAP
     );
 
     /********************** CPLEX CONFIG **********************/
@@ -61,7 +61,7 @@ public class CompareSolvers {
     // determines whether only b=2 or b=3 instances are considered (general b otherwise)
     private static final boolean SOLVE_INSTANCES_WITH_SPECIFIC_STACK_CAPACITY = true;
     // in case of specific capacity: determines whether only b=2 instances are considered (b=3 otherwise)
-    private static final boolean SOLVE_TWO_CAP = true;
+    private static final boolean SOLVE_TWO_CAP = false;
 
     public static void main(String[] args) {
 

@@ -127,6 +127,9 @@ public class BranchAndBound {
         int iterations = 0;
 
         while (!unexploredNodes.isEmpty()) {
+
+            double nodeStartTime = System.currentTimeMillis();
+
             this.printStatistics(cuts, worseLBCuts, feasibleLBCuts, updatedBestSolCuts, iterations, visitedNodes, unexploredNodes.size());
             iterations++;
             Solution currSol = unexploredNodes.poll();
@@ -139,9 +142,9 @@ public class BranchAndBound {
             }
             visitedNodes++;
 
-            for (int stack = 0; stack < currSol.getFilledStacks().length; stack++) {
+            int itemToBeAdded = this.getBranchingItem(currSol);
 
-                int itemToBeAdded = this.getBranchingItem(currSol);
+            for (int stack = 0; stack < currSol.getFilledStacks().length; stack++) {
 
                 if (HeuristicUtil.stackHasFreePosition(currSol.getFilledStacks()[stack])
                     && HeuristicUtil.itemCompatibleWithStack(this.costs, itemToBeAdded, stack)
@@ -176,6 +179,7 @@ public class BranchAndBound {
                     }
                 }
             }
+            System.out.println("time for node: " + ((System.currentTimeMillis() - nodeStartTime) / 1000) + "s");
         }
     }
 
