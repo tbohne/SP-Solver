@@ -31,4 +31,9 @@ public class ItemConflict implements Comparable<ItemConflict> {
         }
         return 0;
     }
+
+    @Override
+    public String toString() {
+        return "item: " + this.itemIdx + " --- conflicts: " + this.numberOfConflicts;
+    }
 }
