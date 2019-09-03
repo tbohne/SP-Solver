@@ -45,6 +45,7 @@ public class BranchAndBound {
      * Starts the branch-and-bound procedure for the given instance.
      */
     public void solve() {
+        double startTime = System.currentTimeMillis();
         System.out.println("feasible: " + this.initialSolution.isFeasible());
         System.out.println("costs: " + this.initialSolution.computeCosts());
         Solution clearSol = new Solution(this.initialSolution);
@@ -53,6 +54,7 @@ public class BranchAndBound {
         this.bestSol.lowerItemsThatAreStackedInTheAir();
         System.out.println("feasible: " + this.bestSol.isFeasible());
         System.out.println("costs: " + this.bestSol.computeCosts());
+        System.out.println("runtime: " + ((System.currentTimeMillis() - startTime) / 1000) + "s");
     }
 
     private int getBranchingItem(Solution currSol) {
@@ -153,7 +155,6 @@ public class BranchAndBound {
                     if (tmpSol.getAssignedItems().size() == this.numberOfItems) {
                         this.updateBestSolution(tmpSol);
                     } else {
-
                         Solution solutionLB = LowerBoundsUtil.computeLowerBound(tmpSol);
                         solutionLB.sortItemsInStacksBasedOnTransitiveStackingConstraints();
 
