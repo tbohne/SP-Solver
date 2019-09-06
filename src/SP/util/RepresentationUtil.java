@@ -1,5 +1,6 @@
 package SP.util;
 
+import SP.constructive_heuristics.GeneralHeuristic;
 import SP.constructive_heuristics.ThreeCapHeuristic;
 import SP.constructive_heuristics.TwoCapHeuristic;
 import SP.experiments.CompareSolvers;
@@ -79,6 +80,8 @@ public class RepresentationUtil {
                 return ThreeCapHeuristic.class.getName();
             case TABU_SEARCH:
                 return TabuSearch.class.getName();
+            case GENERAL_HEURISTIC:
+                return GeneralHeuristic.class.getName();
             default:
                 return "";
         }
@@ -102,6 +105,8 @@ public class RepresentationUtil {
                 return "3Cap";
             case TABU_SEARCH:
                 return "TS";
+            case GENERAL_HEURISTIC:
+                return "GH";
             default:
                 return "";
         }

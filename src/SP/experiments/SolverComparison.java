@@ -1,5 +1,6 @@
 package SP.experiments;
 
+import SP.constructive_heuristics.GeneralHeuristic;
 import SP.io.InstanceReader;
 import SP.io.SolutionWriter;
 import SP.mip_formulations.BinPackingFormulation;
@@ -83,6 +84,18 @@ public class SolverComparison {
         );
     }
 
+    public void solveWithGeneralHeuristic(Instance instance, String solutionName) {
+        GeneralHeuristic heuristic = new GeneralHeuristic(instance, this.timeLimit);
+        Solution sol = heuristic.solve();
+        System.out.println("is feasible ? " + sol.isFeasible());
+        SolutionWriter.writeSolution(
+            this.solutionPrefix + solutionName + ".txt", sol, RepresentationUtil.getNameOfSolver(CompareSolvers.Solver.GENERAL_HEURISTIC)
+        );
+        SolutionWriter.writeSolutionAsCSV(
+            this.solutionPrefix + "solutions.csv", sol, RepresentationUtil.getAbbreviatedNameOfSolver(CompareSolvers.Solver.GENERAL_HEURISTIC)
+        );
+    }
+
     /**
      * Solves the given instance with the three-index solver.
      *
@@ -147,6 +160,11 @@ public class SolverComparison {
                 if (solversToBeCompared.contains(CompareSolvers.Solver.MIP_THREEINDEX)) {
                     System.out.println("solving with 3Idx..");
                     solveWithThreeIdx(instance, solutionName);
+                    instance.resetStacks();
+                }
+                if (solversToBeCompared.contains(CompareSolvers.Solver.GENERAL_HEURISTIC)) {
+                    System.out.println("solving with general heuristic..");
+                    solveWithGeneralHeuristic(instance, solutionName);
                     instance.resetStacks();
                 }
             }

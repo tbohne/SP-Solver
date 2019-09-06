@@ -19,7 +19,8 @@ public class CompareSolvers {
         MIP_THREEINDEX,
         CONSTRUCTIVE_TWO_CAP,
         CONSTRUCTIVE_THREE_CAP,
-        TABU_SEARCH
+        TABU_SEARCH,
+        GENERAL_HEURISTIC
     }
 
     private static final String INSTANCE_PREFIX = "res/instances/";
@@ -30,7 +31,8 @@ public class CompareSolvers {
         Solver.MIP_BINPACKING,
         Solver.MIP_THREEINDEX,
 //        Solver.CONSTRUCTIVE_TWO_CAP,
-        Solver.CONSTRUCTIVE_THREE_CAP
+//        Solver.CONSTRUCTIVE_THREE_CAP,
+        Solver.GENERAL_HEURISTIC
     );
 
     /********************** CPLEX CONFIG **********************/
@@ -59,7 +61,7 @@ public class CompareSolvers {
     /*********************************************************/
 
     // determines whether only b=2 or b=3 instances are considered (general b otherwise)
-    private static final boolean SOLVE_INSTANCES_WITH_SPECIFIC_STACK_CAPACITY = true;
+    private static final boolean SOLVE_INSTANCES_WITH_SPECIFIC_STACK_CAPACITY = false;
     // in case of specific capacity: determines whether only b=2 instances are considered (b=3 otherwise)
     private static final boolean SOLVE_TWO_CAP = false;
 
