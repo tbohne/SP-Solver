@@ -159,6 +159,10 @@ public class StackBasedNeighborhood {
         this.tabuListClears++;
     }
 
+    public int getTabuListClears() {
+        return this.tabuListClears;
+    }
+
     /**
      * Generates a neighbor for the current solution using the "shift-neighborhood".
      *

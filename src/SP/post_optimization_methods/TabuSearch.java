@@ -2,7 +2,6 @@ package SP.post_optimization_methods;
 
 import SP.experiments.PostOptimization;
 import SP.representations.Solution;
-import SP.representations.StackPosition;
 import SP.util.HeuristicUtil;
 
 import java.util.*;
@@ -26,9 +25,7 @@ public class TabuSearch {
     private final int numberOfNeighbors;
 
     private Queue<Shift> tabuList;
-    private int tabuListClears;
     private final int maxTabuListLength;
-    private int failCnt;
     private final int unsuccessfulNeighborGenerationAttempts;
     private final int unsuccessfulKSwapAttempts;
     private final int kSwapIntervalUB;
@@ -99,8 +96,6 @@ public class TabuSearch {
         this.currSol = new Solution(initialSolution);
         this.bestSol = new Solution(initialSolution);
         this.tabuList = new LinkedList<>();
-        this.tabuListClears = 0;
-        this.failCnt = 0;
         this.iterationOfLastImprovement = 0;
 
         this.numberOfNeighbors = numberOfNeighbors;
@@ -228,7 +223,7 @@ public class TabuSearch {
      */
     private void solveTabuListClears(StackBasedNeighborhood neighborhood) {
         int iteration = 0;
-        while (this.tabuListClears < this.numberOfTabuListClears) {
+        while (neighborhood.getTabuListClears() < this.numberOfTabuListClears) {
             if (this.timeLimit != 0 && (System.currentTimeMillis() - this.startTime) / 1000 > this.timeLimit) { break; }
             if (this.bestSol.computeCosts() == this.optimalObjectiveValue) { break; }
             this.updateCurrentSolution(iteration++, neighborhood);
