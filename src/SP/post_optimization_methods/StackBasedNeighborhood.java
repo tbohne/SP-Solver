@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
 
-public class StackBasedNeighborhood {
+public class StackBasedNeighborhood implements SwapShiftNeighborhood {
 
     private int numberOfNeighbors;
     private PostOptimization.ShortTermStrategies shortTermStrategy;
@@ -153,7 +153,7 @@ public class StackBasedNeighborhood {
     /**
      * Clears the entries in the shift tabu list and increments the clear counter.
      */
-    private void clearTabuList(Queue<Shift> tabuList) {
+    public void clearTabuList(Queue<Shift> tabuList) {
         tabuList.clear();
 //        tabuList = new LinkedList<>();
         this.tabuListClears++;
@@ -263,7 +263,7 @@ public class StackBasedNeighborhood {
      * @param swapList - list of swaps to be checked for tabu operations
      * @return whether or not the swap list contains a tabu swap operation
      */
-    private boolean containsTabuSwap(List<Swap> swapList, Queue<Shift> tabuList) {
+    public boolean containsTabuSwap(List<Swap> swapList, Queue<Shift> tabuList) {
         for (Swap swap : swapList) {
             // a swap consists of two shift operations
             if (tabuList.contains(swap.getShiftOne()) && tabuList.contains(swap.getShiftTwo())) {
