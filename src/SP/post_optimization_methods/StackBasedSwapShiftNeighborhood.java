@@ -6,6 +6,7 @@ import SP.representations.StackPosition;
 import SP.util.HeuristicUtil;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
@@ -18,6 +19,7 @@ public class StackBasedSwapShiftNeighborhood implements SwapShiftNeighborhood {
     private int unsuccessfulKSwapAttempts;
 
     private int tabuListClears;
+    private Queue<Shift> tabuList;
 
     public StackBasedSwapShiftNeighborhood(
         int numberOfNeighbors, PostOptimization.ShortTermStrategies shortTermStrategy,
@@ -30,6 +32,7 @@ public class StackBasedSwapShiftNeighborhood implements SwapShiftNeighborhood {
         this.tabuListClears = 0;
         this.unsuccessfulNeighborGenerationAttempts = unsuccessfulNeighborGenerationAttempts;
         this.unsuccessfulKSwapAttempts = unsuccessfulKSwapAttempts;
+        this.tabuList = new LinkedList<>();
     }
 
     /**
@@ -143,19 +146,18 @@ public class StackBasedSwapShiftNeighborhood implements SwapShiftNeighborhood {
      *
      * @param shift - shift operation to be added to the tabu list
      */
-    public void forbidShift(Shift shift, Queue<Shift> tabuList) {
-        if (tabuList.size() >= this.maxTabuListLength) {
-            tabuList.poll();
+    public void forbidShift(Shift shift) {
+        if (this.tabuList.size() >= this.maxTabuListLength) {
+            this.tabuList.poll();
         }
-        tabuList.add(shift);
+        this.tabuList.add(shift);
     }
 
     /**
      * Clears the entries in the shift tabu list and increments the clear counter.
      */
-    public void clearTabuList(Queue<Shift> tabuList) {
-        tabuList.clear();
-//        tabuList = new LinkedList<>();
+    public void clearTabuList() {
+        this.tabuList.clear();
         this.tabuListClears++;
     }
 
@@ -169,7 +171,7 @@ public class StackBasedSwapShiftNeighborhood implements SwapShiftNeighborhood {
      * @return neighboring solution
      */
     @SuppressWarnings("Duplicates")
-    public Solution getNeighborShift(Solution currSol, Queue<Shift> tabuList, Solution bestSol) {
+    public Solution getNeighborShift(Solution currSol, Solution bestSol) {
 
         List<Solution> nbrs = new ArrayList<>();
         int failCnt = 0;
@@ -187,23 +189,23 @@ public class StackBasedSwapShiftNeighborhood implements SwapShiftNeighborhood {
             if (!neighbor.isFeasible()) { continue; }
 
             // FIRST-FIT
-            if (this.shortTermStrategy == PostOptimization.ShortTermStrategies.FIRST_FIT && !tabuList.contains(shift)
+            if (this.shortTermStrategy == PostOptimization.ShortTermStrategies.FIRST_FIT && !this.tabuList.contains(shift)
                 && neighbor.computeCosts() < currSol.computeCosts()) {
 
-                forbidShift(shift, tabuList);
+                forbidShift(shift);
                 return neighbor;
 
                 // BEST-FIT
-            } else if (!tabuList.contains(shift)) {
+            } else if (!this.tabuList.contains(shift)) {
                 nbrs.add(neighbor);
-                forbidShift(shift, tabuList);
+                forbidShift(shift);
             } else {
                 failCnt++;
                 if (failCnt == this.unsuccessfulNeighborGenerationAttempts) {
                     failCnt = 0;
                     if (nbrs.size() == 0) {
                         System.out.println("CLEAR");
-                        this.clearTabuList(tabuList);
+                        this.clearTabuList();
                     } else {
                         return HeuristicUtil.getBestSolution(nbrs);
                     }
@@ -263,10 +265,10 @@ public class StackBasedSwapShiftNeighborhood implements SwapShiftNeighborhood {
      * @param swapList - list of swaps to be checked for tabu operations
      * @return whether or not the swap list contains a tabu swap operation
      */
-    public boolean containsTabuSwap(List<Swap> swapList, Queue<Shift> tabuList) {
+    public boolean containsTabuSwap(List<Swap> swapList) {
         for (Swap swap : swapList) {
             // a swap consists of two shift operations
-            if (tabuList.contains(swap.getShiftOne()) && tabuList.contains(swap.getShiftTwo())) {
+            if (this.tabuList.contains(swap.getShiftOne()) && this.tabuList.contains(swap.getShiftTwo())) {
                 return true;
             }
         }
@@ -280,7 +282,7 @@ public class StackBasedSwapShiftNeighborhood implements SwapShiftNeighborhood {
      * @return a neighboring solution
      */
     @SuppressWarnings("Duplicates")
-    public Solution getNeighborKSwap(int numberOfSwaps, Solution currSol, Queue<Shift> tabuList, Solution bestSol) {
+    public Solution getNeighborKSwap(int numberOfSwaps, Solution currSol, Solution bestSol) {
 
         List<Solution> nbrs = new ArrayList<>();
         int failCnt = 0;
@@ -302,20 +304,20 @@ public class StackBasedSwapShiftNeighborhood implements SwapShiftNeighborhood {
 
             // FIRST-FIT
             if (this.shortTermStrategy == PostOptimization.ShortTermStrategies.FIRST_FIT
-                    && !this.containsTabuSwap(swapList, tabuList) && neighbor.computeCosts() < currSol.computeCosts()) {
+                    && !this.containsTabuSwap(swapList) && neighbor.computeCosts() < currSol.computeCosts()) {
 
                 for (Swap swap : swapList) {
-                    this.forbidShift(swap.getShiftOne(), tabuList);
-                    this.forbidShift(swap.getShiftTwo(), tabuList);
+                    this.forbidShift(swap.getShiftOne());
+                    this.forbidShift(swap.getShiftTwo());
                 }
                 return neighbor;
 
                 // BEST-FIT
-            } else if (!this.containsTabuSwap(swapList, tabuList)) {
+            } else if (!this.containsTabuSwap(swapList)) {
                 nbrs.add(neighbor);
                 for (Swap swap : swapList) {
-                    this.forbidShift(swap.getShiftOne(), tabuList);
-                    this.forbidShift(swap.getShiftTwo(), tabuList);
+                    this.forbidShift(swap.getShiftOne());
+                    this.forbidShift(swap.getShiftTwo());
                 }
             } else {
                 failCnt++;
@@ -323,7 +325,7 @@ public class StackBasedSwapShiftNeighborhood implements SwapShiftNeighborhood {
                     failCnt = 0;
                     if (nbrs.size() == 0) {
                         System.out.println("CLEAR");
-                        this.clearTabuList(tabuList);
+                        this.clearTabuList();
                     } else {
                         return HeuristicUtil.getBestSolution(nbrs);
                     }
