@@ -252,7 +252,7 @@ public class Solution implements Comparable<Solution> {
 //            System.out.println("infeasible solution - the stacking constraints are violated");
             return false;
         } else if (!this.placementConstraintsRespected()) {
-            System.out.println("infeasible solution - the placement constraints are violated");
+//            System.out.println("infeasible solution - the placement constraints are violated");
             return false;
         } else if (this.containsDuplicates()) {
             System.out.println("infeasible solution - there are items that are assigned more than once");
@@ -306,6 +306,14 @@ public class Solution implements Comparable<Solution> {
                 System.out.print(this.getFilledStacks()[i][j] + " ");
             }
             System.out.println();
+        }
+    }
+
+    public void clearFilledStacks() {
+        for (int i = 0; i < this.getFilledStacks().length; i++) {
+            for (int j = 0; j < this.getFilledStacks()[i].length; j++) {
+                this.getFilledStacks()[i][j] = -1;
+            }
         }
     }
 
