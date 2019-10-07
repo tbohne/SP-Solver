@@ -55,6 +55,8 @@ public class PostOptimization {
     // 3Cap solutions otherwise
     private static final boolean OPTIMIZE_TWO_CAP_SOLUTIONS = true;
 
+    private static final boolean USING_STACK_BASED_NEIGHBORHOOD = true;
+
     public static void main(String[] args) {
         optimizeSolutions();
     }
@@ -88,7 +90,7 @@ public class PostOptimization {
                 sol.getSol(), sol.getOptimalObjectiveValue(), NUMBER_OF_NEIGHBORS, MAX_TABU_LIST_LENGTH_FACTOR,
                 SHORT_TERM_STRATEGY, UNSUCCESSFUL_NEIGHBOR_GENERATION_ATTEMPTS, UNSUCCESSFUL_K_SWAP_ATTEMPTS,
                 NUMBER_OF_NON_IMPROVING_ITERATIONS, K_SWAP_INTERVAL_UB, NUMBER_OF_ITERATIONS, NUMBER_OF_TABU_LIST_CLEARS,
-                STOPPING_CRITERION, K_SWAP_PROBABILITY, SWAP_PROBABILITY
+                STOPPING_CRITERION, K_SWAP_PROBABILITY, SWAP_PROBABILITY, USING_STACK_BASED_NEIGHBORHOOD
             );
             Solution impSol = ts.solve();
             impSol.setTimeToSolve((System.currentTimeMillis() - startTime) / 1000.0);

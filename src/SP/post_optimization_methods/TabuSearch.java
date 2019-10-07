@@ -34,6 +34,8 @@ public class TabuSearch {
     private final int numberOfIterations;
     private final int numberOfTabuListClears;
 
+    private final boolean usingStackBasedNeighborhood;
+
     /**
      * Constructor
      *
@@ -56,12 +58,14 @@ public class TabuSearch {
         int maxTabuListLengthFactor, PostOptimization.ShortTermStrategies shortTermStrategy,
         int unsuccessfulNeighborGenerationAttempts, int unsuccessfulKSwapAttempts, int numberOfNonImprovingIterations,
         int kSwapIntervalUB, int numberOfIterations, int numberOfTabuListClears,
-        PostOptimization.StoppingCriteria stoppingCriterion, float kSwapProbability, float swapProbability
+        PostOptimization.StoppingCriteria stoppingCriterion, float kSwapProbability, float swapProbability,
+        boolean usingStackBasedNeighborhood
     ) {
         this(
             initialSolution, optimalObjectiveValue, numberOfNeighbors, maxTabuListLengthFactor, shortTermStrategy,
             unsuccessfulNeighborGenerationAttempts, unsuccessfulKSwapAttempts, numberOfNonImprovingIterations,
-            kSwapIntervalUB, numberOfIterations, numberOfTabuListClears, stoppingCriterion, kSwapProbability, swapProbability
+            kSwapIntervalUB, numberOfIterations, numberOfTabuListClears, stoppingCriterion, kSwapProbability, swapProbability,
+            usingStackBasedNeighborhood
         );
         this.timeLimit = timeLimit;
     }
@@ -88,7 +92,8 @@ public class TabuSearch {
         Solution initialSolution, double optimalObjectiveValue, int numberOfNeighbors, int maxTabuListLengthFactor,
         PostOptimization.ShortTermStrategies shortTermStrategy, int unsuccessfulNeighborGenerationAttempts,
         int unsuccessfulKSwapAttempts, int numberOfNonImprovingIterations, int kSwapIntervalUB, int numberOfIterations,
-        int numberOfTabuListClears, PostOptimization.StoppingCriteria stoppingCriterion, float kSwapProbability, float swapProbability
+        int numberOfTabuListClears, PostOptimization.StoppingCriteria stoppingCriterion, float kSwapProbability, float swapProbability,
+        boolean usingStackBasedNeighborhood
     ) {
         this.currSol = new Solution(initialSolution);
         this.bestSol = new Solution(initialSolution);
@@ -112,6 +117,8 @@ public class TabuSearch {
         this.startTime = System.currentTimeMillis();
         this.timeLimit = 0;
         this.optimalObjectiveValue = optimalObjectiveValue;
+
+        this.usingStackBasedNeighborhood = usingStackBasedNeighborhood;
     }
 
     /**
@@ -122,18 +129,19 @@ public class TabuSearch {
     public Solution solve() {
 
         this.startTime = System.currentTimeMillis();
+        SwapShiftNeighborhood neighborhood;
 
-        // TODO: add other nbh
-
-//        StackBasedSwapShiftNeighborhood neighborhood = new StackBasedSwapShiftNeighborhood(
-//            this.numberOfNeighbors, this.shortTermStrategy, this.maxTabuListLength,
-//            this.unsuccessfulNeighborGenerationAttempts, this.unsuccessfulKSwapAttempts
-//        );
-
-        PartitionBasedSwapShiftNeighborhood neighborhood = new PartitionBasedSwapShiftNeighborhood(
-            this.numberOfNeighbors, this.shortTermStrategy, this.maxTabuListLength,
-            this.unsuccessfulNeighborGenerationAttempts, this.unsuccessfulKSwapAttempts
-        );
+        if (this.usingStackBasedNeighborhood) {
+            neighborhood = new StackBasedSwapShiftNeighborhood(
+                this.numberOfNeighbors, this.shortTermStrategy, this.maxTabuListLength,
+                this.unsuccessfulNeighborGenerationAttempts, this.unsuccessfulKSwapAttempts
+            );
+        } else {
+            neighborhood = new PartitionBasedSwapShiftNeighborhood(
+                this.numberOfNeighbors, this.shortTermStrategy, this.maxTabuListLength,
+                this.unsuccessfulNeighborGenerationAttempts, this.unsuccessfulKSwapAttempts
+            );
+        }
 
         switch (this.stoppingCriterion) {
             case ITERATIONS:
@@ -156,7 +164,7 @@ public class TabuSearch {
      *
      * @return neighboring solution
      */
-    private Solution getNeighborBasedOnProbabilities(PartitionBasedSwapShiftNeighborhood neighborhood) {
+    private Solution getNeighborBasedOnProbabilities(SwapShiftNeighborhood neighborhood) {
 
         double rand = Math.random();
         Solution sol;
@@ -203,7 +211,7 @@ public class TabuSearch {
      *
      * @param iteration - current iteration
      */
-    private void updateCurrentSolution(int iteration, PartitionBasedSwapShiftNeighborhood neighborhood) {
+    private void updateCurrentSolution(int iteration, SwapShiftNeighborhood neighborhood) {
         this.currSol = this.getNeighborBasedOnProbabilities(neighborhood);
         if (this.currSol.computeCosts() < this.bestSol.computeCosts()) {
             this.bestSol = this.currSol;
@@ -214,7 +222,7 @@ public class TabuSearch {
     /**
      * Performs the tabu search with a number of iterations as stop criterion.
      */
-    private void solveIterations(PartitionBasedSwapShiftNeighborhood neighborhood) {
+    private void solveIterations(SwapShiftNeighborhood neighborhood) {
         for (int i = 0; i < this.numberOfIterations; i++) {
             if (this.timeLimit != 0 && (System.currentTimeMillis() - this.startTime) / 1000 > this.timeLimit) { break; }
             if (this.bestSol.computeCosts() == this.optimalObjectiveValue) { break; }
@@ -225,7 +233,7 @@ public class TabuSearch {
     /**
      * Performs the tabu search with a number of tabu list clears as stop criterion.
      */
-    private void solveTabuListClears(PartitionBasedSwapShiftNeighborhood neighborhood) {
+    private void solveTabuListClears(SwapShiftNeighborhood neighborhood) {
         int iteration = 0;
         while (neighborhood.getTabuListClears() < this.numberOfTabuListClears) {
             if (this.timeLimit != 0 && (System.currentTimeMillis() - this.startTime) / 1000 > this.timeLimit) { break; }
@@ -237,7 +245,7 @@ public class TabuSearch {
     /**
      * Performs the tabu search with a number of non-improving iterations as stop criterion.
      */
-    private void solveIterationsSinceLastImprovement(PartitionBasedSwapShiftNeighborhood neighborhood) {
+    private void solveIterationsSinceLastImprovement(SwapShiftNeighborhood neighborhood) {
         int iteration = 0;
         while (Math.abs(this.iterationOfLastImprovement - iteration) < this.numberOfNonImprovingIterations) {
             System.out.println("non improving iterations: " + Math.abs(this.iterationOfLastImprovement - iteration));
