@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
 
-public class StackBasedNeighborhood implements SwapShiftNeighborhood {
+public class StackBasedSwapShiftNeighborhood implements SwapShiftNeighborhood {
 
     private int numberOfNeighbors;
     private PostOptimization.ShortTermStrategies shortTermStrategy;
@@ -19,7 +19,7 @@ public class StackBasedNeighborhood implements SwapShiftNeighborhood {
 
     private int tabuListClears;
 
-    public StackBasedNeighborhood(
+    public StackBasedSwapShiftNeighborhood(
         int numberOfNeighbors, PostOptimization.ShortTermStrategies shortTermStrategy,
         int maxTabuListLength, int unsuccessfulNeighborGenerationAttempts, int unsuccessfulKSwapAttempts
     ) {
