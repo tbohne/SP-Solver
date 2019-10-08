@@ -55,9 +55,11 @@ public class EjectionChainsNeighborhood {
         return stackOrder;
     }
 
-    private void addVerticesForItems(Graph<String, DefaultWeightedEdge> graph, int numberOfItems) {
+    private void addVerticesForItems(Graph<String, DefaultWeightedEdge> graph, int numberOfItems, int source) {
         for (int item = 0; item < numberOfItems; item++) {
-            graph.addVertex("item" + item);
+            if (item != source) {
+                graph.addVertex("item" + item);
+            }
         }
     }
 
@@ -70,7 +72,7 @@ public class EjectionChainsNeighborhood {
     }
 
     private int addRandomSourceVertex(Graph<String, DefaultWeightedEdge> graph, int numberOfItems) {
-        int randomItem = HeuristicUtil.getRandomIntegerInBetween(0, numberOfItems);
+        int randomItem = HeuristicUtil.getRandomIntegerInBetween(0, numberOfItems - 1);
         graph.addVertex("source" + randomItem);
         return randomItem;
     }
@@ -94,37 +96,55 @@ public class EjectionChainsNeighborhood {
         for (int i = 0; i < numberOfItems; i++) {
             for (int j = 0; j < numberOfItems; j++) {
 
-                if (i == j) { continue; }
+                if (i == j || !graph.containsVertex("item" + i) || !graph.containsVertex("item" + j)) { continue; }
 
                 int stackIdxItemOne = currSol.getStackIdxForAssignedItem(i);
                 int stackIdxItemTwo = currSol.getStackIdxForAssignedItem(j);
                 if (stackOrder.indexOf(stackIdxItemOne) < stackOrder.indexOf(stackIdxItemTwo)) {
 
                     if (!graph.containsEdge("item" + i, "item" + j)) {
-                        DefaultWeightedEdge edge = graph.addEdge("item" + i, "item" + j);
-//                        System.out.println("EDGE: " + i + "   " + j);
-                        // the cost difference of bin B(j) when replacing item j by item i
-                        double currCosts = this.getCostsForStack(currSol, stackIdxItemTwo);
-                        double costsItemJ = currSol.getSolvedInstance().getCosts()[j][stackIdxItemTwo];
-                        double costsItemI = currSol.getSolvedInstance().getCosts()[i][stackIdxItemTwo];
-                        double costsAfter = currCosts - costsItemJ + costsItemI;
-                        // cost reduction when positive
-                        double costDiff = currCosts - costsAfter;
-                        graph.setEdgeWeight(edge, costDiff);
+
+                        // place i, remove j
+                        if (HeuristicUtil.itemCompatibleWithAlreadyAssignedItemsWithException(
+                            i, currSol.getFilledStacks()[stackIdxItemTwo], currSol.getSolvedInstance().getItemObjects(),
+                            currSol.getSolvedInstance().getStackingConstraints(), j
+                        )) {
+
+                            if (HeuristicUtil.itemCompatibleWithStack(currSol.getSolvedInstance().getCosts(), i, stackIdxItemTwo)) {
+                                DefaultWeightedEdge edge = graph.addEdge("item" + i, "item" + j);
+                                // the cost difference of bin B(j) when replacing item j by item i
+                                double currCosts = this.getCostsForStack(currSol, stackIdxItemTwo);
+                                double costsItemJ = currSol.getSolvedInstance().getCosts()[j][stackIdxItemTwo];
+                                double costsItemI = currSol.getSolvedInstance().getCosts()[i][stackIdxItemTwo];
+                                double costsAfter = currCosts - costsItemJ + costsItemI;
+                                // cost reduction when positive
+                                double costDiff = currCosts - costsAfter;
+                                graph.setEdgeWeight(edge, costDiff);
+                            }
+                        }
                     }
                 } else {
 
                     if (!graph.containsEdge("item" + j, "item" + i)) {
-                        DefaultWeightedEdge edge = graph.addEdge("item" + j, "item" + i);
-                        // the cost difference of bin B(i) when replacing item i by item j
-                        double currCosts = this.getCostsForStack(currSol, stackIdxItemOne);
-                        double costsItemI = currSol.getSolvedInstance().getCosts()[i][stackIdxItemOne];
-                        double costsItemJ = currSol.getSolvedInstance().getCosts()[j][stackIdxItemOne];
-                        double costsAfter = currCosts - costsItemI + costsItemJ;
-                        // cost reduction when positive
-                        double costDiff = currCosts - costsAfter;
-//                        System.out.println("costs: " + costDiff);
-                        graph.setEdgeWeight(edge, costDiff);
+
+
+                        if (HeuristicUtil.itemCompatibleWithAlreadyAssignedItemsWithException(
+                            j, currSol.getFilledStacks()[stackIdxItemOne], currSol.getSolvedInstance().getItemObjects(),
+                            currSol.getSolvedInstance().getStackingConstraints(), i
+                        )) {
+
+                            if (HeuristicUtil.itemCompatibleWithStack(currSol.getSolvedInstance().getCosts(), j, stackIdxItemOne)) {
+                                DefaultWeightedEdge edge = graph.addEdge("item" + j, "item" + i);
+                                // the cost difference of bin B(i) when replacing item i by item j
+                                double currCosts = this.getCostsForStack(currSol, stackIdxItemOne);
+                                double costsItemI = currSol.getSolvedInstance().getCosts()[i][stackIdxItemOne];
+                                double costsItemJ = currSol.getSolvedInstance().getCosts()[j][stackIdxItemOne];
+                                double costsAfter = currCosts - costsItemI + costsItemJ;
+                                // cost reduction when positive
+                                double costDiff = currCosts - costsAfter;
+                                graph.setEdgeWeight(edge, costDiff);
+                            }
+                        }
                     }
                 }
             }
@@ -132,17 +152,20 @@ public class EjectionChainsNeighborhood {
             for (int stack = 0; stack < stackOrder.size(); stack++) {
                 int stackIdxItem = currSol.getStackIdxForAssignedItem(i);
                 if (stackOrder.indexOf(stackIdxItem) < stackOrder.indexOf(stack)) {
-                    if (graph.containsVertex("stack" + stack)) {
-                        DefaultWeightedEdge edge = graph.addEdge("item" + i, "stack" + stack);
-                        // the cost difference of bin B(j) when inserting item i
-                        double currCosts = this.getCostsForStack(currSol, stack);
-                        double afterInsertion = currCosts + currSol.getSolvedInstance().getCosts()[i][stack];
-                        // cost reduction when positive
-                        double costDiff = currCosts - afterInsertion;
-                        graph.setEdgeWeight(edge, costDiff);
+                    if (graph.containsVertex("stack" + stack) && graph.containsVertex("item" + i)) {
+
+                        if (HeuristicUtil.itemCompatibleWithStack(currSol.getSolvedInstance().getCosts(), i, stack)) {
+                            DefaultWeightedEdge edge = graph.addEdge("item" + i, "stack" + stack);
+                            // the cost difference of bin B(j) when inserting item i
+                            double currCosts = this.getCostsForStack(currSol, stack);
+                            double afterInsertion = currCosts + currSol.getSolvedInstance().getCosts()[i][stack];
+                            // cost reduction when positive
+                            double costDiff = currCosts - afterInsertion;
+                            graph.setEdgeWeight(edge, costDiff);
+                        }
                     }
                 } else {
-                    if (graph.containsVertex("stack" + stack)) {
+                    if (graph.containsVertex("stack" + stack) && graph.containsVertex("item" + i)) {
                         DefaultWeightedEdge edge = graph.addEdge("stack" + stack, "item" + i);
                         // the cost difference of bin B(j) when removing item i
                         double currCosts = this.getCostsForStack(currSol, stack);
@@ -156,14 +179,26 @@ public class EjectionChainsNeighborhood {
         }
 
         for (int item = 0; item < numberOfItems; item++) {
-            DefaultWeightedEdge edge = graph.addEdge("source" + source, "item" + item);
-            // the cost difference of bin B(j) when removing item
-            int stack = currSol.getStackIdxForAssignedItem(item);
-            double currCosts = this.getCostsForStack(currSol, stack);
-            double afterReduction = currCosts - currSol.getSolvedInstance().getCosts()[item][stack];
-            // cost reduction when positive
-            double costDiff = currCosts - afterReduction;
-            graph.setEdgeWeight(edge, costDiff);
+
+            if (HeuristicUtil.itemCompatibleWithAlreadyAssignedItemsWithException(
+                source, currSol.getFilledStacks()[currSol.getStackIdxForAssignedItem(item)], currSol.getSolvedInstance().getItemObjects(),
+                currSol.getSolvedInstance().getStackingConstraints(), item
+            )) {
+
+                if (HeuristicUtil.itemCompatibleWithStack(currSol.getSolvedInstance().getCosts(), source, currSol.getStackIdxForAssignedItem(item))) {
+
+                    if (graph.containsVertex("item" + item)) {
+                        DefaultWeightedEdge edge = graph.addEdge("source" + source, "item" + item);
+                        // the cost difference of bin B(j) when removing item
+                        int stack = currSol.getStackIdxForAssignedItem(item);
+                        double currCosts = this.getCostsForStack(currSol, stack);
+                        double afterReduction = currCosts - currSol.getSolvedInstance().getCosts()[item][stack];
+                        // cost reduction when positive
+                        double costDiff = currCosts - afterReduction;
+                        graph.setEdgeWeight(edge, costDiff);
+                    }
+                }
+            }
         }
     }
 
@@ -251,9 +286,9 @@ public class EjectionChainsNeighborhood {
         // c(i, j): check paper
 
         DefaultDirectedWeightedGraph<String, DefaultWeightedEdge> graph = new DefaultDirectedWeightedGraph<>(DefaultWeightedEdge.class);
-        this.addVerticesForItems(graph, currSol.getSolvedInstance().getItems().length);
-        this.addVerticesForStacks(graph, currSol.getFilledStacks().length, currSol);
         int source = this.addRandomSourceVertex(graph, currSol.getSolvedInstance().getItems().length);
+        this.addVerticesForItems(graph, currSol.getSolvedInstance().getItems().length, source);
+        this.addVerticesForStacks(graph, currSol.getFilledStacks().length, currSol);
         this.addEdgesBetweenItems(graph, stackOrder, currSol.getSolvedInstance().getItems().length, currSol, source);
 
         // compute shortest path from source to any node in V^ZERO (stacks)
@@ -270,11 +305,14 @@ public class EjectionChainsNeighborhood {
         GraphPath bestPath = null;
 
         for (int stack = 0; stack < stackOrder.size(); stack++) {
+
             if (graph.containsVertex("stack" + stack)) {
+
                 GraphPath path = shortestPath.getPath("source" + source, "stack" + stack);
+
                 if (path != null) {
                     if (bestPath != null) {
-                        if (bestPath.getLength() < path.getLength()) {
+                        if (bestPath.getWeight() > path.getWeight()) {
                             bestPath = path;
                         }
                     } else {
@@ -298,8 +336,6 @@ public class EjectionChainsNeighborhood {
         tmpSol.sortItemsInStacksBasedOnTransitiveStackingConstraints();
 
         System.out.println("feasible: " + tmpSol.isFeasible());
-
-        System.exit(0);
 
         return tmpSol;
     }
