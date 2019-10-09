@@ -2,6 +2,7 @@ package SP.post_optimization_methods;
 
 import SP.experiments.PostOptimization;
 import SP.representations.Solution;
+import SP.representations.StackPosition;
 import SP.util.HeuristicUtil;
 import org.jgrapht.Graph;
 import org.jgrapht.GraphPath;
@@ -116,6 +117,7 @@ public class EjectionChainsNeighborhood {
 
                             if (HeuristicUtil.itemCompatibleWithStack(currSol.getSolvedInstance().getCosts(), i, stackIdxItemTwo)) {
                                 DefaultWeightedEdge edge = graph.addEdge("item" + i, "item" + j);
+
                                 // the cost difference of bin B(j) when replacing item j by item i
                                 double currCosts = this.getCostsForStack(currSol, stackIdxItemTwo);
                                 double costsItemJ = currSol.getSolvedInstance().getCosts()[j][stackIdxItemTwo];
@@ -179,8 +181,11 @@ public class EjectionChainsNeighborhood {
                     if (graph.containsVertex("stack" + stack) && graph.containsVertex("item" + i)) {
                         DefaultWeightedEdge edge = graph.addEdge("stack" + stack, "item" + i);
                         // the cost difference of bin B(j) when removing item i
-                        double currCosts = this.getCostsForStack(currSol, stack);
-                        double afterReduction = currCosts - currSol.getSolvedInstance().getCosts()[i][stack];
+
+                        int itemStack = currSol.getStackIdxForAssignedItem(i);
+                        double currCosts = this.getCostsForStack(currSol, itemStack);
+                        double afterReduction = currCosts - currSol.getSolvedInstance().getCosts()[i][itemStack];
+
                         // cost reduction when positive
                         double costDiff = currCosts - afterReduction;
                         graph.setEdgeWeight(edge, costDiff);
@@ -215,13 +220,21 @@ public class EjectionChainsNeighborhood {
         }
     }
 
-    public void applyEjectionChain(Solution currSol, GraphPath path) {
+    public void blockShiftForWholeStack(Solution currSol, int item, int stack, List<Shift> performedShifts) {
+        for (int level = 0; level < currSol.getSolvedInstance().getStackCapacity(); level++) {
+            Shift shift = new Shift(item, new StackPosition(stack, level));
+            performedShifts.add(shift);
+        }
+    }
+
+    public List<Shift> applyEjectionChain(Solution currSol, GraphPath path) {
 
         // (source, item, ..., item, stack)
 
-        System.out.println("path: " + path);
+//        System.out.println("path: " + path);
 
         PendingItemStackAssignment pending = null;
+        List<Shift> performedShifts = new ArrayList<>();
 
         for (Object o : path.getEdgeList()) {
 
@@ -237,8 +250,8 @@ public class EjectionChainsNeighborhood {
                 int item = Integer.parseInt(rhs.replace("item", "").replace(")", "").trim());
                 int stackOfItem = currSol.getStackIdxForAssignedItem(item);
                 HeuristicUtil.removeItemFromStack(item, currSol.getFilledStacks()[stackOfItem]);
+                this.blockShiftForWholeStack(currSol, source, stackOfItem, performedShifts);
                 HeuristicUtil.assignItemToStack(source, currSol.getFilledStacks()[stackOfItem], currSol.getSolvedInstance().getItemObjects());
-
             } else if (lhs.contains("item") && rhs.contains("item")) {
 
                 int itemOne = Integer.parseInt(lhs.replace("(item", "").trim());
@@ -251,6 +264,7 @@ public class EjectionChainsNeighborhood {
                 if (stackOfItemTwo != -1) {
                     HeuristicUtil.removeItemFromStack(itemTwo, currSol.getFilledStacks()[stackOfItemTwo]);
                 }
+                this.blockShiftForWholeStack(currSol, itemOne, stackOfItemOne, performedShifts);
                 HeuristicUtil.assignItemToStack(itemOne, currSol.getFilledStacks()[stackOfItemTwo], currSol.getSolvedInstance().getItemObjects());
 
             } else if (lhs.contains("item") && rhs.contains("stack")) {
@@ -266,6 +280,7 @@ public class EjectionChainsNeighborhood {
                 if (HeuristicUtil.completelyFilledStack(currSol.getFilledStacks()[stack])) {
                     pending = new PendingItemStackAssignment(item, stack);
                 } else {
+                    this.blockShiftForWholeStack(currSol, item, stack, performedShifts);
                     HeuristicUtil.assignItemToStack(item, currSol.getFilledStacks()[stack], currSol.getSolvedInstance().getItemObjects());
                 }
 
@@ -278,6 +293,7 @@ public class EjectionChainsNeighborhood {
                 HeuristicUtil.removeItemFromStack(item, currSol.getFilledStacks()[stack]);
 
                 if (pending != null && stack == pending.getStack()) {
+                    this.blockShiftForWholeStack(currSol, pending.getItem(), stack, performedShifts);
                     HeuristicUtil.assignItemToStack(pending.getItem(), currSol.getFilledStacks()[stack], currSol.getSolvedInstance().getItemObjects());
                     pending = null;
                 }
@@ -285,11 +301,15 @@ public class EjectionChainsNeighborhood {
         }
 
         if (pending != null) {
+            this.blockShiftForWholeStack(currSol, pending.getItem(), pending.getStack(), performedShifts);
             HeuristicUtil.assignItemToStack(pending.getItem(), currSol.getFilledStacks()[pending.getStack()], currSol.getSolvedInstance().getItemObjects());
         }
+
+        return performedShifts;
     }
 
-    public Solution getNeighbor(Solution currSol, Solution bestSol) {
+    public GraphPath getBestPath(Solution currSol) {
+
         List<Integer> stackOrder = this.getRandomStackOrder(currSol);
 
         // construct auxiliary graph:
@@ -312,8 +332,7 @@ public class EjectionChainsNeighborhood {
         BellmanFordShortestPath shortestPath = new BellmanFordShortestPath(graph);
         // each negative path should correspond to a cost reduction
 
-
-        System.out.println("costs before ejection chain: " + currSol.computeCosts());
+//        System.out.println("costs before ejection chain: " + currSol.computeCosts());
 
         GraphPath bestPath = null;
 
@@ -325,7 +344,9 @@ public class EjectionChainsNeighborhood {
 
                 if (path != null) {
                     if (bestPath != null) {
-                        if (bestPath.getWeight() > path.getWeight()) {
+                        // the path should be as long as possible,
+                        // because cost reductions are positive cost values
+                        if (bestPath.getWeight() < path.getWeight()) {
                             bestPath = path;
                         }
                     } else {
@@ -340,21 +361,80 @@ public class EjectionChainsNeighborhood {
             }
         }
 
-        Solution tmpSol = new Solution(currSol);
-        if (bestPath == null) {
-            return tmpSol;
+        return bestPath;
+    }
+
+    public boolean tabuListContainsAnyOfTheShifts(List<Shift> performedShifts) {
+        for (Shift shift : performedShifts) {
+            if (this.tabuList.contains(shift)) {
+                return true;
+            }
         }
-        this.applyEjectionChain(tmpSol, bestPath);
-        System.out.println("costs of best path: " + bestPath.getWeight());
-        System.out.println("costs after ejection chain: " + tmpSol.computeCosts());
-//        tmpSol.printFilledStacks();
+        return false;
+    }
 
-        tmpSol.lowerItemsThatAreStackedInTheAir();
-        tmpSol.sortItemsInStacksBasedOnTransitiveStackingConstraints();
+    public void forbidShifts(List<Shift> performedShifts) {
+        for (Shift shift : performedShifts) {
+            this.tabuList.add(shift);
+        }
+    }
 
-        System.out.println("feasible: " + tmpSol.isFeasible());
-        System.exit(0);
+    public Solution getNeighbor(Solution currSol, Solution bestSol) {
 
-        return tmpSol;
+        List<Solution> nbrs = new ArrayList<>();
+        int failCnt = 0;
+
+        while (nbrs.size() < this.numberOfNeighbors) {
+
+            GraphPath bestPath = this.getBestPath(currSol);
+
+            Solution tmpSol = new Solution(currSol);
+            if (bestPath == null) { return tmpSol; }
+            List<Shift> performedShifts = this.applyEjectionChain(tmpSol, bestPath);
+            tmpSol.lowerItemsThatAreStackedInTheAir();
+            tmpSol.sortItemsInStacksBasedOnTransitiveStackingConstraints();
+
+//        System.out.println("costs of best path: " + bestPath.getWeight());
+//        System.out.println("costs after ejection chain: " + tmpSol.computeCosts());
+////        tmpSol.printFilledStacks();
+//        System.out.println("feasible: " + tmpSol.isFeasible());
+
+            Solution neighbor = tmpSol;
+
+            if (!neighbor.isFeasible()) { continue; }
+
+            // FIRST-FIT
+            if (this.shortTermStrategy == PostOptimization.ShortTermStrategies.FIRST_FIT && !this.tabuListContainsAnyOfTheShifts(performedShifts)
+                && neighbor.computeCosts() < currSol.computeCosts()) {
+
+                this.forbidShifts(performedShifts);
+                return neighbor;
+
+                // BEST-FIT
+            } else if (!this.tabuListContainsAnyOfTheShifts(performedShifts)) {
+                nbrs.add(neighbor);
+                this.forbidShifts(performedShifts);
+            } else {
+                failCnt++;
+                if (failCnt == this.unsuccessfulNeighborGenerationAttempts) {
+                    failCnt = 0;
+                    if (nbrs.size() == 0) {
+                        System.out.println("CLEAR");
+                        this.clearTabuList();
+                    } else {
+                        return HeuristicUtil.getBestSolution(nbrs);
+                    }
+                }
+            }
+            // ASPIRATION CRITERION
+            if (neighbor.computeCosts() < bestSol.computeCosts()) {
+                if (this.shortTermStrategy == PostOptimization.ShortTermStrategies.FIRST_FIT) {
+                    return neighbor;
+                } else {
+                    nbrs.add(neighbor);
+                }
+            }
+        }
+        return HeuristicUtil.getBestSolution(nbrs);
     }
 }
