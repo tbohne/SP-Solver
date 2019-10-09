@@ -125,14 +125,15 @@ public class EjectionChainsNeighborhood {
                                 double costsAfter = currCosts - costsItemJ + costsItemI;
                                 // cost reduction when positive
                                 double costDiff = currCosts - costsAfter;
+                                costDiff *= -1;
                                 graph.setEdgeWeight(edge, costDiff);
+
                             }
                         }
                     }
                 } else {
 
                     if (!graph.containsEdge("item" + j, "item" + i)) {
-
 
                         if (HeuristicUtil.itemCompatibleWithAlreadyAssignedItemsWithException(
                             j, currSol.getFilledStacks()[stackIdxItemOne], currSol.getSolvedInstance().getItemObjects(),
@@ -141,6 +142,7 @@ public class EjectionChainsNeighborhood {
 
                             if (HeuristicUtil.itemCompatibleWithStack(currSol.getSolvedInstance().getCosts(), j, stackIdxItemOne)) {
                                 DefaultWeightedEdge edge = graph.addEdge("item" + j, "item" + i);
+
                                 // the cost difference of bin B(i) when replacing item i by item j
                                 double currCosts = this.getCostsForStack(currSol, stackIdxItemOne);
                                 double costsItemI = currSol.getSolvedInstance().getCosts()[i][stackIdxItemOne];
@@ -148,6 +150,7 @@ public class EjectionChainsNeighborhood {
                                 double costsAfter = currCosts - costsItemI + costsItemJ;
                                 // cost reduction when positive
                                 double costDiff = currCosts - costsAfter;
+                                costDiff *= -1;
                                 graph.setEdgeWeight(edge, costDiff);
                             }
                         }
@@ -168,11 +171,13 @@ public class EjectionChainsNeighborhood {
                                     currSol.getSolvedInstance().getStackingConstraints())) {
 
                                 DefaultWeightedEdge edge = graph.addEdge("item" + i, "stack" + stack);
+
                                 // the cost difference of bin B(j) when inserting item i
                                 double currCosts = this.getCostsForStack(currSol, stack);
                                 double afterInsertion = currCosts + currSol.getSolvedInstance().getCosts()[i][stack];
                                 // cost reduction when positive
                                 double costDiff = currCosts - afterInsertion;
+                                costDiff *= -1;
                                 graph.setEdgeWeight(edge, costDiff);
                             }
                         }
@@ -188,6 +193,7 @@ public class EjectionChainsNeighborhood {
 
                         // cost reduction when positive
                         double costDiff = currCosts - afterReduction;
+                        costDiff *= -1;
                         graph.setEdgeWeight(edge, costDiff);
                     }
                 }
@@ -207,12 +213,19 @@ public class EjectionChainsNeighborhood {
 
                     if (graph.containsVertex("item" + item)) {
                         DefaultWeightedEdge edge = graph.addEdge("source" + source, "item" + item);
+
                         // the cost difference of bin B(j) when removing item
                         int stack = currSol.getStackIdxForAssignedItem(item);
                         double currCosts = this.getCostsForStack(currSol, stack);
                         double afterReduction = currCosts - currSol.getSolvedInstance().getCosts()[item][stack];
+
+                        double sourceCostBefore = currSol.getSolvedInstance().getCosts()[source][currSol.getStackIdxForAssignedItem(source)];
+                        double sourceCostAfter = currSol.getSolvedInstance().getCosts()[source][stack];
+                        double sourceDiff = sourceCostBefore - sourceCostAfter;
+
                         // cost reduction when positive
-                        double costDiff = currCosts - afterReduction;
+                        double costDiff = currCosts - afterReduction + sourceDiff;
+                        costDiff *= -1;
                         graph.setEdgeWeight(edge, costDiff);
                     }
                 }
@@ -252,6 +265,7 @@ public class EjectionChainsNeighborhood {
                 HeuristicUtil.removeItemFromStack(item, currSol.getFilledStacks()[stackOfItem]);
                 this.blockShiftForWholeStack(currSol, source, stackOfItem, performedShifts);
                 HeuristicUtil.assignItemToStack(source, currSol.getFilledStacks()[stackOfItem], currSol.getSolvedInstance().getItemObjects());
+
             } else if (lhs.contains("item") && rhs.contains("item")) {
 
                 int itemOne = Integer.parseInt(lhs.replace("(item", "").trim());
@@ -344,9 +358,8 @@ public class EjectionChainsNeighborhood {
 
                 if (path != null) {
                     if (bestPath != null) {
-                        // the path should be as long as possible,
-                        // because cost reductions are positive cost values
-                        if (bestPath.getWeight() < path.getWeight()) {
+                        // looking for the shortest path --> biggest reduction
+                        if (bestPath.getWeight() > path.getWeight()) {
                             bestPath = path;
                         }
                     } else {
@@ -360,6 +373,12 @@ public class EjectionChainsNeighborhood {
                 }
             }
         }
+
+//        System.out.println("######################");
+//        for (Object o : bestPath.getEdgeList()) {
+//            System.out.println(o + " --> " + graph.getEdgeWeight((DefaultWeightedEdge) o));
+//        }
+//        System.out.println("######################");
 
         return bestPath;
     }
@@ -388,16 +407,18 @@ public class EjectionChainsNeighborhood {
 
             GraphPath bestPath = this.getBestPath(currSol);
 
+//            System.out.println("best path: " + bestPath);
+
             Solution tmpSol = new Solution(currSol);
             if (bestPath == null) { return tmpSol; }
             List<Shift> performedShifts = this.applyEjectionChain(tmpSol, bestPath);
             tmpSol.lowerItemsThatAreStackedInTheAir();
             tmpSol.sortItemsInStacksBasedOnTransitiveStackingConstraints();
 
-//        System.out.println("costs of best path: " + bestPath.getWeight());
-//        System.out.println("costs after ejection chain: " + tmpSol.computeCosts());
-////        tmpSol.printFilledStacks();
-//        System.out.println("feasible: " + tmpSol.isFeasible());
+            System.out.println("costs before: " + currSol.computeCosts());
+            System.out.println("costs of best path: " + bestPath.getWeight());
+            System.out.println("costs after ejection chain: " + tmpSol.computeCosts());
+            System.out.println("feasible: " + tmpSol.isFeasible());
 
             Solution neighbor = tmpSol;
 
@@ -410,7 +431,7 @@ public class EjectionChainsNeighborhood {
                 this.forbidShifts(performedShifts);
                 return neighbor;
 
-                // BEST-FIT
+            // BEST-FIT
             } else if (!this.tabuListContainsAnyOfTheShifts(performedShifts)) {
                 nbrs.add(neighbor);
                 this.forbidShifts(performedShifts);
