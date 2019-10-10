@@ -309,6 +309,9 @@ public class HeuristicUtil {
         items.add(itemObjects[item]);
         // sort items with regard to the transitive stacking constraints
         Collections.sort(items);
+        // clear previous assignments
+        for (int i = 0; i < stack.length; i++) { stack[i] = -1; }
+        // assign items in new order
         for (int i = 0; i < items.size(); i++) {
             stack[i] = items.get(i).getIdx();
         }
