@@ -393,6 +393,11 @@ public class EjectionChainsNeighborhood {
     }
 
     public void forbidShifts(List<Shift> performedShifts) {
+        if (this.tabuList.size() >= this.maxTabuListLength) {
+            while (this.tabuList.size() + performedShifts.size() >= this.maxTabuListLength) {
+                this.tabuList.poll();
+            }
+        }
         for (Shift shift : performedShifts) {
             this.tabuList.add(shift);
         }
@@ -415,10 +420,10 @@ public class EjectionChainsNeighborhood {
             tmpSol.lowerItemsThatAreStackedInTheAir();
             tmpSol.sortItemsInStacksBasedOnTransitiveStackingConstraints();
 
-            System.out.println("costs before: " + currSol.computeCosts());
-            System.out.println("costs of best path: " + bestPath.getWeight());
-            System.out.println("costs after ejection chain: " + tmpSol.computeCosts());
-            System.out.println("feasible: " + tmpSol.isFeasible());
+//            System.out.println("costs before: " + currSol.computeCosts());
+//            System.out.println("costs of best path: " + bestPath.getWeight());
+//            System.out.println("costs after ejection chain: " + tmpSol.computeCosts());
+//            System.out.println("feasible: " + tmpSol.isFeasible());
 
             Solution neighbor = tmpSol;
 
