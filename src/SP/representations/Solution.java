@@ -249,10 +249,10 @@ public class Solution implements Comparable<Solution> {
             System.out.println("infeasible solution - not all items have been assigned");
             return false;
         } else if (!this.stackingConstraintsRespected()) {
-//            System.out.println("infeasible solution - the stacking constraints are violated");
+            System.out.println("infeasible solution - the stacking constraints are violated");
             return false;
         } else if (!this.placementConstraintsRespected()) {
-//            System.out.println("infeasible solution - the placement constraints are violated");
+            System.out.println("infeasible solution - the placement constraints are violated");
             return false;
         } else if (this.containsDuplicates()) {
             System.out.println("infeasible solution - there are items that are assigned more than once");
@@ -262,6 +262,17 @@ public class Solution implements Comparable<Solution> {
             return false;
         }
         return true;
+    }
+
+    public int getStackIdxForAssignedItem(int item) {
+        for (int stack = 0; stack < this.getFilledStacks().length; stack++) {
+            for (int level = 0; level < this.solvedInstance.getStackCapacity(); level++) {
+                if (this.getFilledStacks()[stack][level] == item) {
+                    return stack;
+                }
+            }
+        }
+        return -1;
     }
 
     public List<ItemConflict> getNumberOfConflictsForEachItem() {
