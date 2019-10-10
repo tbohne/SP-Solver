@@ -11,13 +11,13 @@ import org.jgrapht.graph.*;
 
 import java.util.*;
 
+
 public class EjectionChainsNeighborhood {
 
     private int numberOfNeighbors;
     private PostOptimization.ShortTermStrategies shortTermStrategy;
-    private int maxTabuListLength;
     private int unsuccessfulNeighborGenerationAttempts;
-
+    private int maxTabuListLength;
     private int tabuListClears;
     private Queue<Shift> tabuList;
 
@@ -88,12 +88,118 @@ public class EjectionChainsNeighborhood {
         return costs;
     }
 
-    private void addEdgesBetweenItems(
+    private void addEdgeBetweenItems(
+        DefaultDirectedWeightedGraph<String, DefaultWeightedEdge> graph, Solution currSol, int itemOne, int itemTwo
+    ) {
+
+        if (!graph.containsEdge("item" + itemOne, "item" + itemTwo)) {
+
+            int stackIdxItemTwo = currSol.getStackIdxForAssignedItem(itemTwo);
+
+            if (HeuristicUtil.itemCompatibleWithAlreadyAssignedItemsWithException(
+                itemOne, currSol.getFilledStacks()[stackIdxItemTwo], currSol.getSolvedInstance().getItemObjects(),
+                currSol.getSolvedInstance().getStackingConstraints(), itemTwo
+            )) {
+
+                if (HeuristicUtil.itemCompatibleWithStack(currSol.getSolvedInstance().getCosts(), itemOne, stackIdxItemTwo)) {
+
+                    DefaultWeightedEdge edge = graph.addEdge("item" + itemOne, "item" + itemTwo);
+                    double currCosts = this.getCostsForStack(currSol, stackIdxItemTwo);
+                    double costsItemTwo = currSol.getSolvedInstance().getCosts()[itemTwo][stackIdxItemTwo];
+                    double costsItemOne = currSol.getSolvedInstance().getCosts()[itemOne][stackIdxItemTwo];
+                    double costsAfter = currCosts - costsItemTwo + costsItemOne;
+
+                    // cost reduction when positive
+                    double costDiff = currCosts - costsAfter;
+                    // negating edge costs to obtain longest path using Bellman-Ford
+                    costDiff *= -1;
+                    graph.setEdgeWeight(edge, costDiff);
+                }
+            }
+        }
+    }
+
+    private void addEdgeFromItemToStack(
+        DefaultDirectedWeightedGraph<String, DefaultWeightedEdge> graph, Solution currSol, int item, int stack
+    ) {
+
+        if (graph.containsVertex("stack" + stack) && graph.containsVertex("item" + item)) {
+
+            if (HeuristicUtil.itemCompatibleWithStack(currSol.getSolvedInstance().getCosts(), item, stack)) {
+
+                if (HeuristicUtil.itemCompatibleWithAlreadyAssignedItems(item, currSol.getFilledStacks()[stack],
+                    currSol.getSolvedInstance().getItemObjects(), currSol.getSolvedInstance().getStackingConstraints())
+                ) {
+
+                    DefaultWeightedEdge edge = graph.addEdge("item" + item, "stack" + stack);
+                    double currCosts = this.getCostsForStack(currSol, stack);
+                    double afterInsertion = currCosts + currSol.getSolvedInstance().getCosts()[item][stack];
+
+                    // cost reduction when positive
+                    double costDiff = currCosts - afterInsertion;
+                    // negating edge costs to obtain longest path using Bellman-Ford
+                    costDiff *= -1;
+                    graph.setEdgeWeight(edge, costDiff);
+                }
+            }
+        }
+    }
+
+    private void addEdgeFromStackToItem(
+        DefaultDirectedWeightedGraph<String, DefaultWeightedEdge> graph, Solution currSol, int stack, int item
+    ) {
+
+        if (graph.containsVertex("stack" + stack) && graph.containsVertex("item" + item)) {
+            DefaultWeightedEdge edge = graph.addEdge("stack" + stack, "item" + item);
+            int itemStack = currSol.getStackIdxForAssignedItem(item);
+            double currCosts = this.getCostsForStack(currSol, itemStack);
+            double afterReduction = currCosts - currSol.getSolvedInstance().getCosts()[item][itemStack];
+
+            // cost reduction when positive
+            double costDiff = currCosts - afterReduction;
+            // negating edge costs to obtain longest path using Bellman-Ford
+            costDiff *= -1;
+            graph.setEdgeWeight(edge, costDiff);
+        }
+    }
+
+    private void addEdgeBetweenSourceAndItem(
+        DefaultDirectedWeightedGraph<String, DefaultWeightedEdge> graph, Solution currSol, int source, int item
+    ) {
+
+        if (HeuristicUtil.itemCompatibleWithAlreadyAssignedItemsWithException(
+            source, currSol.getFilledStacks()[currSol.getStackIdxForAssignedItem(item)],
+            currSol.getSolvedInstance().getItemObjects(), currSol.getSolvedInstance().getStackingConstraints(), item
+        )) {
+
+            if (HeuristicUtil.itemCompatibleWithStack(currSol.getSolvedInstance().getCosts(), source, currSol.getStackIdxForAssignedItem(item))) {
+
+                if (graph.containsVertex("item" + item)) {
+
+                    DefaultWeightedEdge edge = graph.addEdge("source" + source, "item" + item);
+                    int stack = currSol.getStackIdxForAssignedItem(item);
+                    double currCosts = this.getCostsForStack(currSol, stack);
+                    double afterReduction = currCosts - currSol.getSolvedInstance().getCosts()[item][stack];
+
+                    double sourceCostBefore = currSol.getSolvedInstance().getCosts()[source][currSol.getStackIdxForAssignedItem(source)];
+                    double sourceCostAfter = currSol.getSolvedInstance().getCosts()[source][stack];
+                    double sourceDiff = sourceCostBefore - sourceCostAfter;
+
+                    // cost reduction when positive
+                    double costDiff = currCosts - afterReduction + sourceDiff;
+                    // negating edge costs to obtain longest path using Bellman-Ford
+                    costDiff *= -1;
+                    graph.setEdgeWeight(edge, costDiff);
+                }
+            }
+        }
+    }
+
+    private void addEdges(
         DefaultDirectedWeightedGraph<String, DefaultWeightedEdge> graph, List<Integer> stackOrder,
         int numberOfItems, Solution currSol, int source
     ) {
 
-        // for items
         for (int i = 0; i < numberOfItems; i++) {
             for (int j = 0; j < numberOfItems; j++) {
 
@@ -101,135 +207,32 @@ public class EjectionChainsNeighborhood {
 
                 int stackIdxItemOne = currSol.getStackIdxForAssignedItem(i);
                 int stackIdxItemTwo = currSol.getStackIdxForAssignedItem(j);
-
                 // don't shift in same stack
                 if (stackIdxItemOne == stackIdxItemTwo) { continue; }
 
                 if (stackOrder.indexOf(stackIdxItemOne) < stackOrder.indexOf(stackIdxItemTwo)) {
-
-                    if (!graph.containsEdge("item" + i, "item" + j)) {
-
-                        // place i, remove j
-                        if (HeuristicUtil.itemCompatibleWithAlreadyAssignedItemsWithException(
-                            i, currSol.getFilledStacks()[stackIdxItemTwo], currSol.getSolvedInstance().getItemObjects(),
-                            currSol.getSolvedInstance().getStackingConstraints(), j
-                        )) {
-
-                            if (HeuristicUtil.itemCompatibleWithStack(currSol.getSolvedInstance().getCosts(), i, stackIdxItemTwo)) {
-                                DefaultWeightedEdge edge = graph.addEdge("item" + i, "item" + j);
-
-                                // the cost difference of bin B(j) when replacing item j by item i
-                                double currCosts = this.getCostsForStack(currSol, stackIdxItemTwo);
-                                double costsItemJ = currSol.getSolvedInstance().getCosts()[j][stackIdxItemTwo];
-                                double costsItemI = currSol.getSolvedInstance().getCosts()[i][stackIdxItemTwo];
-                                double costsAfter = currCosts - costsItemJ + costsItemI;
-                                // cost reduction when positive
-                                double costDiff = currCosts - costsAfter;
-                                costDiff *= -1;
-                                graph.setEdgeWeight(edge, costDiff);
-
-                            }
-                        }
-                    }
+                    this.addEdgeBetweenItems(graph, currSol, i, j);
                 } else {
-
-                    if (!graph.containsEdge("item" + j, "item" + i)) {
-
-                        if (HeuristicUtil.itemCompatibleWithAlreadyAssignedItemsWithException(
-                            j, currSol.getFilledStacks()[stackIdxItemOne], currSol.getSolvedInstance().getItemObjects(),
-                            currSol.getSolvedInstance().getStackingConstraints(), i
-                        )) {
-
-                            if (HeuristicUtil.itemCompatibleWithStack(currSol.getSolvedInstance().getCosts(), j, stackIdxItemOne)) {
-                                DefaultWeightedEdge edge = graph.addEdge("item" + j, "item" + i);
-
-                                // the cost difference of bin B(i) when replacing item i by item j
-                                double currCosts = this.getCostsForStack(currSol, stackIdxItemOne);
-                                double costsItemI = currSol.getSolvedInstance().getCosts()[i][stackIdxItemOne];
-                                double costsItemJ = currSol.getSolvedInstance().getCosts()[j][stackIdxItemOne];
-                                double costsAfter = currCosts - costsItemI + costsItemJ;
-                                // cost reduction when positive
-                                double costDiff = currCosts - costsAfter;
-                                costDiff *= -1;
-                                graph.setEdgeWeight(edge, costDiff);
-                            }
-                        }
-                    }
+                    this.addEdgeBetweenItems(graph, currSol, j, i);
                 }
             }
 
             for (int stack = 0; stack < stackOrder.size(); stack++) {
+
                 int stackIdxItem = currSol.getStackIdxForAssignedItem(i);
+                if (stackIdxItem == stack) { continue; }
+
                 if (stackOrder.indexOf(stackIdxItem) < stackOrder.indexOf(stack)) {
-                    if (graph.containsVertex("stack" + stack) && graph.containsVertex("item" + i)) {
-
-                        if (stackIdxItem == stack) { continue; }
-
-                        if (HeuristicUtil.itemCompatibleWithStack(currSol.getSolvedInstance().getCosts(), i, stack)) {
-
-                            if (HeuristicUtil.itemCompatibleWithAlreadyAssignedItems(i, currSol.getFilledStacks()[stack], currSol.getSolvedInstance().getItemObjects(),
-                                    currSol.getSolvedInstance().getStackingConstraints())) {
-
-                                DefaultWeightedEdge edge = graph.addEdge("item" + i, "stack" + stack);
-
-                                // the cost difference of bin B(j) when inserting item i
-                                double currCosts = this.getCostsForStack(currSol, stack);
-                                double afterInsertion = currCosts + currSol.getSolvedInstance().getCosts()[i][stack];
-                                // cost reduction when positive
-                                double costDiff = currCosts - afterInsertion;
-                                costDiff *= -1;
-                                graph.setEdgeWeight(edge, costDiff);
-                            }
-                        }
-                    }
+                    this.addEdgeFromItemToStack(graph, currSol, i, stack);
                 } else {
-                    if (graph.containsVertex("stack" + stack) && graph.containsVertex("item" + i)) {
-                        DefaultWeightedEdge edge = graph.addEdge("stack" + stack, "item" + i);
-                        // the cost difference of bin B(j) when removing item i
-
-                        int itemStack = currSol.getStackIdxForAssignedItem(i);
-                        double currCosts = this.getCostsForStack(currSol, itemStack);
-                        double afterReduction = currCosts - currSol.getSolvedInstance().getCosts()[i][itemStack];
-
-                        // cost reduction when positive
-                        double costDiff = currCosts - afterReduction;
-                        costDiff *= -1;
-                        graph.setEdgeWeight(edge, costDiff);
-                    }
+                    this.addEdgeFromStackToItem(graph, currSol, stack, i);
                 }
             }
         }
 
         for (int item = 0; item < numberOfItems; item++) {
-
-            if (HeuristicUtil.itemCompatibleWithAlreadyAssignedItemsWithException(
-                source, currSol.getFilledStacks()[currSol.getStackIdxForAssignedItem(item)], currSol.getSolvedInstance().getItemObjects(),
-                currSol.getSolvedInstance().getStackingConstraints(), item
-            )) {
-
-                if (HeuristicUtil.itemCompatibleWithStack(currSol.getSolvedInstance().getCosts(), source, currSol.getStackIdxForAssignedItem(item))) {
-
-                    if (currSol.getStackIdxForAssignedItem(item) == currSol.getStackIdxForAssignedItem(source)) { continue; }
-
-                    if (graph.containsVertex("item" + item)) {
-                        DefaultWeightedEdge edge = graph.addEdge("source" + source, "item" + item);
-
-                        // the cost difference of bin B(j) when removing item
-                        int stack = currSol.getStackIdxForAssignedItem(item);
-                        double currCosts = this.getCostsForStack(currSol, stack);
-                        double afterReduction = currCosts - currSol.getSolvedInstance().getCosts()[item][stack];
-
-                        double sourceCostBefore = currSol.getSolvedInstance().getCosts()[source][currSol.getStackIdxForAssignedItem(source)];
-                        double sourceCostAfter = currSol.getSolvedInstance().getCosts()[source][stack];
-                        double sourceDiff = sourceCostBefore - sourceCostAfter;
-
-                        // cost reduction when positive
-                        double costDiff = currCosts - afterReduction + sourceDiff;
-                        costDiff *= -1;
-                        graph.setEdgeWeight(edge, costDiff);
-                    }
-                }
-            }
+            if (currSol.getStackIdxForAssignedItem(item) == currSol.getStackIdxForAssignedItem(source)) { continue; }
+            this.addEdgeBetweenSourceAndItem(graph, currSol, source, item);
         }
     }
 
@@ -240,122 +243,105 @@ public class EjectionChainsNeighborhood {
         }
     }
 
+    private void applySourceToItemEdge(String lhs, String rhs, Solution currSol, List<Shift> performedShifts) {
+        int source = Integer.parseInt(lhs.replace("(source", "").trim());
+        int stackOfSource = currSol.getStackIdxForAssignedItem(source);
+        HeuristicUtil.removeItemFromStack(source, currSol.getFilledStacks()[stackOfSource]);
+        int item = Integer.parseInt(rhs.replace("item", "").replace(")", "").trim());
+        int stackOfItem = currSol.getStackIdxForAssignedItem(item);
+        HeuristicUtil.removeItemFromStack(item, currSol.getFilledStacks()[stackOfItem]);
+        this.blockShiftForWholeStack(currSol, source, stackOfItem, performedShifts);
+        HeuristicUtil.assignItemToStack(source, currSol.getFilledStacks()[stackOfItem], currSol.getSolvedInstance().getItemObjects());
+    }
+
+    private void applyItemToItemEdge(String lhs, String rhs, Solution currSol, List<Shift> performedShifts) {
+        int itemOne = Integer.parseInt(lhs.replace("(item", "").trim());
+        int itemTwo = Integer.parseInt(rhs.replace("item", "").replace(")", "").trim());
+        int stackOfItemOne = currSol.getStackIdxForAssignedItem(itemOne);
+        int stackOfItemTwo = currSol.getStackIdxForAssignedItem(itemTwo);
+        if (stackOfItemOne != -1) {
+            HeuristicUtil.removeItemFromStack(itemOne, currSol.getFilledStacks()[stackOfItemOne]);
+        }
+        if (stackOfItemTwo != -1) {
+            HeuristicUtil.removeItemFromStack(itemTwo, currSol.getFilledStacks()[stackOfItemTwo]);
+        }
+        this.blockShiftForWholeStack(currSol, itemOne, stackOfItemOne, performedShifts);
+        HeuristicUtil.assignItemToStack(itemOne, currSol.getFilledStacks()[stackOfItemTwo], currSol.getSolvedInstance().getItemObjects());
+    }
+
+    private PendingItemStackAssignment applyItemToStackEdge(String lhs, String rhs, Solution currSol, List<Shift> performedShifts, PendingItemStackAssignment pending) {
+        int item = Integer.parseInt(lhs.replace("(item", "").trim());
+        int stack = Integer.parseInt(rhs.replace("stack", "").replace(")", "").trim());
+        int stackOfItem = currSol.getStackIdxForAssignedItem(item);
+
+        if (stackOfItem != -1) {
+            HeuristicUtil.removeItemFromStack(item, currSol.getFilledStacks()[stackOfItem]);
+        }
+
+        if (HeuristicUtil.completelyFilledStack(currSol.getFilledStacks()[stack])) {
+            return new PendingItemStackAssignment(item, stack);
+        } else {
+            this.blockShiftForWholeStack(currSol, item, stack, performedShifts);
+            HeuristicUtil.assignItemToStack(item, currSol.getFilledStacks()[stack], currSol.getSolvedInstance().getItemObjects());
+        }
+        return pending;
+    }
+
+    private PendingItemStackAssignment applyStackToItemEdge(
+        String lhs, String rhs, Solution currSol, PendingItemStackAssignment pending, List<Shift> performedShifts
+    ) {
+
+        int stack = Integer.parseInt(lhs.replace("(stack", "").trim());
+        int item = Integer.parseInt(rhs.replace("item", "").replace(")", "").trim());
+
+        HeuristicUtil.removeItemFromStack(item, currSol.getFilledStacks()[stack]);
+
+        if (pending != null && stack == pending.getStack()) {
+            this.blockShiftForWholeStack(currSol, pending.getItem(), stack, performedShifts);
+            HeuristicUtil.assignItemToStack(pending.getItem(), currSol.getFilledStacks()[stack], currSol.getSolvedInstance().getItemObjects());
+            return null;
+        }
+        return pending;
+    }
+
     public List<Shift> applyEjectionChain(Solution currSol, GraphPath path) {
-
-        // (source, item, ..., item, stack)
-
-//        System.out.println("path: " + path);
 
         PendingItemStackAssignment pending = null;
         List<Shift> performedShifts = new ArrayList<>();
 
         for (Object o : path.getEdgeList()) {
-
             String lhs = o.toString().split(":")[0];
             String rhs = o.toString().split(":")[1];
 
-            // case 1: (source -> item)
             if (lhs.contains("source") && rhs.contains("item")) {
-
-                int source = Integer.parseInt(lhs.replace("(source", "").trim());
-                int stackOfSource = currSol.getStackIdxForAssignedItem(source);
-                HeuristicUtil.removeItemFromStack(source, currSol.getFilledStacks()[stackOfSource]);
-                int item = Integer.parseInt(rhs.replace("item", "").replace(")", "").trim());
-                int stackOfItem = currSol.getStackIdxForAssignedItem(item);
-                HeuristicUtil.removeItemFromStack(item, currSol.getFilledStacks()[stackOfItem]);
-                this.blockShiftForWholeStack(currSol, source, stackOfItem, performedShifts);
-                HeuristicUtil.assignItemToStack(source, currSol.getFilledStacks()[stackOfItem], currSol.getSolvedInstance().getItemObjects());
-
+                this.applySourceToItemEdge(lhs, rhs, currSol, performedShifts);
             } else if (lhs.contains("item") && rhs.contains("item")) {
-
-                int itemOne = Integer.parseInt(lhs.replace("(item", "").trim());
-                int itemTwo = Integer.parseInt(rhs.replace("item", "").replace(")", "").trim());
-                int stackOfItemOne = currSol.getStackIdxForAssignedItem(itemOne);
-                int stackOfItemTwo = currSol.getStackIdxForAssignedItem(itemTwo);
-                if (stackOfItemOne != -1) {
-                    HeuristicUtil.removeItemFromStack(itemOne, currSol.getFilledStacks()[stackOfItemOne]);
-                }
-                if (stackOfItemTwo != -1) {
-                    HeuristicUtil.removeItemFromStack(itemTwo, currSol.getFilledStacks()[stackOfItemTwo]);
-                }
-                this.blockShiftForWholeStack(currSol, itemOne, stackOfItemOne, performedShifts);
-                HeuristicUtil.assignItemToStack(itemOne, currSol.getFilledStacks()[stackOfItemTwo], currSol.getSolvedInstance().getItemObjects());
-
+                this.applyItemToItemEdge(lhs, rhs, currSol, performedShifts);
             } else if (lhs.contains("item") && rhs.contains("stack")) {
-
-                int item = Integer.parseInt(lhs.replace("(item", "").trim());
-                int stack = Integer.parseInt(rhs.replace("stack", "").replace(")", "").trim());
-                int stackOfItem = currSol.getStackIdxForAssignedItem(item);
-
-                if (stackOfItem != -1) {
-                    HeuristicUtil.removeItemFromStack(item, currSol.getFilledStacks()[stackOfItem]);
-                }
-
-                if (HeuristicUtil.completelyFilledStack(currSol.getFilledStacks()[stack])) {
-                    pending = new PendingItemStackAssignment(item, stack);
-                } else {
-                    this.blockShiftForWholeStack(currSol, item, stack, performedShifts);
-                    HeuristicUtil.assignItemToStack(item, currSol.getFilledStacks()[stack], currSol.getSolvedInstance().getItemObjects());
-                }
-
-
+                pending = this.applyItemToStackEdge(lhs, rhs, currSol, performedShifts, pending);
             } else if (lhs.contains("stack") && rhs.contains("item")) {
-
-                int stack = Integer.parseInt(lhs.replace("(stack", "").trim());
-                int item = Integer.parseInt(rhs.replace("item", "").replace(")", "").trim());
-
-                HeuristicUtil.removeItemFromStack(item, currSol.getFilledStacks()[stack]);
-
-                if (pending != null && stack == pending.getStack()) {
-                    this.blockShiftForWholeStack(currSol, pending.getItem(), stack, performedShifts);
-                    HeuristicUtil.assignItemToStack(pending.getItem(), currSol.getFilledStacks()[stack], currSol.getSolvedInstance().getItemObjects());
-                    pending = null;
-                }
+                pending = this.applyStackToItemEdge(lhs, rhs, currSol, pending, performedShifts);
             }
         }
-
         if (pending != null) {
             this.blockShiftForWholeStack(currSol, pending.getItem(), pending.getStack(), performedShifts);
-            HeuristicUtil.assignItemToStack(pending.getItem(), currSol.getFilledStacks()[pending.getStack()], currSol.getSolvedInstance().getItemObjects());
+            HeuristicUtil.assignItemToStack(
+                pending.getItem(), currSol.getFilledStacks()[pending.getStack()], currSol.getSolvedInstance().getItemObjects()
+            );
         }
-
         return performedShifts;
     }
 
-    public GraphPath getBestPath(Solution currSol) {
-
-        List<Integer> stackOrder = this.getRandomStackOrder(currSol);
-
-        // construct auxiliary graph:
-        // V: items + stacks + source
-        // A: (i, j) forall i, j for which B(i) < B(j) in the order
-        //           and one arc from (source, j) for any j from the set of items
-        // c(i, j): check paper
-
-        DefaultDirectedWeightedGraph<String, DefaultWeightedEdge> graph = new DefaultDirectedWeightedGraph<>(DefaultWeightedEdge.class);
-        int source = this.addRandomSourceVertex(graph, currSol.getSolvedInstance().getItems().length);
-        this.addVerticesForItems(graph, currSol.getSolvedInstance().getItems().length, source);
-        this.addVerticesForStacks(graph, currSol.getFilledStacks().length, currSol);
-        this.addEdgesBetweenItems(graph, stackOrder, currSol.getSolvedInstance().getItems().length, currSol, source);
-
-        // compute shortest path from source to any node in V^ZERO (stacks)
-        // --> sequence of combined item insertions and removals
-        // update solution in case of improvement
-        // each shortest path from source to a node in V^ZERO corresponds to one ejection chain?
-        // --> choose best
-        BellmanFordShortestPath shortestPath = new BellmanFordShortestPath(graph);
-        // each negative path should correspond to a cost reduction
-
-//        System.out.println("costs before ejection chain: " + currSol.computeCosts());
+    public GraphPath getBestPath(
+        DefaultDirectedWeightedGraph<String, DefaultWeightedEdge> graph,
+        BellmanFordShortestPath shortestPath, int numberOfStacks, int source
+    ) {
 
         GraphPath bestPath = null;
 
-        for (int stack = 0; stack < stackOrder.size(); stack++) {
-
+        for (int stack = 0; stack < numberOfStacks; stack++) {
             if (graph.containsVertex("stack" + stack)) {
-
                 GraphPath path = shortestPath.getPath("source" + source, "stack" + stack);
-
                 if (path != null) {
                     if (bestPath != null) {
                         // looking for the shortest path --> biggest reduction
@@ -365,22 +351,29 @@ public class EjectionChainsNeighborhood {
                     } else {
                         bestPath = path;
                     }
-//                System.out.println("path: " + path);
-//                System.out.println("costs: " + path.getLength());
-                } else {
-//                System.out.println("no path from " + source + " to " + stack);
-//                System.exit(0);
                 }
             }
         }
-
-//        System.out.println("######################");
-//        for (Object o : bestPath.getEdgeList()) {
-//            System.out.println(o + " --> " + graph.getEdgeWeight((DefaultWeightedEdge) o));
-//        }
-//        System.out.println("######################");
-
         return bestPath;
+    }
+
+    public GraphPath constructEjectionChain(Solution currSol) {
+
+        List<Integer> stackOrder = this.getRandomStackOrder(currSol);
+
+        // construct auxiliary graph:
+        DefaultDirectedWeightedGraph<String, DefaultWeightedEdge> graph = new DefaultDirectedWeightedGraph<>(DefaultWeightedEdge.class);
+        int source = this.addRandomSourceVertex(graph, currSol.getSolvedInstance().getItems().length);
+        this.addVerticesForItems(graph, currSol.getSolvedInstance().getItems().length, source);
+        this.addVerticesForStacks(graph, currSol.getFilledStacks().length, currSol);
+        this.addEdges(graph, stackOrder, currSol.getSolvedInstance().getItems().length, currSol, source);
+
+        // compute shortest path from source to any node in V^ZERO (stacks)
+        // --> sequence of combined item insertions and removals
+        // each shortest path from source to a node in V^ZERO corresponds to one ejection chain --> choose best
+        BellmanFordShortestPath shortestPath = new BellmanFordShortestPath(graph);
+
+        return this.getBestPath(graph, shortestPath, stackOrder.size(), source);
     }
 
     public boolean tabuListContainsAnyOfTheShifts(List<Shift> performedShifts) {
@@ -403,6 +396,14 @@ public class EjectionChainsNeighborhood {
         }
     }
 
+    private void logCurrentState(Solution currSol, GraphPath bestPath, Solution tmpSol) {
+        System.out.println("costs before: " + currSol.computeCosts());
+        System.out.println("costs of best path: " + bestPath.getWeight());
+        System.out.println("costs after ejection chain: " + tmpSol.computeCosts());
+        System.out.println("feasible: " + tmpSol.isFeasible());
+        System.exit(0);
+    }
+
     public Solution getNeighbor(Solution currSol, Solution bestSol) {
 
         List<Solution> nbrs = new ArrayList<>();
@@ -410,9 +411,7 @@ public class EjectionChainsNeighborhood {
 
         while (nbrs.size() < this.numberOfNeighbors) {
 
-            GraphPath bestPath = this.getBestPath(currSol);
-
-//            System.out.println("best path: " + bestPath);
+            GraphPath bestPath = this.constructEjectionChain(currSol);
 
             Solution tmpSol = new Solution(currSol);
             if (bestPath == null) { return tmpSol; }
@@ -420,10 +419,7 @@ public class EjectionChainsNeighborhood {
             tmpSol.lowerItemsThatAreStackedInTheAir();
             tmpSol.sortItemsInStacksBasedOnTransitiveStackingConstraints();
 
-//            System.out.println("costs before: " + currSol.computeCosts());
-//            System.out.println("costs of best path: " + bestPath.getWeight());
-//            System.out.println("costs after ejection chain: " + tmpSol.computeCosts());
-//            System.out.println("feasible: " + tmpSol.isFeasible());
+            this.logCurrentState(currSol, bestPath, tmpSol);
 
             Solution neighbor = tmpSol;
 
