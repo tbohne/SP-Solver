@@ -259,6 +259,32 @@ public class HeuristicUtil {
         return items;
     }
 
+    public static boolean itemCompatibleWithAlreadyAssignedItemsWithException(
+        int item, int[] stack, Item[] itemObjects, int[][] stackingConstraints, int exception
+    ) {
+
+        // no assigned items
+        if (stackIsEmpty(stack)) { return true; }
+
+        List<Item> items = getItemObjectsFromIndices(stack, itemObjects);
+        items.add(itemObjects[item]);
+        List<Item> tmpItems = getItemObjectsFromIndices(stack, itemObjects);
+        for (Item i : tmpItems) {
+            if (i.getIdx() == exception) {
+                items.remove(i);
+            }
+        }
+
+        // sort items with regard to the transitive stacking constraints
+        Collections.sort(items);
+        for (int i = 0; i < items.size() - 1; i++) {
+            if (stackingConstraints[items.get(i).getIdx()][items.get(i + 1).getIdx()] != 1) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public static boolean itemCompatibleWithAlreadyAssignedItems(int item, int[] stack, Item[] itemObjects, int[][] stackingConstraints) {
 
         // no assigned items
@@ -285,6 +311,23 @@ public class HeuristicUtil {
         Collections.sort(items);
         for (int i = 0; i < items.size(); i++) {
             stack[i] = items.get(i).getIdx();
+        }
+    }
+
+    public static boolean completelyFilledStack(int[] stack) {
+        for (int i = 0; i < stack.length; i++) {
+            if (stack[i] == -1) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static void removeItemFromStack(int item, int[] stack) {
+        for (int i = 0; i < stack.length; i++) {
+            if (stack[i] == item) {
+                stack[i] = -1;
+            }
         }
     }
 
