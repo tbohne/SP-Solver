@@ -38,6 +38,7 @@ public class PostOptimization {
     private static final String SOLUTION_PREFIX = "res/solutions/";
 
     // GENERAL
+    private static final CompareSolvers.Solver SOLVER_OF_INITIAL_SOLUTION = CompareSolvers.Solver.CONSTRUCTIVE_THREE_CAP;
     private static final ShortTermStrategies SHORT_TERM_STRATEGY = ShortTermStrategies.BEST_FIT;
     private static final StoppingCriteria STOPPING_CRITERION = StoppingCriteria.NON_IMPROVING_ITERATIONS;
     private static final int NUMBER_OF_NEIGHBORS = 30;
@@ -54,10 +55,6 @@ public class PostOptimization {
     private static final int K_SWAP_INTERVAL_UB = 4;
     private static final float K_SWAP_PROBABILITY = 5.0F;
     private static final float SWAP_PROBABILITY = 45.0F;
-
-    // 3Cap solutions otherwise
-    // TODO: shouldn't matter - should work for general b
-    private static final boolean OPTIMIZE_TWO_CAP_SOLUTIONS = false;
     /**********************************************************************************/
 
     public static void main(String[] args) {
@@ -70,16 +67,9 @@ public class PostOptimization {
     private static void optimizeSolutions() {
 
         List<OptimizableSolution> solutions;
-        if (OPTIMIZE_TWO_CAP_SOLUTIONS) {
-            solutions = SolutionReader.readSolutionsFromDir(
-                SOLUTION_PREFIX, INSTANCE_PREFIX, RepresentationUtil.getNameOfSolver(CompareSolvers.Solver.CONSTRUCTIVE_TWO_CAP)
-            );
-        } else {
-            solutions = SolutionReader.readSolutionsFromDir(
-                SOLUTION_PREFIX, INSTANCE_PREFIX, RepresentationUtil.getNameOfSolver(CompareSolvers.Solver.CONSTRUCTIVE_THREE_CAP)
-            );
-        }
-
+        solutions = SolutionReader.readSolutionsFromDir(
+            SOLUTION_PREFIX, INSTANCE_PREFIX, RepresentationUtil.getNameOfSolver(SOLVER_OF_INITIAL_SOLUTION)
+        );
         if (solutions.size() == 0) {
             System.out.println("No solution read. Either the specified directory doesn't "
                 + "contain any solutions, or the specified heuristic doesn't match the stack capacity of the solutions.");
@@ -104,14 +94,9 @@ public class PostOptimization {
                 + "_imp.txt", impSol, RepresentationUtil.getNameOfSolver(CompareSolvers.Solver.TABU_SEARCH)
             );
 
-            CompareSolvers.Solver solver;
-            if (sol.getSol().getFilledStacks()[0].length == 2) {
-                solver = CompareSolvers.Solver.CONSTRUCTIVE_TWO_CAP;
-            } else {
-                solver = CompareSolvers.Solver.CONSTRUCTIVE_THREE_CAP;
-            }
             SolutionWriter.writeSolutionAsCSV(
-                SOLUTION_PREFIX + "solutions_imp.csv", sol.getSol(), RepresentationUtil.getAbbreviatedNameOfSolver(solver)
+                SOLUTION_PREFIX + "solutions_imp.csv", sol.getSol(),
+                RepresentationUtil.getAbbreviatedNameOfSolver(SOLVER_OF_INITIAL_SOLUTION)
             );
             SolutionWriter.writeOptAndImpAsCSV(SOLUTION_PREFIX + "solutions_imp.csv", sol, impSol);
         }
