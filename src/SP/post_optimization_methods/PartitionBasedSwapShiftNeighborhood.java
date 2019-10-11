@@ -12,20 +12,24 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 
 import java.util.*;
 
-public class PartitionBasedSwapShiftNeighborhood implements SwapShiftNeighborhood {
+public class PartitionBasedSwapShiftNeighborhood implements Neighborhood {
 
     private int numberOfNeighbors;
     private PostOptimization.ShortTermStrategies shortTermStrategy;
     private int maxTabuListLength;
     private int unsuccessfulNeighborGenerationAttempts;
     private int unsuccessfulKSwapAttempts;
+    private float kSwapProbability;
+    private int kSwapIntervalUB;
+    private float swapProbability;
 
     private Queue<PartitionShift> tabuList;
     private int tabuListClears;
 
     public PartitionBasedSwapShiftNeighborhood(
             int numberOfNeighbors, PostOptimization.ShortTermStrategies shortTermStrategy,
-            int maxTabuListLength, int unsuccessfulNeighborGenerationAttempts, int unsuccessfulKSwapAttempts
+            int maxTabuListLength, int unsuccessfulNeighborGenerationAttempts, int unsuccessfulKSwapAttempts,
+            float kSwapProbability, int kSwapIntervalUB, float swapProbability
     ) {
         this.numberOfNeighbors = numberOfNeighbors;
         this.shortTermStrategy = shortTermStrategy;
@@ -35,6 +39,9 @@ public class PartitionBasedSwapShiftNeighborhood implements SwapShiftNeighborhoo
         this.unsuccessfulNeighborGenerationAttempts = unsuccessfulNeighborGenerationAttempts;
         this.unsuccessfulKSwapAttempts = unsuccessfulKSwapAttempts;
         this.tabuList = new LinkedList<>();
+        this.kSwapProbability = kSwapProbability;
+        this.kSwapIntervalUB = kSwapIntervalUB;
+        this.swapProbability = swapProbability;
     }
 
     /**
@@ -210,6 +217,22 @@ public class PartitionBasedSwapShiftNeighborhood implements SwapShiftNeighborhoo
         }
 
         return newSol;
+    }
+
+    public Solution getNeighbor(Solution currSol, Solution bestSol) {
+        double rand = Math.random();
+        if (rand < this.kSwapProbability / 100.0) {
+            return this.getNeighborKSwap(HeuristicUtil.getRandomIntegerInBetween(2, this.kSwapIntervalUB), currSol, bestSol);
+        } else if (rand < (this.swapProbability + this.kSwapProbability) / 100.0) {
+            return this.getNeighborKSwap(1, currSol, bestSol);
+        } else {
+            // shift is only possible if there are free slots
+            if (currSol.getNumberOfAssignedItems() < currSol.getFilledStacks().length * currSol.getFilledStacks()[0].length) {
+                return this.getNeighborShift(currSol, bestSol);
+            } else {
+                return this.getNeighborKSwap(1, currSol, bestSol);
+            }
+        }
     }
 
     /**
