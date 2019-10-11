@@ -1,6 +1,7 @@
 package SP.post_optimization_methods;
 
 import SP.experiments.PostOptimization;
+import SP.representations.Instance;
 import SP.representations.Solution;
 import SP.representations.StackPosition;
 import SP.util.HeuristicUtil;
@@ -304,10 +305,10 @@ public class EjectionChainsNeighborhood implements Neighborhood {
         return pending;
     }
 
-    public List<Shift> applyEjectionChain(Solution currSol, GraphPath path) {
+    public void applyEjectionChain(Solution currSol, GraphPath path, List<Shift> performedShifts) {
 
         PendingItemStackAssignment pending = null;
-        List<Shift> performedShifts = new ArrayList<>();
+        performedShifts.clear();
 
         for (Object o : path.getEdgeList()) {
             String lhs = o.toString().split(":")[0];
@@ -329,7 +330,6 @@ public class EjectionChainsNeighborhood implements Neighborhood {
                 pending.getItem(), currSol.getFilledStacks()[pending.getStack()], currSol.getSolvedInstance().getItemObjects()
             );
         }
-        return performedShifts;
     }
 
     public GraphPath getBestPath(
@@ -404,6 +404,47 @@ public class EjectionChainsNeighborhood implements Neighborhood {
         System.exit(0);
     }
 
+    public Solution generateEjectionChainNeighbor(Solution currSol, List<Shift> performedShifts) {
+        GraphPath bestPath = this.constructEjectionChain(currSol);
+        Solution neighbor = new Solution(currSol);
+        if (bestPath == null) { return neighbor; }
+        this.applyEjectionChain(neighbor, bestPath, performedShifts);
+        neighbor.lowerItemsThatAreStackedInTheAir();
+        neighbor.sortItemsInStacksBasedOnTransitiveStackingConstraints();
+        return neighbor;
+    }
+
+    public Solution generateShiftNeighbor(Solution currSol, List<Shift> performedShifts) {
+
+        Solution neighbor = new Solution(currSol);
+        StackPosition pos = HeuristicUtil.getRandomStackPositionFilledWithItem(neighbor);
+        int item = neighbor.getFilledStacks()[pos.getStackIdx()][pos.getLevel()];
+        StackPosition shiftTarget = HeuristicUtil.getRandomFreeSlot(neighbor);
+        HeuristicUtil.ensureShiftTargetInDifferentStack(shiftTarget, pos, neighbor);
+
+        int failCnt = 0;
+
+        Instance instance = currSol.getSolvedInstance();
+
+        while (!HeuristicUtil.itemCompatibleWithStack(instance.getCosts(), item, shiftTarget.getStackIdx())
+            || !HeuristicUtil.itemCompatibleWithAlreadyAssignedItems(
+                item, currSol.getFilledStacks()[shiftTarget.getStackIdx()],instance.getItemObjects(), instance.getStackingConstraints()
+            )
+        ) {
+            if (failCnt == this.unsuccessfulNeighborGenerationAttempts) { return neighbor; }
+            shiftTarget = HeuristicUtil.getRandomFreeSlot(neighbor);
+            HeuristicUtil.ensureShiftTargetInDifferentStack(shiftTarget, pos, neighbor);
+            failCnt++;
+        }
+
+        Shift shift = HeuristicUtil.shiftItem(neighbor, item, pos, shiftTarget);
+        performedShifts.clear();
+        performedShifts.add(shift);
+        neighbor.lowerItemsThatAreStackedInTheAir();
+        neighbor.sortItemsInStacksBasedOnTransitiveStackingConstraints();
+        return neighbor;
+    }
+
     public Solution getNeighbor(Solution currSol, Solution bestSol) {
 
         List<Solution> nbrs = new ArrayList<>();
@@ -411,23 +452,25 @@ public class EjectionChainsNeighborhood implements Neighborhood {
 
         while (nbrs.size() < this.numberOfNeighbors) {
 
-            GraphPath bestPath = this.constructEjectionChain(currSol);
+            List<Shift> performedShifts = new ArrayList<>();
 
-            Solution tmpSol = new Solution(currSol);
-            if (bestPath == null) { return tmpSol; }
-            List<Shift> performedShifts = this.applyEjectionChain(tmpSol, bestPath);
-            tmpSol.lowerItemsThatAreStackedInTheAir();
-            tmpSol.sortItemsInStacksBasedOnTransitiveStackingConstraints();
+            Solution neighbor;
 
-            // this.logCurrentState(currSol, bestPath, tmpSol);
+            if (Math.random() < 0.5) {
+                neighbor = this.generateEjectionChainNeighbor(currSol, performedShifts);
+            } else {
+                neighbor = this.generateShiftNeighbor(currSol, performedShifts);
+            }
 
-            Solution neighbor = tmpSol;
+            System.out.println("TL: " + this.tabuList.size());
 
             if (!neighbor.isFeasible()) { continue; }
 
             // FIRST-FIT
-            if (this.shortTermStrategy == PostOptimization.ShortTermStrategies.FIRST_FIT && !this.tabuListContainsAnyOfTheShifts(performedShifts)
-                && neighbor.computeCosts() < currSol.computeCosts()) {
+            if (this.shortTermStrategy == PostOptimization.ShortTermStrategies.FIRST_FIT
+                && !this.tabuListContainsAnyOfTheShifts(performedShifts)
+                && neighbor.computeCosts() < currSol.computeCosts()
+            ) {
 
                 this.forbidShifts(performedShifts);
                 return neighbor;
