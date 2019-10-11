@@ -12,7 +12,7 @@ import org.jgrapht.graph.*;
 import java.util.*;
 
 
-public class EjectionChainsNeighborhood {
+public class EjectionChainsNeighborhood implements Neighborhood {
 
     private int numberOfNeighbors;
     private PostOptimization.ShortTermStrategies shortTermStrategy;
@@ -419,7 +419,7 @@ public class EjectionChainsNeighborhood {
             tmpSol.lowerItemsThatAreStackedInTheAir();
             tmpSol.sortItemsInStacksBasedOnTransitiveStackingConstraints();
 
-            this.logCurrentState(currSol, bestPath, tmpSol);
+            // this.logCurrentState(currSol, bestPath, tmpSol);
 
             Solution neighbor = tmpSol;
 
@@ -437,26 +437,32 @@ public class EjectionChainsNeighborhood {
                 nbrs.add(neighbor);
                 this.forbidShifts(performedShifts);
             } else {
-                failCnt++;
-                if (failCnt == this.unsuccessfulNeighborGenerationAttempts) {
-                    failCnt = 0;
-                    if (nbrs.size() == 0) {
-                        System.out.println("CLEAR");
-                        this.clearTabuList();
+
+                // TABU
+                // ASPIRATION CRITERION
+                if (neighbor.computeCosts() < bestSol.computeCosts()) {
+                    System.out.println("ASPIRATION!");
+                    if (this.shortTermStrategy == PostOptimization.ShortTermStrategies.FIRST_FIT) {
+                        return neighbor;
                     } else {
-                        return HeuristicUtil.getBestSolution(nbrs);
+                        nbrs.add(neighbor);
+                    }
+                } else {
+                    failCnt++;
+                    if (failCnt == this.unsuccessfulNeighborGenerationAttempts) {
+                        System.out.println("FAIL!");
+                        failCnt = 0;
+                        if (nbrs.size() == 0) {
+                            System.out.println("CLEAR");
+                            this.clearTabuList();
+                        } else {
+                            return HeuristicUtil.getBestSolution(nbrs);
+                        }
                     }
                 }
             }
-            // ASPIRATION CRITERION
-            if (neighbor.computeCosts() < bestSol.computeCosts()) {
-                if (this.shortTermStrategy == PostOptimization.ShortTermStrategies.FIRST_FIT) {
-                    return neighbor;
-                } else {
-                    nbrs.add(neighbor);
-                }
-            }
         }
+        System.out.println("returnning BEST!");
         return HeuristicUtil.getBestSolution(nbrs);
     }
 }
