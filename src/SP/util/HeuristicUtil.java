@@ -1,5 +1,6 @@
 package SP.util;
 
+import SP.post_optimization_methods.Shift;
 import SP.representations.*;
 import org.jgrapht.alg.matching.MaximumWeightBipartiteMatching;
 import org.jgrapht.graph.DefaultWeightedEdge;
@@ -118,6 +119,94 @@ public class HeuristicUtil {
         GridPosition itemPosition = items[item].getPosition();
         GridPosition stackPosition = stackPositions.get(stack);
         return Math.abs(itemPosition.getXCoord() - stackPosition.getXCoord()) + Math.abs(itemPosition.getYCoord() - stackPosition.getYCoord());
+    }
+
+    /**
+     * Retrieves the free slots in the stacks.
+     *
+     * @param sol - solution to retrieve the free slots for
+     * @return list of free slots in the stacks
+     */
+    public static List<StackPosition> getFreeSlots(Solution sol) {
+        List<StackPosition> freeSlots = new ArrayList<>();
+        for (int stack = 0; stack < sol.getFilledStacks().length; stack++) {
+            for (int level = 0; level < sol.getFilledStacks()[stack].length; level++) {
+                if (sol.getFilledStacks()[stack][level] == -1) {
+                    freeSlots.add(new StackPosition(stack, level));
+                }
+            }
+        }
+        return freeSlots;
+    }
+
+    /**
+     * Ensures that the shift target is in a different stack.
+     *
+     * @param shiftTarget - stack position the item gets shifted to
+     * @param pos         - current position of the item
+     * @param neighbor    - considered solution
+     */
+    public static void ensureShiftTargetInDifferentStack(StackPosition shiftTarget, StackPosition pos, Solution neighbor) {
+        while (shiftTarget.getStackIdx() == pos.getStackIdx()) {
+            shiftTarget = HeuristicUtil.getRandomFreeSlot(neighbor);
+        }
+    }
+
+    /**
+     * Shifts the item stored in pos to the shift target.
+     *
+     * @param sol         - solution to be updated
+     * @param item        - item to be shifted
+     * @param shiftTarget - position the item is shifted to
+     * @param pos         - the item's original position
+     */
+    public static Shift shiftItem(Solution sol, int item, StackPosition pos, StackPosition shiftTarget) {
+
+        sol.getFilledStacks()[shiftTarget.getStackIdx()][shiftTarget.getLevel()] =
+                sol.getFilledStacks()[pos.getStackIdx()][pos.getLevel()];
+
+        sol.getFilledStacks()[pos.getStackIdx()][pos.getLevel()] = -1;
+        return new Shift(item, shiftTarget);
+    }
+
+    /**
+     * Returns a random free slot in the stacks of the specified solution.
+     *
+     * @param sol - specified solution to return a free slot for
+     * @return random free slot in the stacks
+     */
+    public static StackPosition getRandomFreeSlot(Solution sol) {
+        List<StackPosition> freeSlots = getFreeSlots(sol);
+        int freeSlotIdx = HeuristicUtil.getRandomIntegerInBetween(0, freeSlots.size() - 1);
+        return freeSlots.get(freeSlotIdx);
+    }
+
+    /**
+     * Returns a random position in the stacks.
+     *
+     * @param sol - solution for which to retrieve a random stack position
+     * @return random position in the stacks
+     */
+    public static StackPosition getRandomStackPosition(Solution sol) {
+        int stackIdx = getRandomIntegerInBetween(0, sol.getFilledStacks().length - 1);
+        int level = getRandomIntegerInBetween(0, sol.getFilledStacks()[stackIdx].length - 1);
+        return new StackPosition(stackIdx, level);
+    }
+
+    /**
+     * Returns a random stack position that is occupied with an item.
+     *
+     * @param sol - solution to return an occupied stack position for
+     * @return occupied stack position
+     */
+    public static StackPosition getRandomStackPositionFilledWithItem(Solution sol) {
+        StackPosition pos = getRandomStackPosition(sol);
+        int item = sol.getFilledStacks()[pos.getStackIdx()][pos.getLevel()];
+        while (item == -1) {
+            pos = getRandomStackPosition(sol);
+            item = sol.getFilledStacks()[pos.getStackIdx()][pos.getLevel()];
+        }
+        return pos;
     }
 
     /**
