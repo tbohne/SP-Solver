@@ -82,40 +82,25 @@ public class TabuSearch {
     }
 
     /**
-     * Retrieves a neighboring solution by applying the operators with certain probabilities.
+     * Retrieves a neighboring solution by applying the operators of the specified neighborhood.
      *
+     * @param neighborhood - neighborhood structure used to generate neighboring solutions
      * @return neighboring solution
      */
-    private Solution getNeighborBasedOnProbabilities(Neighborhood neighborhood) {
+    private Solution getNeighbor(Neighborhood neighborhood) {
         Solution sol = neighborhood.getNeighbor(this.currSol, this.bestSol);
         return sol == null ? this.currSol : sol;
     }
-
-//    /**
-//     * Applies the combined shift- and swap-neighborhood to retrieve the best neighbor.
-//     *
-//     * @return best generated neighbor
-//     */
-//    private Solution getNeighbor() {
-//        List<Solution> nbrs = new ArrayList<>();
-//        // shift is only possible if there are free slots
-//        if (this.currSol.getNumberOfAssignedItems() < this.currSol.getFilledStacks().length * this.currSol.getFilledStacks()[0].length) {
-//            nbrs.add(this.getNeighborShift());
-//        }
-//        nbrs.add(this.getNeighborKSwap(1));
-//        nbrs.add(this.getNeighborKSwap(HeuristicUtil.getRandomIntegerInBetween(2, this.kSwapIntervalUB)));
-//
-//        return Collections.min(nbrs);
-//    }
 
     /**
      * Updates the current solution with the best neighbor.
      * Additionally, the best solution gets updated if a new best solution is found.
      *
-     * @param iteration - current iteration
+     * @param iteration    - current iteration
+     * @param neighborhood - neighborhood structure used to generate neighboring solutions
      */
     private void updateCurrentSolution(int iteration, Neighborhood neighborhood) {
-        this.currSol = this.getNeighborBasedOnProbabilities(neighborhood);
+        this.currSol = this.getNeighbor(neighborhood);
         if (this.currSol.computeCosts() < this.bestSol.computeCosts()) {
             this.bestSol = this.currSol;
             this.iterationOfLastImprovement = iteration;
@@ -124,6 +109,8 @@ public class TabuSearch {
 
     /**
      * Performs the tabu search with a number of iterations as stop criterion.
+     *
+     * @param neighborhood - neighborhood structure used to generate neighboring solutions
      */
     private void solveIterations(Neighborhood neighborhood) {
         for (int i = 0; i < this.numberOfIterations; i++) {
@@ -135,6 +122,8 @@ public class TabuSearch {
 
     /**
      * Performs the tabu search with a number of tabu list clears as stop criterion.
+     *
+     * @param neighborhood - neighborhood structure used to generate neighboring solutions
      */
     private void solveTabuListClears(Neighborhood neighborhood) {
         int iteration = 0;
@@ -147,6 +136,8 @@ public class TabuSearch {
 
     /**
      * Performs the tabu search with a number of non-improving iterations as stop criterion.
+     *
+     * @param neighborhood - neighborhood structure used to generate neighboring solutions
      */
     private void solveIterationsSinceLastImprovement(Neighborhood neighborhood) {
         int iteration = 0;
@@ -158,5 +149,3 @@ public class TabuSearch {
         }
     }
 }
-
-
