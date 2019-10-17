@@ -1,7 +1,5 @@
 package SP.post_optimization_methods;
 
-import SP.representations.StackPosition;
-
 /**
  * Represents a shift operation in the tabu search.
  *
@@ -10,17 +8,17 @@ import SP.representations.StackPosition;
 public class Shift {
 
     private final int item;
-    private final StackPosition shiftPos;
+    private final int stack;
 
     /**
      * Constructor
      *
-     * @param item     - item to be shifted
-     * @param shiftPos - position the item gets shifted to
+     * @param item  - item to be shifted
+     * @param stack - stack the item gets shifted to
      */
-    public Shift(int item, StackPosition shiftPos) {
+    public Shift(int item, int stack) {
         this.item = item;
-        this.shiftPos = shiftPos;
+        this.stack = stack;
     }
 
     /**
@@ -33,12 +31,12 @@ public class Shift {
     }
 
     /**
-     * Returns the position the item gets shifted to.
+     * Returns the stack the item gets shifted to.
      *
-     * @return position the item gets shifted to
+     * @return stack the item gets shifted to
      */
-    private StackPosition getShiftPos() {
-        return this.shiftPos;
+    private int getStack() {
+        return this.stack;
     }
 
     /**
@@ -49,7 +47,7 @@ public class Shift {
      */
     @Override
     public boolean equals(Object object) {
-        return object != null && object instanceof Shift && (this.item == ((Shift) object).getItem() && this.shiftPos.equals(((Shift) object).getShiftPos()));
+        return object != null && object instanceof Shift && (this.item == ((Shift) object).getItem() && this.stack == ((Shift) object).getStack());
     }
 
     /**
@@ -59,6 +57,6 @@ public class Shift {
      */
     @Override
     public String toString() {
-        return this.item + " --- " + this.shiftPos.toString();
+        return this.item + " --- " + this.stack;
     }
 }
