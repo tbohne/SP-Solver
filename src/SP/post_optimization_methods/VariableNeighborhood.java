@@ -1,6 +1,5 @@
 package SP.post_optimization_methods;
 
-
 import SP.experiments.PostOptimization;
 import SP.representations.Solution;
 import SP.util.HeuristicUtil;
@@ -18,9 +17,15 @@ public class VariableNeighborhood implements Neighborhood {
     private int tabuListClears;
     private Queue<Shift> tabuList;
 
+    // nbh operators
+    private EjectionChainOperator ejectionChainOperator;
+    private ShiftOperator shiftOperator;
+    private SwapOperator swapOperator;
+
     public VariableNeighborhood(
         int numberOfNeighbors, PostOptimization.ShortTermStrategies shortTermStrategy,
-        int maxTabuListLength, int unsuccessfulNeighborGenerationAttempts
+        int maxTabuListLength, int unsuccessfulNeighborGenerationAttempts,
+        EjectionChainOperator ejectionChainOperator, ShiftOperator shiftOperator, SwapOperator swapOperator
     ) {
         this.numberOfNeighbors = numberOfNeighbors;
         this.shortTermStrategy = shortTermStrategy;
@@ -29,6 +34,10 @@ public class VariableNeighborhood implements Neighborhood {
         this.tabuListClears = 0;
         this.unsuccessfulNeighborGenerationAttempts = unsuccessfulNeighborGenerationAttempts;
         this.tabuList = new LinkedList<>();
+
+        this.ejectionChainOperator = ejectionChainOperator;
+        this.shiftOperator = shiftOperator;
+        this.swapOperator = swapOperator;
     }
 
     /**
@@ -86,9 +95,9 @@ public class VariableNeighborhood implements Neighborhood {
 
             // TODO: implement variable NBH
             if (Math.random() < 0.7) {
-                neighbor = EjectionChainOperator.generateEjectionChainNeighbor(currSol, performedShifts);
+                neighbor = this.ejectionChainOperator.generateEjectionChainNeighbor(currSol, performedShifts);
             } else {
-                neighbor = ShiftOperator.generateShiftNeighbor(currSol, performedShifts, this.unsuccessfulNeighborGenerationAttempts);
+                neighbor = this.shiftOperator.generateShiftNeighbor(currSol, performedShifts, this.unsuccessfulNeighborGenerationAttempts);
             }
 
             if (!neighbor.isFeasible()) { continue; }
