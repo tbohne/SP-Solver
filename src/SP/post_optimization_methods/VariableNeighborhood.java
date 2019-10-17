@@ -94,10 +94,18 @@ public class VariableNeighborhood implements Neighborhood {
             Solution neighbor;
 
             // TODO: implement variable NBH
-            if (Math.random() < 0.7) {
+            double rand = Math.random();
+            if (rand < 0.3) {
                 neighbor = this.ejectionChainOperator.generateEjectionChainNeighbor(currSol, performedShifts);
+            } else if (rand < 0.6) {
+                // shift is only possible if there are free slots
+                if (currSol.getNumberOfAssignedItems() < currSol.getFilledStacks().length * currSol.getFilledStacks()[0].length) {
+                    neighbor = this.shiftOperator.generateShiftNeighbor(currSol, performedShifts, this.unsuccessfulNeighborGenerationAttempts);
+                } else {
+                    neighbor = this.swapOperator.generateSwapNeighbor(currSol, performedShifts, this.unsuccessfulNeighborGenerationAttempts, 1);
+                }
             } else {
-                neighbor = this.shiftOperator.generateShiftNeighbor(currSol, performedShifts, this.unsuccessfulNeighborGenerationAttempts);
+                neighbor = this.swapOperator.generateSwapNeighbor(currSol, performedShifts, this.unsuccessfulNeighborGenerationAttempts, 1);
             }
 
             if (!neighbor.isFeasible()) { continue; }
