@@ -1,6 +1,8 @@
 package SP.util;
 
+import SP.post_optimization_methods.Shift;
 import SP.representations.BipartiteGraph;
+import SP.representations.ItemConflict;
 import SP.representations.Solution;
 import SP.representations.StackPosition;
 import org.jgrapht.Graph;
@@ -8,6 +10,7 @@ import org.jgrapht.alg.matching.KuhnMunkresMinimalWeightBipartitePerfectMatching
 import org.jgrapht.graph.DefaultUndirectedWeightedGraph;
 import org.jgrapht.graph.DefaultWeightedEdge;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -30,6 +33,9 @@ public class LowerBoundsUtil {
      * @return computed lower bound
      */
     public static Solution computeLowerBound(Solution sol) {
+
+        List<Integer> fixedItems = sol.getAssignedItems();
+
         BipartiteGraph graph = constructBipartiteGraph(sol);
         KuhnMunkresMinimalWeightBipartitePerfectMatching<String, DefaultWeightedEdge> minCostPerfectMatching =
             new KuhnMunkresMinimalWeightBipartitePerfectMatching<>(graph.getGraph(), graph.getPartitionOne(), graph.getPartitionTwo());
@@ -52,9 +58,91 @@ public class LowerBoundsUtil {
 
 //        System.out.println("expected: " + (minCostPerfectMatching.getMatching().getWeight() + sol.computeCosts()));
 //        System.out.println("actual: " + tmpSol.computeCosts());
-        return tmpSol;
 
+        if (tmpSol.isFeasible()) {
+            return tmpSol;
+        } else {
+            // improve LB
+            System.out.println("before: " + tmpSol.computeCosts());
+            boolean changes = true;
+            // <item, stack>
+            List<Shift> itemShifts = new ArrayList<>();
+
+            while (changes) {
+                changes = postProcessing(tmpSol, fixedItems, itemShifts);
+                tmpSol.lowerItemsThatAreStackedInTheAir();
+            }
+
+            return tmpSol;
+        }
 //        return minCostPerfectMatching.getMatching().getWeight() + sol.computeCosts();
+    }
+
+    private static boolean postProcessing(Solution tmpSol, List<Integer> fixedItems, List<Shift> itemShifts) {
+
+        List<StackPosition> freePositions = HeuristicUtil.retrieveEmptyPositions(tmpSol);
+
+        boolean change = false;
+
+        List<Integer> conflictingItems = new ArrayList<>();
+
+        // iteratively move conflicting items
+        for (ItemConflict conflict : tmpSol.getNumberOfConflictsForEachItem()) {
+            if (fixedItems.contains(conflict.getItemIdx())) { continue; }
+            if (conflictingItems.size() < freePositions.size()) {
+                conflictingItems.add(conflict.getItemIdx());
+            } else {
+                break;
+            }
+        }
+
+        Graph<String, DefaultWeightedEdge> graph = new DefaultUndirectedWeightedGraph<>(DefaultWeightedEdge.class);
+        Set<String> partitionOne = new HashSet<>();
+        Set<String> partitionTwo = new HashSet<>();
+
+        GraphUtil.addVerticesForUnmatchedItems(conflictingItems, graph, partitionOne);
+        GraphUtil.addVerticesForEmptyPositions(freePositions, graph, partitionTwo);
+        List<Integer> dummyItems = GraphUtil.introduceDummyVerticesToBipartiteGraph(graph, partitionOne, partitionTwo);
+
+//        System.out.println("p1: " + partitionOne.size() + " p2: " + partitionTwo.size());
+
+        GraphUtil.addEdgesBetweenDummyItemsAndStackPositions(graph, dummyItems, freePositions);
+        addEdgesBetweenItemsAndStackPositions(tmpSol, graph, conflictingItems, freePositions);
+
+        BipartiteGraph g = new BipartiteGraph(partitionOne, partitionTwo, graph);
+
+        KuhnMunkresMinimalWeightBipartitePerfectMatching<String, DefaultWeightedEdge> minCostPerfectMatching =
+                new KuhnMunkresMinimalWeightBipartitePerfectMatching<>(g.getGraph(), g.getPartitionOne(), g.getPartitionTwo());
+
+        for (Object o : minCostPerfectMatching.getMatching()) {
+            if (!o.toString().contains("dummy")) {
+                int item = Integer.parseInt(o.toString().split("pos")[0].replace(" :", "").replace("(item", "").trim());
+                int stack = Integer.parseInt(o.toString().split("pos")[1].split(",")[0].replace("(stack: ", "").trim());
+                int level = Integer.parseInt(o.toString().split("pos")[1].split(",")[1].replace("level: ", "").replace("))", "").trim());
+
+                if (tmpSol.getFilledStacks()[stack][level] == -1) {
+
+                    Shift tmpShift = new Shift(item, new StackPosition(stack, level));
+
+                    if (itemShifts.contains(tmpShift)) { continue; }
+                    if (!HeuristicUtil.itemCompatibleWithStack(tmpSol.getSolvedInstance().getCosts(), item, stack)) { continue; }
+
+                    for (int[] s : tmpSol.getFilledStacks()) {
+                        for (int i = 0; i < s.length; i++) {
+                            if (s[i] == item) {
+                                s[i] = -1;
+                            }
+                        }
+                    }
+                    change = true;
+                    itemShifts.add(tmpShift);
+                    tmpSol.getFilledStacks()[stack][level] = item;
+                } else {
+                    System.out.println("PROBLEM: position already allocated");
+                }
+            }
+        }
+        return change;
     }
 
     /**
