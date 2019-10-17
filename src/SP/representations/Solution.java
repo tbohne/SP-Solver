@@ -275,6 +275,7 @@ public class Solution implements Comparable<Solution> {
         return -1;
     }
 
+    // TODO: check if correct
     public List<ItemConflict> getNumberOfConflictsForEachItem() {
 
         List<ItemConflict> itemConflicts = new ArrayList<>();

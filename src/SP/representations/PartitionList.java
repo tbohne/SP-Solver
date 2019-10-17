@@ -18,10 +18,14 @@ public class PartitionList {
 
     public PartitionList(Solution sol) {
         this.sol = new Solution(sol);
-        this.partitions = this.getPartitions();
+        this.partitions = this.generatePartitions();
     }
 
     public List<List<Integer>> getPartitions() {
+        return this.partitions;
+    }
+
+    private List<List<Integer>> generatePartitions() {
         List<List<Integer>> partitions = new ArrayList<>();
         for (int[] stack : this.sol.getFilledStacks()) {
             List<Integer> partition = new ArrayList<>();
