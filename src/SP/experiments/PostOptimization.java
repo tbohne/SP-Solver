@@ -5,6 +5,7 @@ import SP.io.SolutionWriter;
 import SP.post_optimization_methods.*;
 import SP.representations.OptimizableSolution;
 import SP.representations.Solution;
+import SP.util.HeuristicUtil;
 import SP.util.RepresentationUtil;
 
 import java.util.List;
@@ -33,35 +34,25 @@ public class PostOptimization {
         BEST_FIT
     }
 
-    public enum Neighborhoods {
-        EJECTION_CHAINS,
-        PARTITION_BASED_SWAP_SHIFT,
-        STACK_BASED_SWAP_SHIFT
-    }
-
     /************************************* CONFIG *************************************/
     private static final String INSTANCE_PREFIX = "res/instances/";
     private static final String SOLUTION_PREFIX = "res/solutions/";
 
     // GENERAL
-    private static final CompareSolvers.Solver SOLVER_OF_INITIAL_SOLUTION = CompareSolvers.Solver.CONSTRUCTIVE_THREE_CAP;
-    private static final ShortTermStrategies SHORT_TERM_STRATEGY = ShortTermStrategies.BEST_FIT;
+    private static final CompareSolvers.Solver SOLVER_OF_INITIAL_SOLUTION = CompareSolvers.Solver.CONSTRUCTIVE_TWO_CAP;
+    private static final ShortTermStrategies SHORT_TERM_STRATEGY = ShortTermStrategies.FIRST_FIT;
     private static final StoppingCriteria STOPPING_CRITERION = StoppingCriteria.NON_IMPROVING_ITERATIONS;
-    private static final Neighborhoods NEIGHBORHOOD = Neighborhoods.EJECTION_CHAINS;
-    private static final int NUMBER_OF_NEIGHBORS = 30;
+    private static final int NUMBER_OF_NEIGHBORS = 10;
     private static final int MAX_TABU_LIST_LENGTH_FACTOR = 10;
     private static final int UNSUCCESSFUL_NEIGHBOR_GENERATION_ATTEMPTS = 100;
 
     // STOPPING SPECIFIC
     private static final int NUMBER_OF_ITERATIONS = 50;
     private static final int NUMBER_OF_TABU_LIST_CLEARS = 10;
-    private static final int NUMBER_OF_NON_IMPROVING_ITERATIONS = 5;
+    private static final int NUMBER_OF_NON_IMPROVING_ITERATIONS = 10;
 
-    // NBH SPECIFIC
-    private static final int UNSUCCESSFUL_K_SWAP_ATTEMPTS = 1000;
-    private static final int K_SWAP_INTERVAL_UB = 4;
-    private static final float K_SWAP_PROBABILITY = 5.0F;
-    private static final float SWAP_PROBABILITY = 45.0F;
+    // maximum number of swaps to be performed in a single application of the swap operator
+    private static final int MAX_NUMBER_OF_SWAPS = 4;
     /**********************************************************************************/
 
     public static void main(String[] args) {
@@ -86,37 +77,16 @@ public class PostOptimization {
 
             double startTime = System.currentTimeMillis();
 
-            Neighborhood neighborhood;
+            // operators to be used in the variable neighborhood
+            EjectionChainOperator ejectionChainOperator = new EjectionChainOperator();
+            ShiftOperator shiftOperator = new ShiftOperator();
+            SwapOperator swapOperator = new SwapOperator(MAX_NUMBER_OF_SWAPS);
 
-            switch (NEIGHBORHOOD) {
-                case EJECTION_CHAINS:
-                    neighborhood = new EjectionChainsNeighborhood(
-                        NUMBER_OF_NEIGHBORS, SHORT_TERM_STRATEGY,
-                        NUMBER_OF_NEIGHBORS * MAX_TABU_LIST_LENGTH_FACTOR,
-                        UNSUCCESSFUL_NEIGHBOR_GENERATION_ATTEMPTS
-                    );
-                    break;
-                case STACK_BASED_SWAP_SHIFT:
-                    neighborhood = new StackBasedSwapShiftNeighborhood(
-                        NUMBER_OF_NEIGHBORS, SHORT_TERM_STRATEGY, NUMBER_OF_NEIGHBORS * MAX_TABU_LIST_LENGTH_FACTOR,
-                        UNSUCCESSFUL_NEIGHBOR_GENERATION_ATTEMPTS, UNSUCCESSFUL_K_SWAP_ATTEMPTS, K_SWAP_PROBABILITY,
-                        K_SWAP_INTERVAL_UB, SWAP_PROBABILITY
-                    );
-                    break;
-                case PARTITION_BASED_SWAP_SHIFT:
-                    neighborhood = new PartitionBasedSwapShiftNeighborhood(
-                        NUMBER_OF_NEIGHBORS, SHORT_TERM_STRATEGY, NUMBER_OF_NEIGHBORS * MAX_TABU_LIST_LENGTH_FACTOR,
-                        UNSUCCESSFUL_NEIGHBOR_GENERATION_ATTEMPTS, UNSUCCESSFUL_K_SWAP_ATTEMPTS, K_SWAP_PROBABILITY,
-                        K_SWAP_INTERVAL_UB, SWAP_PROBABILITY
-                    );
-                    break;
-                default:
-                    neighborhood = new EjectionChainsNeighborhood(
-                        NUMBER_OF_NEIGHBORS, SHORT_TERM_STRATEGY,
-                        NUMBER_OF_NEIGHBORS * MAX_TABU_LIST_LENGTH_FACTOR,
-                        UNSUCCESSFUL_NEIGHBOR_GENERATION_ATTEMPTS
-                    );
-            }
+            Neighborhood neighborhood = new VariableNeighborhood(
+                NUMBER_OF_NEIGHBORS, SHORT_TERM_STRATEGY,
+                NUMBER_OF_NEIGHBORS * MAX_TABU_LIST_LENGTH_FACTOR,
+                UNSUCCESSFUL_NEIGHBOR_GENERATION_ATTEMPTS, ejectionChainOperator, shiftOperator, swapOperator
+            );
 
             TabuSearch ts = new TabuSearch(
                 sol.getSol(), 0, sol.getOptimalObjectiveValue(),
@@ -138,6 +108,14 @@ public class PostOptimization {
                 RepresentationUtil.getAbbreviatedNameOfSolver(SOLVER_OF_INITIAL_SOLUTION)
             );
             SolutionWriter.writeOptAndImpAsCSV(SOLUTION_PREFIX + "solutions_imp.csv", sol, impSol);
+
+            SolutionWriter.writePostOptimizationConfig(
+                SOLUTION_PREFIX + "post_optimization_config.csv",
+                SOLVER_OF_INITIAL_SOLUTION, SHORT_TERM_STRATEGY, STOPPING_CRITERION, NUMBER_OF_NEIGHBORS,
+                MAX_TABU_LIST_LENGTH_FACTOR, UNSUCCESSFUL_NEIGHBOR_GENERATION_ATTEMPTS, NUMBER_OF_ITERATIONS,
+                NUMBER_OF_TABU_LIST_CLEARS, NUMBER_OF_NON_IMPROVING_ITERATIONS, MAX_NUMBER_OF_SWAPS
+            );
+
         }
     }
 }

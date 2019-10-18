@@ -1,5 +1,7 @@
 package SP.io;
 
+import SP.experiments.CompareSolvers;
+import SP.experiments.PostOptimization;
 import SP.representations.OptimizableSolution;
 import SP.representations.Solution;
 
@@ -40,6 +42,49 @@ public class SolutionWriter {
             bw.close();
             fw.close();
 
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Writes the configuration of the post-optimization process to a csv file.
+     *
+     * @param filename                               - name of the file to store the config in
+     * @param solverOfInitialSolution                - name of the constructive heuristic used to create the init solution
+     * @param shortTermStrategy                      - used short-term strategy
+     * @param stoppingCriterion                      - used stopping criterion
+     * @param numOfNeighbors                         - number of neighbors considered in each iteration
+     * @param maxTabuListLengthFactor                - factor that is multiplied with the number of nbrs to provide a max length for the tabu list
+     * @param unsuccessfulNeighborGenerationAttempts - number of unsuccessful neighbor generation attempts before the nbh search is stopped
+     * @param numOfIterations                        - number of iterations (only used when stopping criterion)
+     * @param numOfTabuListClears                    - number of tabu list clears (only used when stopping criterion)
+     * @param numOfNonImprovingIterations            - number of non-improving iterations (only used when stopping criterion)
+     * @param maxNumOfSwaps                          - maximum number of swaps (only used in swap-operator)
+     */
+    public static void writePostOptimizationConfig(
+        String filename, CompareSolvers.Solver solverOfInitialSolution, PostOptimization.ShortTermStrategies shortTermStrategy,
+        PostOptimization.StoppingCriteria stoppingCriterion, int numOfNeighbors, int maxTabuListLengthFactor,
+        int unsuccessfulNeighborGenerationAttempts, int numOfIterations, int numOfTabuListClears,
+        int numOfNonImprovingIterations, int maxNumOfSwaps
+    ) {
+
+        File file = new File(filename);
+
+        try {
+            FileOutputStream fos = new FileOutputStream(file);
+            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));
+            bw.write(
+            "solverOfInitialSolution,shortTermStrategy,stoppingCriterion,numOfNeighbors,maxTabuListLengthFactor,"
+                + "unsuccessfulNeighborGenerationAttempts,numOfIterations,numOfTabuListClears,numOfNonImprovingIterations,maxNumOfSwaps\n"
+            );
+            bw.write(
+            solverOfInitialSolution + "," + shortTermStrategy + "," + stoppingCriterion + "," + numOfNeighbors
+                + "," + maxTabuListLengthFactor + "," + unsuccessfulNeighborGenerationAttempts + ","
+                + numOfIterations + "," + numOfTabuListClears + "," + numOfNonImprovingIterations + "," + maxNumOfSwaps
+            );
+            bw.close();
+            fos.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
