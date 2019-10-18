@@ -1,9 +1,7 @@
 package SP.post_optimization_methods;
 
 import SP.representations.Solution;
-import SP.representations.StackPosition;
 import SP.util.HeuristicUtil;
-import SP.util.NeighborhoodUtil;
 import org.jgrapht.Graph;
 import org.jgrapht.GraphPath;
 import org.jgrapht.alg.shortestpath.BellmanFordShortestPath;
@@ -14,7 +12,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-@SuppressWarnings("Duplicates")
 public class EjectionChainOperator {
 
     public EjectionChainOperator() {}
@@ -215,8 +212,9 @@ public class EjectionChainOperator {
         HeuristicUtil.removeItemFromStack(source, currSol.getFilledStacks()[stackOfSource]);
         int item = Integer.parseInt(rhs.replace("item", "").replace(")", "").trim());
         int stackOfItem = currSol.getStackIdxForAssignedItem(item);
+
         HeuristicUtil.removeItemFromStack(item, currSol.getFilledStacks()[stackOfItem]);
-        NeighborhoodUtil.blockShiftForWholeStack(currSol, source, stackOfItem, performedShifts);
+        performedShifts.add(new Shift(source, stackOfItem));
         HeuristicUtil.assignItemToStack(source, currSol.getFilledStacks()[stackOfItem], currSol.getSolvedInstance().getItemObjects());
     }
 
@@ -231,7 +229,7 @@ public class EjectionChainOperator {
         if (stackOfItemTwo != -1) {
             HeuristicUtil.removeItemFromStack(itemTwo, currSol.getFilledStacks()[stackOfItemTwo]);
         }
-        NeighborhoodUtil.blockShiftForWholeStack(currSol, itemOne, stackOfItemOne, performedShifts);
+        performedShifts.add(new Shift(itemOne, stackOfItemTwo));
         HeuristicUtil.assignItemToStack(itemOne, currSol.getFilledStacks()[stackOfItemTwo], currSol.getSolvedInstance().getItemObjects());
     }
 
@@ -247,7 +245,7 @@ public class EjectionChainOperator {
         if (HeuristicUtil.completelyFilledStack(currSol.getFilledStacks()[stack])) {
             return new PendingItemStackAssignment(item, stack);
         } else {
-            NeighborhoodUtil.blockShiftForWholeStack(currSol, item, stack, performedShifts);
+            performedShifts.add(new Shift(item, stack));
             HeuristicUtil.assignItemToStack(item, currSol.getFilledStacks()[stack], currSol.getSolvedInstance().getItemObjects());
         }
         return pending;
@@ -263,7 +261,7 @@ public class EjectionChainOperator {
         HeuristicUtil.removeItemFromStack(item, currSol.getFilledStacks()[stack]);
 
         if (pending != null && stack == pending.getStack()) {
-            NeighborhoodUtil.blockShiftForWholeStack(currSol, pending.getItem(), stack, performedShifts);
+            performedShifts.add(new Shift(pending.getItem(), stack));
             HeuristicUtil.assignItemToStack(pending.getItem(), currSol.getFilledStacks()[stack], currSol.getSolvedInstance().getItemObjects());
             return null;
         }
@@ -290,7 +288,7 @@ public class EjectionChainOperator {
             }
         }
         if (pending != null) {
-            NeighborhoodUtil.blockShiftForWholeStack(currSol, pending.getItem(), pending.getStack(), performedShifts);
+            performedShifts.add(new Shift(pending.getItem(), pending.getStack()));
             HeuristicUtil.assignItemToStack(
                     pending.getItem(), currSol.getFilledStacks()[pending.getStack()], currSol.getSolvedInstance().getItemObjects()
             );

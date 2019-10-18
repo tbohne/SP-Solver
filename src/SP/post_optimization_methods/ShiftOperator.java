@@ -4,14 +4,22 @@ import SP.representations.Instance;
 import SP.representations.Solution;
 import SP.representations.StackPosition;
 import SP.util.HeuristicUtil;
-import SP.util.NeighborhoodUtil;
 
 import java.util.List;
 
-@SuppressWarnings("Duplicates")
 public class ShiftOperator {
 
     public ShiftOperator() {}
+
+
+    public static Shift shiftItem(Solution sol, int item, StackPosition pos, StackPosition shiftTarget) {
+
+        HeuristicUtil.assignItemToStack(item, sol.getFilledStacks()[shiftTarget.getStackIdx()], sol.getSolvedInstance().getItemObjects());
+
+        sol.getFilledStacks()[pos.getStackIdx()][pos.getLevel()] = -1;
+
+        return new Shift(item, shiftTarget.getStackIdx());
+    }
 
     public Solution generateShiftNeighbor(Solution currSol, List<Shift> performedShifts, int unsuccessfulNeighborGenerationAttempts) {
 
@@ -39,10 +47,8 @@ public class ShiftOperator {
             failCnt++;
         }
 
-        Shift shift = HeuristicUtil.shiftItem(neighbor, item, pos, shiftTarget);
+        Shift shift = this.shiftItem(neighbor, item, pos, shiftTarget);
         performedShifts.clear();
-        NeighborhoodUtil.blockShiftForWholeStack(currSol, item, shiftTarget.getStackIdx(), performedShifts);
-
         performedShifts.add(shift);
         neighbor.lowerItemsThatAreStackedInTheAir();
         neighbor.sortItemsInStacksBasedOnTransitiveStackingConstraints();

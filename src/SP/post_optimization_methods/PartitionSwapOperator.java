@@ -29,8 +29,6 @@ public class PartitionSwapOperator {
             partitions.get(partitionIdxOne).set(itemIdxOne, itemTwo);
             partitions.get(partitionIdxTwo).set(itemIdxTwo, itemOne);
 
-            PartitionSwap swap = new PartitionSwap(new PartitionShift(itemOne, partitionIdxTwo), new PartitionShift(itemTwo, partitionIdxOne));
-
             // TODO: add performed shifts
         }
     }

@@ -7,7 +7,6 @@ import SP.util.HeuristicUtil;
 import java.util.ArrayList;
 import java.util.List;
 
-@SuppressWarnings("Duplicates")
 public class SwapOperator {
 
     private int maxNumberOfSwaps;
@@ -30,7 +29,7 @@ public class SwapOperator {
         sol.getFilledStacks()[posTwo.getStackIdx()][posTwo.getLevel()] = itemOne;
 
         // the swap operations consists of two shift operations
-        return new Swap(new Shift(itemOne, posTwo), new Shift(itemTwo, posOne));
+        return new Swap(new Shift(itemOne, posTwo.getStackIdx()), new Shift(itemTwo, posOne.getStackIdx()));
     }
 
     /**

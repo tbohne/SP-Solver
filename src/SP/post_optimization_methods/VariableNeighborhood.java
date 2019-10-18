@@ -7,7 +7,6 @@ import org.jgrapht.GraphPath;
 
 import java.util.*;
 
-@SuppressWarnings("Duplicates")
 public class VariableNeighborhood implements Neighborhood {
 
     private int numberOfNeighbors;
@@ -65,7 +64,6 @@ public class VariableNeighborhood implements Neighborhood {
      * Adds the specified shift operation to the tabu list.
      * Replaces the oldest entry if the maximum length of the tabu list is reached.
      *
-     * @param shift - shift operation to be added to the tabu list
      */
     public void forbidShifts(List<Shift> performedShifts) {
         if (this.tabuList.size() >= this.maxTabuListLength) {
