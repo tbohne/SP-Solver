@@ -21,15 +21,15 @@ public class ShiftOperator {
         return new Shift(item, targetStack);
     }
 
-    private StackPosition getFeasibleShiftTarget(Solution neighbor, StackPosition srcPos, int item, Solution currSol) {
+    private StackPosition getFeasibleShiftTarget(Solution neighbor, StackPosition srcPos, int item) {
         StackPosition shiftTarget = HeuristicUtil.getRandomFreeSlot(neighbor);
-        HeuristicUtil.ensureShiftTargetInDifferentStack(shiftTarget, srcPos, neighbor);
+        shiftTarget = HeuristicUtil.ensureShiftTargetInDifferentStack(shiftTarget, srcPos, neighbor);
         int failCnt = 0;
-        Instance instance = currSol.getSolvedInstance();
+        Instance instance = neighbor.getSolvedInstance();
 
         while (!HeuristicUtil.itemCompatibleWithStack(instance.getCosts(), item, shiftTarget.getStackIdx()) ||
             !HeuristicUtil.itemCompatibleWithAlreadyAssignedItems(
-                item, currSol.getFilledStacks()[shiftTarget.getStackIdx()],instance.getItemObjects(), instance.getStackingConstraints()
+                item, neighbor.getFilledStacks()[shiftTarget.getStackIdx()],instance.getItemObjects(), instance.getStackingConstraints()
             )
         ) {
             if (failCnt == this.unsuccessfulNbrGenerationAttempts) {
@@ -37,7 +37,7 @@ public class ShiftOperator {
                 return null;
             }
             shiftTarget = HeuristicUtil.getRandomFreeSlot(neighbor);
-            HeuristicUtil.ensureShiftTargetInDifferentStack(shiftTarget, srcPos, neighbor);
+            shiftTarget = HeuristicUtil.ensureShiftTargetInDifferentStack(shiftTarget, srcPos, neighbor);
             failCnt++;
         }
         return shiftTarget;
@@ -47,7 +47,7 @@ public class ShiftOperator {
         Solution neighbor = new Solution(currSol);
         StackPosition srcPos = HeuristicUtil.getRandomStackPositionFilledWithItem(neighbor);
         int item = neighbor.getFilledStacks()[srcPos.getStackIdx()][srcPos.getLevel()];
-        StackPosition shiftTarget = this.getFeasibleShiftTarget(neighbor, srcPos, item, currSol);
+        StackPosition shiftTarget = this.getFeasibleShiftTarget(neighbor, srcPos, item);
         if (shiftTarget == null) { return neighbor; }
         Shift shift = this.shiftItem(neighbor, item, srcPos, shiftTarget.getStackIdx());
         performedShifts.clear();
