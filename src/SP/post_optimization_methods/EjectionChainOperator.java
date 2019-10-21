@@ -348,5 +348,4 @@ public class EjectionChainOperator {
         neighbor.sortItemsInStacksBasedOnTransitiveStackingConstraints();
         return neighbor;
     }
-
 }

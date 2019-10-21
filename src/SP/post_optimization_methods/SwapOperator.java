@@ -31,18 +31,17 @@ public class SwapOperator {
         // clear stack pos of swap items
         sol.getFilledStacks()[posOne.getStackIdx()][posOne.getLevel()] = -1;
         sol.getFilledStacks()[posTwo.getStackIdx()][posTwo.getLevel()] = -1;
+
         HeuristicUtil.assignItemToStack(itemOne, sol.getFilledStacks()[posTwo.getStackIdx()], sol.getSolvedInstance().getItemObjects());
         HeuristicUtil.assignItemToStack(itemTwo, sol.getFilledStacks()[posOne.getStackIdx()], sol.getSolvedInstance().getItemObjects());
         // the swap operations consists of two shift operations
         return new Swap(new Shift(itemOne, posTwo.getStackIdx()), new Shift(itemTwo, posOne.getStackIdx()));
     }
 
-    private StackPosition getFeasibleSwapPartner(Solution neighbor, Solution currSol, StackPosition posOne, int swapItemOne) {
+    private StackPosition getFeasibleSwapPartner(Solution neighbor, StackPosition posOne, int swapItemOne) {
         int failCnt = 0;
         StackPosition posTwo = HeuristicUtil.getRandomStackPositionFilledWithItem(neighbor);
-        int swapItemTwo = currSol.getFilledStacks()[posTwo.getStackIdx()][posTwo.getLevel()];
-        // not swapping inside a stack
-        HeuristicUtil.ensureShiftTargetInDifferentStack(posTwo, posOne, neighbor);
+        int swapItemTwo = neighbor.getFilledStacks()[posTwo.getStackIdx()][posTwo.getLevel()];
 
         double[][] costs = neighbor.getSolvedInstance().getCosts();
         int[][] stacks = neighbor.getFilledStacks();
@@ -53,14 +52,15 @@ public class SwapOperator {
             || !HeuristicUtil.itemCompatibleWithStack(costs, swapItemTwo, posOne.getStackIdx())
             || !HeuristicUtil.itemCompatibleWithAlreadyAssignedItems(swapItemOne, stacks[posTwo.getStackIdx()], itemObjects, stackingConstraints)
             || !HeuristicUtil.itemCompatibleWithAlreadyAssignedItems(swapItemTwo, stacks[posOne.getStackIdx()], itemObjects, stackingConstraints)
+            || posOne.getStackIdx() == posTwo.getStackIdx()
         ) {
-
             if (failCnt == this.unsuccessfulNbrGenerationAttempts) {
                 System.out.println("FAILED TO FIND A COMPATIBLE SWAP");
                 return null;
             }
-            posTwo = HeuristicUtil.getRandomStackPosition(neighbor);
-            HeuristicUtil.ensureShiftTargetInDifferentStack(posTwo, posOne, neighbor);
+            posTwo = HeuristicUtil.getRandomStackPositionFilledWithItem(neighbor);
+            swapItemTwo = neighbor.getFilledStacks()[posTwo.getStackIdx()][posTwo.getLevel()];
+            failCnt++;
         }
         return posTwo;
     }
@@ -81,7 +81,7 @@ public class SwapOperator {
             StackPosition posOne = HeuristicUtil.getRandomStackPositionFilledWithItem(neighbor);
             int swapItemOne = neighbor.getFilledStacks()[posOne.getStackIdx()][posOne.getLevel()];
 
-            StackPosition posTwo = this.getFeasibleSwapPartner(neighbor, currSol, posOne, swapItemOne);
+            StackPosition posTwo = this.getFeasibleSwapPartner(neighbor, posOne, swapItemOne);
             if (posTwo == null) { return neighbor; }
 
             Solution tmpSol = new Solution(neighbor);
@@ -90,13 +90,10 @@ public class SwapOperator {
                 swapList.add(swap);
                 neighbor = tmpSol;
                 swapCnt++;
-                neighbor.lowerItemsThatAreStackedInTheAir();
-                neighbor.sortItemsInStacksBasedOnTransitiveStackingConstraints();
             }
         }
         return neighbor;
     }
-
 
     /**
      * Generates a neighbor for the current solution using the "k-swap-neighborhood".
@@ -112,6 +109,8 @@ public class SwapOperator {
             performedShifts.add(swap.getShiftOne());
             performedShifts.add(swap.getShiftTwo());
         }
+        neighbor.lowerItemsThatAreStackedInTheAir();
+        neighbor.sortItemsInStacksBasedOnTransitiveStackingConstraints();
         return neighbor;
     }
 }
