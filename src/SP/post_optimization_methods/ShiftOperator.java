@@ -9,50 +9,51 @@ import java.util.List;
 
 public class ShiftOperator {
 
-    public ShiftOperator() {}
+    private int unsuccessfulNbrGenerationAttempts;
 
-
-    public static Shift shiftItem(Solution sol, int item, StackPosition pos, StackPosition shiftTarget) {
-
-        HeuristicUtil.assignItemToStack(item, sol.getFilledStacks()[shiftTarget.getStackIdx()], sol.getSolvedInstance().getItemObjects());
-
-        sol.getFilledStacks()[pos.getStackIdx()][pos.getLevel()] = -1;
-
-        return new Shift(item, shiftTarget.getStackIdx());
+    public ShiftOperator(int unsuccessfulNbrGenerationAttempts) {
+        this.unsuccessfulNbrGenerationAttempts = unsuccessfulNbrGenerationAttempts;
     }
 
-    public Solution generateShiftNeighbor(Solution currSol, List<Shift> performedShifts, int unsuccessfulNeighborGenerationAttempts) {
+    private Shift shiftItem(Solution sol, int item, StackPosition srcPos, int targetStack) {
+        HeuristicUtil.assignItemToStack(item, sol.getFilledStacks()[targetStack], sol.getSolvedInstance().getItemObjects());
+        sol.getFilledStacks()[srcPos.getStackIdx()][srcPos.getLevel()] = -1;
+        return new Shift(item, targetStack);
+    }
 
-        Solution neighbor = new Solution(currSol);
-        StackPosition pos = HeuristicUtil.getRandomStackPositionFilledWithItem(neighbor);
-        int item = neighbor.getFilledStacks()[pos.getStackIdx()][pos.getLevel()];
+    private StackPosition getFeasibleShiftTarget(Solution neighbor, StackPosition srcPos, int item, Solution currSol) {
         StackPosition shiftTarget = HeuristicUtil.getRandomFreeSlot(neighbor);
-        HeuristicUtil.ensureShiftTargetInDifferentStack(shiftTarget, pos, neighbor);
-
+        HeuristicUtil.ensureShiftTargetInDifferentStack(shiftTarget, srcPos, neighbor);
         int failCnt = 0;
-
         Instance instance = currSol.getSolvedInstance();
 
-        while (!HeuristicUtil.itemCompatibleWithStack(instance.getCosts(), item, shiftTarget.getStackIdx())
-                || !HeuristicUtil.itemCompatibleWithAlreadyAssignedItems(
+        while (!HeuristicUtil.itemCompatibleWithStack(instance.getCosts(), item, shiftTarget.getStackIdx()) ||
+            !HeuristicUtil.itemCompatibleWithAlreadyAssignedItems(
                 item, currSol.getFilledStacks()[shiftTarget.getStackIdx()],instance.getItemObjects(), instance.getStackingConstraints()
-        )
-                ) {
-            if (failCnt == unsuccessfulNeighborGenerationAttempts) {
+            )
+        ) {
+            if (failCnt == this.unsuccessfulNbrGenerationAttempts) {
                 System.out.println("FAILED TO FIND A COMPATIBLE SHIFT TARGET");
-                return neighbor;
+                return null;
             }
             shiftTarget = HeuristicUtil.getRandomFreeSlot(neighbor);
-            HeuristicUtil.ensureShiftTargetInDifferentStack(shiftTarget, pos, neighbor);
+            HeuristicUtil.ensureShiftTargetInDifferentStack(shiftTarget, srcPos, neighbor);
             failCnt++;
         }
+        return shiftTarget;
+    }
 
-        Shift shift = this.shiftItem(neighbor, item, pos, shiftTarget);
+    public Solution generateShiftNeighbor(Solution currSol, List<Shift> performedShifts) {
+        Solution neighbor = new Solution(currSol);
+        StackPosition srcPos = HeuristicUtil.getRandomStackPositionFilledWithItem(neighbor);
+        int item = neighbor.getFilledStacks()[srcPos.getStackIdx()][srcPos.getLevel()];
+        StackPosition shiftTarget = this.getFeasibleShiftTarget(neighbor, srcPos, item, currSol);
+        if (shiftTarget == null) { return neighbor; }
+        Shift shift = this.shiftItem(neighbor, item, srcPos, shiftTarget.getStackIdx());
         performedShifts.clear();
         performedShifts.add(shift);
         neighbor.lowerItemsThatAreStackedInTheAir();
         neighbor.sortItemsInStacksBasedOnTransitiveStackingConstraints();
         return neighbor;
     }
-
 }
