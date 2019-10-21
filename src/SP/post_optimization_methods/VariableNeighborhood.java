@@ -84,56 +84,58 @@ public class VariableNeighborhood implements Neighborhood {
         System.exit(0);
     }
 
-    public Solution getNeighbor(Solution currSol, Solution bestSol) {
+    private Solution applyVariableNeighborhood(Solution currSol, List<Shift> performedShifts) {
 
+        Solution neighbor = new Solution();
+
+        // shift is only possible if there are free slots
+        if (currSol.getNumberOfAssignedItems() < currSol.getFilledStacks().length * currSol.getFilledStacks()[0].length) {
+            neighbor = this.shiftOperator.generateShiftNeighbor(currSol, performedShifts);
+        }
+        if (!neighbor.isFeasible() || neighbor.computeCosts() > currSol.computeCosts()) {
+            // next operator
+            int rand = HeuristicUtil.getRandomIntegerInBetween(1, 4);
+            performedShifts.clear();
+            neighbor = this.swapOperator.generateSwapNeighbor(currSol, performedShifts, rand);
+            if (!neighbor.isFeasible() || neighbor.computeCosts() > currSol.computeCosts()) {
+                // next operator
+                performedShifts.clear();
+                neighbor = this.ejectionChainOperator.generateEjectionChainNeighbor(currSol, performedShifts);
+                System.out.println("USING EJECTION CHAIN OPERATOR");
+            } else {
+                System.out.println("USING SWAP OPERATOR");
+            }
+        } else {
+            System.out.println("USING SHIFT OPERATOR");
+        }
+        return neighbor;
+    }
+
+    public Solution getNeighbor(Solution currSol, Solution bestSol) {
         List<Solution> nbrs = new ArrayList<>();
         int failCnt = 0;
         Map<Solution, List<Shift>> shiftsForSolution = new HashMap<>();
-
         System.out.println("TL: " + this.tabuList.size());
 
         while (nbrs.size() < this.numberOfNeighbors) {
 
             List<Shift> performedShifts = new ArrayList<>();
-            Solution neighbor;
-
-            // TODO: implement variable NBH
-            double rand = Math.random();
-            if (rand < 0.3) {
-                neighbor = this.ejectionChainOperator.generateEjectionChainNeighbor(currSol, performedShifts);
-            } else if (rand < 0.6) {
-                // shift is only possible if there are free slots
-                if (currSol.getNumberOfAssignedItems() < currSol.getFilledStacks().length * currSol.getFilledStacks()[0].length) {
-                    neighbor = this.shiftOperator.generateShiftNeighbor(currSol, performedShifts, this.unsuccessfulNeighborGenerationAttempts);
-                } else {
-                    neighbor = this.swapOperator.generateSwapNeighbor(currSol, performedShifts, this.unsuccessfulNeighborGenerationAttempts, 1);
-                }
-            } else {
-                neighbor = this.swapOperator.generateSwapNeighbor(currSol, performedShifts, this.unsuccessfulNeighborGenerationAttempts, 1);
-            }
-
+            Solution neighbor = this.applyVariableNeighborhood(currSol, performedShifts);
             if (!neighbor.isFeasible()) { continue; }
-
             shiftsForSolution.put(neighbor, performedShifts);
-
-//            System.out.println("NBRS: " + nbrs.size());
 
             // FIRST-FIT
             if (this.shortTermStrategy == PostOptimization.ShortTermStrategies.FIRST_FIT
-                    && !this.tabuListContainsAnyOfTheShifts(performedShifts)
-                    && neighbor.computeCosts() < currSol.computeCosts()
-                    ) {
-
+                && !this.tabuListContainsAnyOfTheShifts(performedShifts)
+                && neighbor.computeCosts() < currSol.computeCosts()
+            ) {
                 this.forbidShifts(performedShifts);
                 System.out.println("FIRST-FIT RETURN");
                 return neighbor;
-
-                // BEST-FIT
+            // BEST-FIT
             } else if (!this.tabuListContainsAnyOfTheShifts(performedShifts)) {
                 nbrs.add(neighbor);
-//                this.forbidShifts(performedShifts);
             } else {
-
                 // TABU
                 // ASPIRATION CRITERION
                 if (neighbor.computeCosts() < bestSol.computeCosts()) {
