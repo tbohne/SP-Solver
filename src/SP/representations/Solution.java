@@ -264,6 +264,12 @@ public class Solution implements Comparable<Solution> {
         return true;
     }
 
+    /**
+     * Retrieves the index of the stack the specified item is assigned to.
+     *
+     * @param item - item to get the stack index for
+     * @return index of the stack the item is assigned to or -1 if not assigned at all
+     */
     public int getStackIdxForAssignedItem(int item) {
         for (int stack = 0; stack < this.getFilledStacks().length; stack++) {
             for (int level = 0; level < this.solvedInstance.getStackCapacity(); level++) {
@@ -275,19 +281,20 @@ public class Solution implements Comparable<Solution> {
         return -1;
     }
 
-    // TODO: check if correct
+    /**
+     * Retrieves the number of stacking constraint based conflicts for each item.
+     * TODO: check if correct
+     *
+     * @return list of item conflicts
+     */
     public List<ItemConflict> getNumberOfConflictsForEachItem() {
-
         List<ItemConflict> itemConflicts = new ArrayList<>();
         for (int item = 0; item < this.solvedInstance.getItems().length; item++) {
             itemConflicts.add(new ItemConflict(item, 0));
         }
-
         for (int[] filledStack : this.filledStacks) {
             for (int item : filledStack) {
-
                 int conflicts = 0;
-
                 if (item != -1) {
                     for (int otherItem : filledStack) {
                         if (otherItem != item && otherItem != -1) {
@@ -321,6 +328,30 @@ public class Solution implements Comparable<Solution> {
         }
     }
 
+    /**
+     * Returns the items that are not yet assigned to a stack position.
+     *
+     * @return list of unassigned items
+     */
+    public List<Integer> getUnassignedItems() {
+        List<Integer> assigned = new ArrayList<>();
+        for (int[] filledStack : this.filledStacks) {
+            for (int item : filledStack) {
+                if (item != -1) { assigned.add(item); }
+            }
+        }
+        List<Integer> unassigned = new ArrayList<>();
+        for (int item = 0; item < this.solvedInstance.getItems().length; item++) {
+            if (!assigned.contains(item)) {
+                unassigned.add(item);
+            }
+        }
+        return unassigned;
+    }
+
+    /**
+     * Clears the filled stacks of the solution.
+     */
     public void clearFilledStacks() {
         for (int i = 0; i < this.getFilledStacks().length; i++) {
             for (int j = 0; j < this.getFilledStacks()[i].length; j++) {
@@ -422,27 +453,6 @@ public class Solution implements Comparable<Solution> {
             }
         }
         return true;
-    }
-
-    /**
-     * Returns the items that are not yet assigned to a stack position.
-     *
-     * @return list of unassigned items
-     */
-    public List<Integer> getUnassignedItems() {
-        List<Integer> assigned = new ArrayList<>();
-        for (int[] filledStack : this.filledStacks) {
-            for (int item : filledStack) {
-                if (item != -1) { assigned.add(item); }
-            }
-        }
-        List<Integer> unassigned = new ArrayList<>();
-        for (int item = 0; item < this.solvedInstance.getItems().length; item++) {
-            if (!assigned.contains(item)) {
-                unassigned.add(item);
-            }
-        }
-        return unassigned;
     }
 
     /**
