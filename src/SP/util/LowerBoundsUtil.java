@@ -55,35 +55,34 @@ public class LowerBoundsUtil {
                 }
             }
         }
-
-//        System.out.println("expected: " + (minCostPerfectMatching.getMatching().getWeight() + sol.computeCosts()));
-//        System.out.println("actual: " + tmpSol.computeCosts());
-
         if (tmpSol.isFeasible()) {
             return tmpSol;
         } else {
             // improve LB
-            System.out.println("before: " + tmpSol.computeCosts());
             boolean changes = true;
             // <item, stack>
             List<Shift> itemShifts = new ArrayList<>();
-
             while (changes) {
                 changes = postProcessing(tmpSol, fixedItems, itemShifts);
                 tmpSol.lowerItemsThatAreStackedInTheAir();
             }
-
             return tmpSol;
         }
-//        return minCostPerfectMatching.getMatching().getWeight() + sol.computeCosts();
     }
 
+    /**
+     * Post-processing procedure to improve the lower bound.
+     * TODO: check and refactor post-processing
+     *
+     * @param tmpSol     - lower bound solution
+     * @param fixedItems - items already assigned to stacks in the partial solution
+     * @param itemShifts - to be filled with the performed item shifts
+     * @return whether or not the lower bound solution was changed during the post-processing
+     */
     private static boolean postProcessing(Solution tmpSol, List<Integer> fixedItems, List<Shift> itemShifts) {
 
         List<StackPosition> freePositions = HeuristicUtil.retrieveEmptyPositions(tmpSol);
-
         boolean change = false;
-
         List<Integer> conflictingItems = new ArrayList<>();
 
         // iteratively move conflicting items
@@ -95,22 +94,15 @@ public class LowerBoundsUtil {
                 break;
             }
         }
-
         Graph<String, DefaultWeightedEdge> graph = new DefaultUndirectedWeightedGraph<>(DefaultWeightedEdge.class);
         Set<String> partitionOne = new HashSet<>();
         Set<String> partitionTwo = new HashSet<>();
-
         GraphUtil.addVerticesForUnmatchedItems(conflictingItems, graph, partitionOne);
         GraphUtil.addVerticesForEmptyPositions(freePositions, graph, partitionTwo);
         List<Integer> dummyItems = GraphUtil.introduceDummyVerticesToBipartiteGraph(graph, partitionOne, partitionTwo);
-
-//        System.out.println("p1: " + partitionOne.size() + " p2: " + partitionTwo.size());
-
         GraphUtil.addEdgesBetweenDummyItemsAndStackPositions(graph, dummyItems, freePositions);
         addEdgesBetweenItemsAndStackPositions(tmpSol, graph, conflictingItems, freePositions);
-
         BipartiteGraph g = new BipartiteGraph(partitionOne, partitionTwo, graph);
-
         KuhnMunkresMinimalWeightBipartitePerfectMatching<String, DefaultWeightedEdge> minCostPerfectMatching =
                 new KuhnMunkresMinimalWeightBipartitePerfectMatching<>(g.getGraph(), g.getPartitionOne(), g.getPartitionTwo());
 
@@ -121,12 +113,9 @@ public class LowerBoundsUtil {
                 int level = Integer.parseInt(o.toString().split("pos")[1].split(",")[1].replace("level: ", "").replace("))", "").trim());
 
                 if (tmpSol.getFilledStacks()[stack][level] == -1) {
-
-                    Shift tmpShift = new Shift(item, new StackPosition(stack, level));
-
+                    Shift tmpShift = new Shift(item, stack);
                     if (itemShifts.contains(tmpShift)) { continue; }
                     if (!HeuristicUtil.itemCompatibleWithStack(tmpSol.getSolvedInstance().getCosts(), item, stack)) { continue; }
-
                     for (int[] s : tmpSol.getFilledStacks()) {
                         for (int i = 0; i < s.length; i++) {
                             if (s[i] == item) {

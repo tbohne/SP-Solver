@@ -1,6 +1,5 @@
 package SP.util;
 
-import SP.post_optimization_methods.Shift;
 import SP.representations.*;
 import org.jgrapht.alg.matching.MaximumWeightBipartiteMatching;
 import org.jgrapht.graph.DefaultWeightedEdge;
@@ -122,51 +121,17 @@ public class HeuristicUtil {
     }
 
     /**
-     * Retrieves the free slots in the stacks.
-     *
-     * @param sol - solution to retrieve the free slots for
-     * @return list of free slots in the stacks
-     */
-    public static List<StackPosition> getFreeSlots(Solution sol) {
-        List<StackPosition> freeSlots = new ArrayList<>();
-        for (int stack = 0; stack < sol.getFilledStacks().length; stack++) {
-            for (int level = 0; level < sol.getFilledStacks()[stack].length; level++) {
-                if (sol.getFilledStacks()[stack][level] == -1) {
-                    freeSlots.add(new StackPosition(stack, level));
-                }
-            }
-        }
-        return freeSlots;
-    }
-
-    /**
      * Ensures that the shift target is in a different stack.
      *
      * @param shiftTarget - stack position the item gets shifted to
      * @param pos         - current position of the item
      * @param neighbor    - considered solution
      */
-    public static void ensureShiftTargetInDifferentStack(StackPosition shiftTarget, StackPosition pos, Solution neighbor) {
+    public static StackPosition ensureShiftTargetInDifferentStack(StackPosition shiftTarget, StackPosition pos, Solution neighbor) {
         while (shiftTarget.getStackIdx() == pos.getStackIdx()) {
             shiftTarget = HeuristicUtil.getRandomFreeSlot(neighbor);
         }
-    }
-
-    /**
-     * Shifts the item stored in pos to the shift target.
-     *
-     * @param sol         - solution to be updated
-     * @param item        - item to be shifted
-     * @param shiftTarget - position the item is shifted to
-     * @param pos         - the item's original position
-     */
-    public static Shift shiftItem(Solution sol, int item, StackPosition pos, StackPosition shiftTarget) {
-
-        sol.getFilledStacks()[shiftTarget.getStackIdx()][shiftTarget.getLevel()] =
-                sol.getFilledStacks()[pos.getStackIdx()][pos.getLevel()];
-
-        sol.getFilledStacks()[pos.getStackIdx()][pos.getLevel()] = -1;
-        return new Shift(item, shiftTarget);
+        return shiftTarget;
     }
 
     /**
@@ -179,18 +144,6 @@ public class HeuristicUtil {
         List<StackPosition> freeSlots = getFreeSlots(sol);
         int freeSlotIdx = HeuristicUtil.getRandomIntegerInBetween(0, freeSlots.size() - 1);
         return freeSlots.get(freeSlotIdx);
-    }
-
-    /**
-     * Returns a random position in the stacks.
-     *
-     * @param sol - solution for which to retrieve a random stack position
-     * @return random position in the stacks
-     */
-    public static StackPosition getRandomStackPosition(Solution sol) {
-        int stackIdx = getRandomIntegerInBetween(0, sol.getFilledStacks().length - 1);
-        int level = getRandomIntegerInBetween(0, sol.getFilledStacks()[stackIdx].length - 1);
-        return new StackPosition(stackIdx, level);
     }
 
     /**
@@ -320,6 +273,12 @@ public class HeuristicUtil {
         return costs[item][stack] < Integer.MAX_VALUE / costs.length;
     }
 
+    /**
+     * Returns whether the specified stack has a free position.
+     *
+     * @param stack - stack to be checked
+     * @return whether or not the stack has a free position
+     */
     public static boolean stackHasFreePosition(int[] stack) {
         for (int item : stack) {
             if (item == -1) {
@@ -329,32 +288,22 @@ public class HeuristicUtil {
         return false;
     }
 
-    public static boolean stackIsEmpty(int[] stack) {
-        for (int item : stack) {
-            if (item != -1) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    // Returns the item objects that are stored in the stack
-    public static List<Item> getItemObjectsFromIndices(int[] stack, Item[] itemObjects) {
-        List<Item> items = new ArrayList<>();
-        for (int itemIdx : stack) {
-            if (itemIdx == -1) { continue; }
-            items.add(itemObjects[itemIdx]);
-        }
-        return items;
-    }
-
+    /**
+     * Checks whether the specified item is compatible with the
+     * items already assigned to the specified stack with one exception.
+     *
+     * @param item                - item to check compatibility for
+     * @param stack               - stack to check compatibility for
+     * @param itemObjects         - object representations of the instance's items
+     * @param stackingConstraints - stacking constraints to be respected (basis for compatibility)
+     * @param exception           - item that has not necessarily to be compatible
+     * @return whether or not the item is compatible to the items already assigned to the stack
+     */
     public static boolean itemCompatibleWithAlreadyAssignedItemsWithException(
         int item, int[] stack, Item[] itemObjects, int[][] stackingConstraints, int exception
     ) {
-
         // no assigned items
         if (stackIsEmpty(stack)) { return true; }
-
         List<Item> items = getItemObjectsFromIndices(stack, itemObjects);
         items.add(itemObjects[item]);
         List<Item> tmpItems = getItemObjectsFromIndices(stack, itemObjects);
@@ -363,7 +312,6 @@ public class HeuristicUtil {
                 items.remove(i);
             }
         }
-
         // sort items with regard to the transitive stacking constraints
         Collections.sort(items);
         for (int i = 0; i < items.size() - 1; i++) {
@@ -374,25 +322,39 @@ public class HeuristicUtil {
         return true;
     }
 
+    /**
+     * Checks whether the specified item is compatible with the
+     * items already assigned to the specified stack.
+     *
+     * @param item                - item to check compatibility for
+     * @param stack               - stack to check compatibility for
+     * @param itemObjects         - object representations of the instance's items
+     * @param stackingConstraints - stacking constraints to be respected (basis for compatibility)
+     * @return whether or not the item is compatible to the items already assigned to the stack
+     */
     public static boolean itemCompatibleWithAlreadyAssignedItems(int item, int[] stack, Item[] itemObjects, int[][] stackingConstraints) {
-
         // no assigned items
         if (stackIsEmpty(stack)) { return true; }
-
         List<Item> items = getItemObjectsFromIndices(stack, itemObjects);
         items.add(itemObjects[item]);
         // sort items with regard to the transitive stacking constraints
         Collections.sort(items);
-
         for (int i = 0; i < items.size() - 1; i++) {
             if (stackingConstraints[items.get(i).getIdx()][items.get(i + 1).getIdx()] != 1) {
                 return false;
             }
         }
-
         return true;
     }
 
+    /**
+     * Assigns the specified item to the specified stack and sorts
+     * the stack with regard to the stacking constraints.
+     *
+     * @param item        - item to be assigned to the stack
+     * @param stack       - stack the item gets assigned to
+     * @param itemObjects - object representations of the instance's items
+     */
     public static void assignItemToStack(int item, int[] stack, Item[] itemObjects) {
         List<Item> items = getItemObjectsFromIndices(stack, itemObjects);
         items.add(itemObjects[item]);
@@ -406,6 +368,12 @@ public class HeuristicUtil {
         }
     }
 
+    /**
+     * Checks whether the specified stack is completely filled with items.
+     *
+     * @param stack - stack to be checked
+     * @return whether or not the stack is completely filled
+     */
     public static boolean completelyFilledStack(int[] stack) {
         for (int i = 0; i < stack.length; i++) {
             if (stack[i] == -1) {
@@ -415,6 +383,12 @@ public class HeuristicUtil {
         return true;
     }
 
+    /**
+     * Removes the specified item from the specified stack.
+     *
+     * @param item  - item to be removed
+     * @param stack - stack the item gets removed from
+     */
     public static void removeItemFromStack(int item, int[] stack) {
         for (int i = 0; i < stack.length; i++) {
             if (stack[i] == item) {
@@ -640,16 +614,6 @@ public class HeuristicUtil {
     public static float getRandomValueInBetween(float min, float max) {
         Random r = new Random();
         return (float)(Math.round(min + r.nextFloat() * (max - min) * 10.0) / 10.0);
-    }
-
-    /**
-     * Rounds the given value to the next half.
-     *
-     * @param val - value to be rounded
-     * @return rounded value
-     */
-    public static float roundToHalf(float val) {
-        return (float)(Math.round(val * 2) / 2.0);
     }
 
     /**
@@ -924,5 +888,76 @@ public class HeuristicUtil {
             HeuristicUtil.removeItemFromStacks(itemTwo, instance.getStacks());
             instance.getStacks()[stack][instance.getGroundLevel()] = itemTwo;
         }
+    }
+
+    /**
+     * Retrieves the free slots in the stacks.
+     *
+     * @param sol - solution to retrieve the free slots for
+     * @return list of free slots in the stacks
+     */
+    private static List<StackPosition> getFreeSlots(Solution sol) {
+        List<StackPosition> freeSlots = new ArrayList<>();
+        for (int stack = 0; stack < sol.getFilledStacks().length; stack++) {
+            for (int level = 0; level < sol.getFilledStacks()[stack].length; level++) {
+                if (sol.getFilledStacks()[stack][level] == -1) {
+                    freeSlots.add(new StackPosition(stack, level));
+                }
+            }
+        }
+        return freeSlots;
+    }
+
+    /**
+     * Rounds the given value to the next half.
+     *
+     * @param val - value to be rounded
+     * @return rounded value
+     */
+    private static float roundToHalf(float val) {
+        return (float)(Math.round(val * 2) / 2.0);
+    }
+
+    /**
+     * Returns whether the specified stack is empty.
+     *
+     * @param stack - stack to be checked
+     * @return whether or not the stack is empty
+     */
+    private static boolean stackIsEmpty(int[] stack) {
+        for (int item : stack) {
+            if (item != -1) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Retrieves the item objects corresponding to the indices that are part of the specified stack.
+     *
+     * @param stack       - stack containing indices to get item objects for
+     * @param itemObjects - object representations of the instance's items
+     * @return list of item objects corresponding to the stack content
+     */
+    private static List<Item> getItemObjectsFromIndices(int[] stack, Item[] itemObjects) {
+        List<Item> items = new ArrayList<>();
+        for (int itemIdx : stack) {
+            if (itemIdx == -1) { continue; }
+            items.add(itemObjects[itemIdx]);
+        }
+        return items;
+    }
+
+    /**
+     * Returns a random position in the stacks.
+     *
+     * @param sol - solution for which to retrieve a random stack position
+     * @return random position in the stacks
+     */
+    private static StackPosition getRandomStackPosition(Solution sol) {
+        int stackIdx = getRandomIntegerInBetween(0, sol.getFilledStacks().length - 1);
+        int level = getRandomIntegerInBetween(0, sol.getFilledStacks()[stackIdx].length - 1);
+        return new StackPosition(stackIdx, level);
     }
 }
