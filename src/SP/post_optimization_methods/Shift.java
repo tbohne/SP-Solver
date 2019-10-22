@@ -47,7 +47,7 @@ public class Shift {
      */
     @Override
     public boolean equals(Object object) {
-        return object != null && object instanceof Shift && (this.item == ((Shift) object).getItem() && this.stack == ((Shift) object).getStack());
+        return object instanceof Shift && (this.item == ((Shift) object).getItem() && this.stack == ((Shift) object).getStack());
     }
 
     /**

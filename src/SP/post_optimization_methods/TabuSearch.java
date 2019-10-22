@@ -18,7 +18,7 @@ public class TabuSearch {
     private final double optimalObjectiveValue;
 
     private final PostOptimization.StoppingCriteria stoppingCriterion;
-    private Neighborhood neighborhood;
+    private final Neighborhood neighborhood;
 
     private int iterationOfLastImprovement;
     private final int numberOfNonImprovingIterations;

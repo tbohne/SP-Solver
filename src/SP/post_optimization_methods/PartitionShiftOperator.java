@@ -1,11 +1,11 @@
 package SP.post_optimization_methods;
 
-import SP.representations.PartitionList;
 import SP.representations.Solution;
 import SP.util.HeuristicUtil;
 
 import java.util.List;
 
+// TODO: not yet tested nor completed
 public class PartitionShiftOperator {
 
     public PartitionShiftOperator() {}
