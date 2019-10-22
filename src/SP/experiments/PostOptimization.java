@@ -5,7 +5,6 @@ import SP.io.SolutionWriter;
 import SP.post_optimization_methods.*;
 import SP.representations.OptimizableSolution;
 import SP.representations.Solution;
-import SP.util.HeuristicUtil;
 import SP.util.RepresentationUtil;
 
 import java.util.List;
@@ -39,17 +38,17 @@ public class PostOptimization {
     private static final String SOLUTION_PREFIX = "res/solutions/";
 
     // GENERAL
-    private static final CompareSolvers.Solver SOLVER_OF_INITIAL_SOLUTION = CompareSolvers.Solver.CONSTRUCTIVE_TWO_CAP;
-    private static final ShortTermStrategies SHORT_TERM_STRATEGY = ShortTermStrategies.FIRST_FIT;
+    private static final CompareSolvers.Solver SOLVER_OF_INITIAL_SOLUTION = CompareSolvers.Solver.CONSTRUCTIVE_THREE_CAP;
+    private static final ShortTermStrategies SHORT_TERM_STRATEGY = ShortTermStrategies.BEST_FIT;
     private static final StoppingCriteria STOPPING_CRITERION = StoppingCriteria.NON_IMPROVING_ITERATIONS;
-    private static final int NUMBER_OF_NEIGHBORS = 10;
-    private static final int MAX_TABU_LIST_LENGTH_FACTOR = 10;
-    private static final int UNSUCCESSFUL_NEIGHBOR_GENERATION_ATTEMPTS = 100;
+    private static final int NUMBER_OF_NEIGHBORS = 1;
+    private static final int MAX_TABU_LIST_LENGTH_FACTOR = 500;
+    private static final int UNSUCCESSFUL_NEIGHBOR_GENERATION_ATTEMPTS = 500;
 
     // STOPPING SPECIFIC
-    private static final int NUMBER_OF_ITERATIONS = 50;
+    private static final int NUMBER_OF_ITERATIONS = 500;
     private static final int NUMBER_OF_TABU_LIST_CLEARS = 10;
-    private static final int NUMBER_OF_NON_IMPROVING_ITERATIONS = 10;
+    private static final int NUMBER_OF_NON_IMPROVING_ITERATIONS = 100;
 
     // maximum number of swaps to be performed in a single application of the swap operator
     private static final int MAX_NUMBER_OF_SWAPS = 4;
@@ -79,8 +78,8 @@ public class PostOptimization {
 
             // operators to be used in the variable neighborhood
             EjectionChainOperator ejectionChainOperator = new EjectionChainOperator();
-            ShiftOperator shiftOperator = new ShiftOperator();
-            SwapOperator swapOperator = new SwapOperator(MAX_NUMBER_OF_SWAPS);
+            ShiftOperator shiftOperator = new ShiftOperator(UNSUCCESSFUL_NEIGHBOR_GENERATION_ATTEMPTS);
+            SwapOperator swapOperator = new SwapOperator(MAX_NUMBER_OF_SWAPS, UNSUCCESSFUL_NEIGHBOR_GENERATION_ATTEMPTS);
 
             Neighborhood neighborhood = new VariableNeighborhood(
                 NUMBER_OF_NEIGHBORS, SHORT_TERM_STRATEGY,
@@ -115,7 +114,6 @@ public class PostOptimization {
                 MAX_TABU_LIST_LENGTH_FACTOR, UNSUCCESSFUL_NEIGHBOR_GENERATION_ATTEMPTS, NUMBER_OF_ITERATIONS,
                 NUMBER_OF_TABU_LIST_CLEARS, NUMBER_OF_NON_IMPROVING_ITERATIONS, MAX_NUMBER_OF_SWAPS
             );
-
         }
     }
 }

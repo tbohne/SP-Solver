@@ -84,6 +84,12 @@ public class SolverComparison {
         );
     }
 
+    /**
+     * Solves the given instance with the general heuristic.
+     *
+     * @param instance     - instance to be solved
+     * @param solutionName - name of the generated solution
+     */
     public void solveWithGeneralHeuristic(Instance instance, String solutionName) {
         GeneralHeuristic heuristic = new GeneralHeuristic(instance, this.timeLimit);
         Solution sol = heuristic.solve();

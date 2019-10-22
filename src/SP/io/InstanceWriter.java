@@ -59,10 +59,18 @@ public class InstanceWriter {
      * @param chanceForOneInPlacementConstraints           - chance for a 1-entry in the placement constraint matrix
      * @param usingStackingConstraintGenerationApproachOne - determines whether the 1st approach of stacking constraint
      *                                                       generation is used (2nd approach otherwise)
+     * @param transitiveStackingConstraints                - determines whether the stacking constraints are transitive
+     * @param costGenerationApproach                       - approach used to generate the costs
+     * @param minCost                                      - minimum costs for item-stack assignments
+     * @param maxCost                                      - maximum costs for item-stack assignments
      * @param itemLengthLB                                 - lower bound of the item lengths
      * @param itemLengthUB                                 - upper bound of the item lengths
      * @param itemWidthLB                                  - lower bound of the item widths
      * @param itemWidthUB                                  - upper bound of the item widths
+     * @param storageAreaSlotLength                        - length of a storage area slot
+     * @param storageAreaSlotWidth                         - width of a storage area slot
+     * @param storageAreaVehicleDistanceFactor             - factor used to determine the distance between vehicle and storage area
+     * @param numberOfRowsInStorageArea                    - number of available rows in the storage area
      */
     public static void writeConfig(
         String filename, int numOfInstances, int numOfItems, int stackCapacity, int additionalStackPercentage,

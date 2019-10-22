@@ -25,9 +25,9 @@ public class TestDataGenerator {
     }
 
     /******************************* CONFIGURATION *************************************/
-    private static final int NUMBER_OF_INSTANCES = 1;
-    private static final int NUMBER_OF_ITEMS = 70;
-    private static final int STACK_CAPACITY = 5;
+    private static final int NUMBER_OF_INSTANCES = 20;
+    private static final int NUMBER_OF_ITEMS = 500;
+    private static final int STACK_CAPACITY = 4;
 
     // The number of stacks m is initially m = n / b,
     // this number specifies the percentage by which the initial m gets increased.
@@ -74,7 +74,7 @@ public class TestDataGenerator {
             if (COST_GENERATION_APPROACH == costGenerationApproaches.MANHATTAN) {
                 generateManhattanCosts(costs, numOfStacks, items, stackPositions);
             } else if (COST_GENERATION_APPROACH == costGenerationApproaches.RANDOM) {
-                generateRandomCosts(costs, numOfStacks, items, stackPositions);
+                generateRandomCosts(costs, numOfStacks);
             }
             generateInstance(idx, numOfStacks, items, stackPositions, stackingConstraintMatrix, costs);
         }
@@ -241,6 +241,11 @@ public class TestDataGenerator {
         return stackingConstraintMatrix;
     }
 
+    /**
+     * Prints the percentage of one-entries in the stacking constraint matrix.
+     *
+     * @param stackingConstraints - stacking constraint matrix to be analyzed
+     */
     private static void printPercentageOfOneEntries(int[][] stackingConstraints) {
         float sum = 0;
         for (int i = 0; i < stackingConstraints.length; i++) {
@@ -248,7 +253,9 @@ public class TestDataGenerator {
                 sum += stackingConstraints[i][j];
             }
         }
-        System.out.println("percentage of one entries: " + sum / (stackingConstraints[0].length * stackingConstraints.length) * 100);
+        System.out.println(
+            "percentage of one entries: " + sum / (stackingConstraints[0].length * stackingConstraints.length) * 100
+        );
     }
 
     /**
@@ -314,7 +321,16 @@ public class TestDataGenerator {
         addPlacementConstraintsViaHighCostEntries(numOfStacks, costs);
     }
 
-    private static void generateRandomCosts(double[][] costs, int numOfStacks, Item[] items, List<GridPosition> stackPositions) {
+    /**
+     * Generates the matrix containing the transport costs for item-stack-assignments.
+     * The cost generation is based on random entries from a certain range in this approach.
+     * The placement constraint that forbid certain item-stack-assignments are
+     * indirectly implemented via high cost entries.
+     *
+     * @param costs       - matrix of costs to be filled
+     * @param numOfStacks - number of available stacks
+     */
+    private static void generateRandomCosts(double[][] costs, int numOfStacks) {
         for (int item = 0; item < NUMBER_OF_ITEMS; item++) {
             for (int stack = 0; stack < numOfStacks; stack++) {
                 Random r = new Random();

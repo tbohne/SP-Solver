@@ -30,8 +30,8 @@ public class CompareSolvers {
     private static final List<Solver> SOLVERS = Lists.newArrayList(
         Solver.MIP_BINPACKING,
         Solver.MIP_THREEINDEX,
-//        Solver.CONSTRUCTIVE_TWO_CAP,
-//        Solver.CONSTRUCTIVE_THREE_CAP,
+//        Solver.CONSTRUCTIVE_TWO_CAP
+//        Solver.CONSTRUCTIVE_THREE_CAP
         Solver.GENERAL_HEURISTIC
     );
 
@@ -44,7 +44,7 @@ public class CompareSolvers {
     /**********************************************************/
 
     // specifies the time limit for the solving procedure in seconds
-    private static final double TIME_LIMIT = 300;
+    private static final double TIME_LIMIT = 600;
 
     // 2Cap and 3Cap provide post processing procedures that can be enabled here
     private static final boolean POST_PROCESSING = true;
