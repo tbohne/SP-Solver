@@ -8,6 +8,11 @@ import SP.util.RepresentationUtil;
 
 import java.util.List;
 
+/**
+ * Test class for the branch and bound procedure.
+ *
+ * @author Tim Bohne
+ */
 public class BranchAndBoundTest {
 
     private static final String INSTANCE_PREFIX = "res/instances/";

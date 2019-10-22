@@ -22,8 +22,8 @@ public class BranchAndBound {
     private final int[][] stackingConstraints;
     private final Item[] itemObjects;
     private Solution bestSol;
-    private Map<Solution, Double> computedLowerBounds;
-    private Map<Solution, List<ItemConflict>> listOfConflicts;
+    private final Map<Solution, Double> computedLowerBounds;
+    private final Map<Solution, List<ItemConflict>> listOfConflicts;
 
     /**
      * Constructor
@@ -57,6 +57,13 @@ public class BranchAndBound {
         System.out.println("runtime: " + ((System.currentTimeMillis() - startTime) / 1000) + "s");
     }
 
+    /**
+     * Retrieves the branching item (item to be added next) based on a certain branching rule.
+     * The branching rule that is used here prefers conflicting items.
+     *
+     * @param currSol - current solution
+     * @return branching item
+     */
     private int getBranchingItem(Solution currSol) {
 
         List<Integer> unassignedItems = currSol.getUnassignedItems();
@@ -76,6 +83,11 @@ public class BranchAndBound {
         // int itemToBeAdded = currSol.getAssignedItems().size();
     }
 
+    /**
+     * Updates the best solution with the current one if it's better.
+     *
+     * @param tmpSol - current solution to be checked
+     */
     private void updateBestSolution(Solution tmpSol) {
         if (tmpSol.computeCosts() < this.bestSol.computeCosts()) {
             System.out.println("best sol updated..");
@@ -83,13 +95,31 @@ public class BranchAndBound {
         }
     }
 
+    /**
+     * Saves the conflicts for the specified solution based on the lower bound.
+     *
+     * @param solutionLB - current (incomplete) solution's lower bound
+     * @param currentSol - solution to save conflicts for
+     */
     private void saveConflictsForCurrentLB(Solution solutionLB, Solution currentSol) {
         List<ItemConflict> conflictList = solutionLB.getNumberOfConflictsForEachItem();
         this.listOfConflicts.put(currentSol, conflictList);
     }
 
+    /**
+     * Logs several statistics useful to analyze the B&B procedure.
+     *
+     * @param cuts               - number of overall cuts in the B&B procedure
+     * @param worseLBCuts        - number of "worse-LB-cuts" in the B&B procedure
+     * @param feasibleLBCuts     - number of "feasible-LB-cuts" in the B&B procedure
+     * @param updatedBestSolCuts - number of "updated-best-solution-cuts" in the B&B procedure
+     * @param iterations         - number of iterations in the B&B procedure
+     * @param visitedNodes       - number of already visited nodes
+     * @param unexploredNodes    - number of unexplored nodes
+     */
     private void printStatistics(
-        int cuts, int worseLBCuts, int feasibleLBCuts, int updatedBestSolCuts, int iterations, int visitedNodes, int unexploredNodes
+        int cuts, int worseLBCuts, int feasibleLBCuts, int updatedBestSolCuts,
+        int iterations, int visitedNodes, int unexploredNodes
     ) {
 
         String worseLBCutsPercentage = String.format("%.2f", (worseLBCuts * 1.0 / cuts * 100.0));
@@ -110,6 +140,19 @@ public class BranchAndBound {
     }
 
     /**
+     * Clears the stacks of the specified solution.
+     *
+     * @param sol - solution to clear the stacks for
+     */
+    private void clearSolution(Solution sol) {
+        for (int i = 0; i < sol.getFilledStacks().length; i++) {
+            for (int j = 0; j < sol.getFilledStacks()[0].length; j++) {
+                sol.getFilledStacks()[i][j] = -1;
+            }
+        }
+    }
+
+    /**
      * Branch-and-Bound procedure that generates exact solutions for stacking problems.
      *
      * @param sol - currently considered partial solution
@@ -118,7 +161,7 @@ public class BranchAndBound {
 
         PriorityQueue<Solution> unexploredNodes = new PriorityQueue<>(1, new CombinedComparator());
         unexploredNodes.add(new Solution(sol));
-
+        // variables used to keep track of certain properties during the B&B procedure
         int visitedNodes = 0;
         int cuts = 0;
         int updatedBestSolCuts = 0;
@@ -129,13 +172,16 @@ public class BranchAndBound {
         while (!unexploredNodes.isEmpty()) {
 
             double nodeStartTime = System.currentTimeMillis();
-
-            this.printStatistics(cuts, worseLBCuts, feasibleLBCuts, updatedBestSolCuts, iterations, visitedNodes, unexploredNodes.size());
+            this.printStatistics(
+                cuts, worseLBCuts, feasibleLBCuts, updatedBestSolCuts, iterations, visitedNodes, unexploredNodes.size()
+            );
             iterations++;
             Solution currSol = unexploredNodes.poll();
 
             // the best sol could have been updated since this solution was added - check again
-            if ((this.computedLowerBounds.containsKey(currSol) && this.computedLowerBounds.get(currSol) >= this.bestSol.computeCosts())) {
+            if ((this.computedLowerBounds.containsKey(currSol)
+                && this.computedLowerBounds.get(currSol) >= this.bestSol.computeCosts())
+            ) {
                 cuts++;
                 updatedBestSolCuts++;
                 continue;
@@ -180,19 +226,6 @@ public class BranchAndBound {
                 }
             }
             System.out.println("time for node: " + ((System.currentTimeMillis() - nodeStartTime) / 1000) + "s");
-        }
-    }
-
-    /**
-     * Clears the stacks of the specified solution.
-     *
-     * @param sol - solution to clear the stacks for
-     */
-    private void clearSolution(Solution sol) {
-        for (int i = 0; i < sol.getFilledStacks().length; i++) {
-            for (int j = 0; j < sol.getFilledStacks()[0].length; j++) {
-                sol.getFilledStacks()[i][j] = -1;
-            }
         }
     }
 }
