@@ -1,6 +1,7 @@
 package SP.post_optimization_methods;
 
 import SP.experiments.PostOptimization;
+import SP.representations.PartitionList;
 import SP.representations.Solution;
 
 /**
@@ -57,6 +58,17 @@ public class TabuSearch {
     }
 
     /**
+     * Ignores the best solution's current stack assignments and generates the cheapest stack assignments
+     * for its given partitions (item tuples) by computing a min-cost-perfect-matching.
+     */
+    private void computeBestAssignmentForCurrentPartitions() {
+        PartitionList partitionSol = new PartitionList(this.bestSol);
+        System.out.println("best sol before: " + this.bestSol.computeCosts() + " feasible? " + this.bestSol.isFeasible());
+        this.bestSol = partitionSol.generateSolutionFromPartitions();
+        System.out.println("best sol after: " + this.bestSol.computeCosts() + " feasible? " + this.bestSol.isFeasible());
+    }
+
+    /**
      * Improves a given solution to a stacking problem using a tabu search.
      *
      * @return best solution generated in the tabu search procedure
@@ -64,6 +76,7 @@ public class TabuSearch {
     public Solution solve() {
 
         this.startTime = System.currentTimeMillis();
+        this.computeBestAssignmentForCurrentPartitions();
 
         switch (this.stoppingCriterion) {
             case ITERATIONS:
@@ -78,6 +91,8 @@ public class TabuSearch {
             default:
                 this.solveIterationsSinceLastImprovement(this.neighborhood);
         }
+
+        this.computeBestAssignmentForCurrentPartitions();
         return this.bestSol;
     }
 
