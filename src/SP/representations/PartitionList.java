@@ -33,6 +33,45 @@ public class PartitionList {
     }
 
     /**
+     * Generates an actual solution from the list of item partitions
+     * by assigning the partitions to stacks using a min-cost-perfect-matching.
+     *
+     * @return generated solution
+     */
+    public Solution generateSolutionFromPartitions() {
+
+        BipartiteGraph graph = this.constructBipartiteGraph();
+
+        KuhnMunkresMinimalWeightBipartitePerfectMatching<String, DefaultWeightedEdge> minCostPerfectMatching =
+            new KuhnMunkresMinimalWeightBipartitePerfectMatching<>(
+                graph.getGraph(), graph.getPartitionOne(), graph.getPartitionTwo()
+            );
+
+        Solution newSol = new Solution(this.sol);
+        newSol.clearFilledStacks();
+
+        for (Object o : minCostPerfectMatching.getMatching()) {
+            if (!o.toString().contains("dummy")) {
+                List<Integer> itemList = new ArrayList<>();
+                String listOfItems = o.toString().split(":")[0].replace("(partition", "").replace("[", "").replace("]", "").trim();
+                // empty partition
+                if (listOfItems.isEmpty()) { continue; }
+                for (String item : listOfItems.split(",")) {
+                    itemList.add(Integer.parseInt(item.trim()));
+                }
+                int stack = Integer.parseInt(o.toString().split(":")[1].replace("stack", "").replace(")", "").trim());
+                int level = 0;
+                for (int item : itemList) {
+                    newSol.getFilledStacks()[stack][level++] = item;
+                }
+            }
+        }
+        newSol.lowerItemsThatAreStackedInTheAir();
+        newSol.sortItemsInStacksBasedOnTransitiveStackingConstraints();
+        return newSol;
+    }
+
+    /**
      * Generates the item partition list.
      *
      * @return list of item partitions
@@ -132,42 +171,5 @@ public class PartitionList {
         this.addEdgesBetweenDummyPartitionsAndStacks(graph, dummyPartitions);
         this.addEdgesBetweenItemsAndStackPositions(graph);
         return new BipartiteGraph(partitionOne, partitionTwo, graph);
-    }
-
-    /**
-     * Generates an actual solution from the list of item partitions
-     * by assigning the partitions to stacks using a min-cost-perfect-matching.
-     *
-     * @return generated solution
-     */
-    private Solution generateSolutionFromPartitions() {
-
-        BipartiteGraph graph = this.constructBipartiteGraph();
-
-        KuhnMunkresMinimalWeightBipartitePerfectMatching<String, DefaultWeightedEdge> minCostPerfectMatching =
-            new KuhnMunkresMinimalWeightBipartitePerfectMatching<>(
-                    graph.getGraph(), graph.getPartitionOne(), graph.getPartitionTwo()
-            );
-
-        Solution newSol = new Solution(this.sol);
-        newSol.clearFilledStacks();
-
-        for (Object o : minCostPerfectMatching.getMatching()) {
-            if (!o.toString().contains("dummy")) {
-                List<Integer> itemList = new ArrayList<>();
-                String listOfItems = o.toString().split(":")[0].replace("(partition", "").replace("[", "").replace("]", "").trim();
-                // empty partition
-                if (listOfItems.isEmpty()) { continue; }
-                for (String item : listOfItems.split(",")) {
-                    itemList.add(Integer.parseInt(item.trim()));
-                }
-                int stack = Integer.parseInt(o.toString().split(":")[1].replace("stack", "").replace(")", "").trim());
-                int level = 0;
-                for (int item : itemList) {
-                    newSol.getFilledStacks()[stack][level++] = item;
-                }
-            }
-        }
-        return newSol;
     }
 }
