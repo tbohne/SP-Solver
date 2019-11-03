@@ -75,6 +75,8 @@ if __name__ == '__main__':
             TS_solutions += 1
 
     num_of_instances = int(instance_idx) + 1
-    print("avg percentage deviation TS: " + str(get_avg_percentage_deviation(sum_of_deviations_TS, TS_solutions)))
-    print()
-    print("optimally solved by TS: " + str((optimally_solved / num_of_instances) * 100) + " %")
+
+    f = open("perc_dev_PO.txt", "a")
+    f.write("avg percentage deviation TS: " + str(get_avg_percentage_deviation(sum_of_deviations_TS, TS_solutions)) + "\n")
+    f.write("optimally solved by TS: " + str((optimally_solved / num_of_instances) * 100) + " %\n")
+    f.close()
