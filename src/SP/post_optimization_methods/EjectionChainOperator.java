@@ -1,5 +1,6 @@
 package SP.post_optimization_methods;
 
+import SP.experiments.OwnPath;
 import SP.representations.Solution;
 import SP.util.HeuristicUtil;
 import org.jgrapht.Graph;
@@ -7,10 +8,9 @@ import org.jgrapht.GraphPath;
 import org.jgrapht.alg.shortestpath.BellmanFordShortestPath;
 import org.jgrapht.graph.DefaultDirectedWeightedGraph;
 import org.jgrapht.graph.DefaultWeightedEdge;
+import org.jgrapht.traverse.TopologicalOrderIterator;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * Operator to be used in neighborhood structures for the local search.
@@ -370,6 +370,82 @@ public class EjectionChainOperator {
         }
     }
 
+    private List<String> getTopologicalOrder(DefaultDirectedWeightedGraph<String, DefaultWeightedEdge> graph) {
+        List<String> topologicalOrderList = new ArrayList<>();
+        TopologicalOrderIterator topologicalOrder = new TopologicalOrderIterator<>(graph);
+        while (topologicalOrder.hasNext()) {
+            topologicalOrderList.add(topologicalOrder.next().toString());
+        }
+        return topologicalOrderList;
+    }
+
+    private GraphPath getBestPathNewWay(DefaultDirectedWeightedGraph<String, DefaultWeightedEdge> graph) {
+
+        List<String> topologicalOrder = this.getTopologicalOrder(graph);
+
+        // TODO: dbg
+        if (!topologicalOrder.get(0).equals("source")) {
+            System.out.println("PROBLEM - NO SOURCE VERTEX!");
+            System.exit(0);
+        }
+
+        Map<String, Double> distances = new HashMap<>();
+        // init distances
+        for (String node : topologicalOrder) { distances.put(node, Double.MAX_VALUE); }
+
+        Map<String, String> pred = new HashMap<>();
+
+        for (String node : topologicalOrder) {
+            if (node.contains("source")) {
+                distances.put(node, 0.0);
+            } else {
+                double costs = Double.MAX_VALUE;
+                String predecessor = "";
+                for (String predCandidate : topologicalOrder) {
+                    if (!predCandidate.equals(node)) {
+                        if (graph.containsEdge(predCandidate, node)) {
+                            if (distances.get(predCandidate) + graph.getEdgeWeight(graph.getEdge(predCandidate, node)) < costs) {
+                                costs = distances.get(predCandidate) + graph.getEdgeWeight(graph.getEdge(predCandidate, node));
+                                predecessor = predCandidate;
+                            }
+                        }
+                    }
+                }
+                if (costs < Double.MAX_VALUE) {
+                    distances.put(node, costs);
+                    pred.put(node, predecessor);
+                }
+            }
+        }
+        double minCosts = Double.MAX_VALUE;
+        String lastNodeOfPath = "";
+        for (String node : distances.keySet()) {
+            if (node.contains("stack")) {
+                if (distances.get(node) < minCosts) {
+                    minCosts = distances.get(node);
+                    lastNodeOfPath = node;
+                }
+            }
+        }
+
+        // TODO: dbg
+        if (lastNodeOfPath.isEmpty()) { return new OwnPath(graph); }
+
+        String curr = lastNodeOfPath;
+        List<String> reversedPath = new ArrayList<>();
+        reversedPath.add(curr);
+        while (!curr.equals("source")) {
+            reversedPath.add(pred.get(curr));
+            curr = pred.get(curr);
+            // TODO: dbg
+            if (curr == null) { System.exit(0); }
+        }
+        Collections.reverse(reversedPath);
+        OwnPath bestPath = new OwnPath(graph);
+        bestPath.setPath(reversedPath, graph);
+        return bestPath;
+    }
+
     /**
      * Retrieves the best ejection chain (shortest path from source to any stack).
      *
@@ -379,15 +455,20 @@ public class EjectionChainOperator {
      * @return best ejection chain (biggest cost reduction)
      */
     private GraphPath getBestPath(
-            DefaultDirectedWeightedGraph<String, DefaultWeightedEdge> graph,
-            BellmanFordShortestPath shortestPath, int numberOfStacks
+        DefaultDirectedWeightedGraph<String, DefaultWeightedEdge> graph,
+        BellmanFordShortestPath shortestPath, int numberOfStacks
     ) {
-
         GraphPath bestPath = null;
 
+        // compute shortest path from source to any stack
+        // --> sequence of combined item insertions and removals
+        // --> each shortest path from source to a stack corresponds to one ejection chain
         for (int stack = 0; stack < numberOfStacks; stack++) {
             if (graph.containsVertex("stack" + stack)) {
+
+                // get a shortest path from source vertex to the specified stack
                 GraphPath path = shortestPath.getPath("source", "stack" + stack);
+
                 if (path != null) {
                     if (bestPath != null) {
                         // looking for the shortest path --> biggest reduction
@@ -414,19 +495,33 @@ public class EjectionChainOperator {
 
         List<Integer> stackOrder = getRandomStackOrder(currSol);
 
+        double start = System.currentTimeMillis();
         // construct auxiliary graph
         DefaultDirectedWeightedGraph<String, DefaultWeightedEdge> graph = new DefaultDirectedWeightedGraph<>(DefaultWeightedEdge.class);
         graph.addVertex("source");
         addVerticesForItems(graph, currSol.getSolvedInstance().getItems().length);
         addVerticesForStacks(graph, currSol.getFilledStacks().length, currSol);
         addEdges(graph, stackOrder, currSol.getSolvedInstance().getItems().length, currSol);
+        System.out.println("----------> graph const: " + (System.currentTimeMillis() - start) / 1000.0);
 
-        // compute shortest path from source to any stack
-        // --> sequence of combined item insertions and removals
-        // --> each shortest path from source to a stack corresponds to one ejection chain
+        // creating bellman-ford instance
         BellmanFordShortestPath shortestPath = new BellmanFordShortestPath(graph);
 
-        // return best ejection chain
-        return getBestPath(graph, shortestPath, stackOrder.size());
+        start = System.currentTimeMillis();
+
+        // return best ejection chain:
+        GraphPath bestPath = this.getBestPathNewWay(graph);
+
+        // TODO: further check whether both results always the same
+//        GraphPath bestPath = getBestPath(graph, shortestPath, stackOrder.size());
+//        if (Math.abs(v.getWeight() - bestPath.getWeight()) > 0.0005) {
+//            System.out.println("PROBLEM:");
+//            System.out.println("MY: " + v.getWeight());
+//            System.out.println("BELLMAN-FORD: " + bestPath.getWeight());
+//            System.exit(0);
+//        }
+
+        System.out.println("----------> Bellman-Ford: " + (System.currentTimeMillis() - start) / 1000.0);
+        return bestPath;
     }
 }
