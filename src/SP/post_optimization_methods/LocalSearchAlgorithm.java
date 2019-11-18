@@ -17,11 +17,4 @@ public interface Neighborhood {
      * @return neighboring solution
      */
     Solution getNeighbor(Solution currSol, Solution bestSol);
-
-    /**
-     * Returns the amount of tabu list clear operations.
-     *
-     * @return number of tabu list clears
-     */
-    int getTabuListClears();
 }

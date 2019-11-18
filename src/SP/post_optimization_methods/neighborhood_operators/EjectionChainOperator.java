@@ -1,6 +1,6 @@
 package SP.post_optimization_methods;
 
-import SP.experiments.OwnPath;
+import SP.representations.OwnPath;
 import SP.representations.Solution;
 import SP.util.HeuristicUtil;
 import org.jgrapht.Graph;
@@ -513,13 +513,13 @@ public class EjectionChainOperator {
         GraphPath bestPath = this.getBestPathNewWay(graph);
 
         // TODO: further check whether both results always the same
-//        GraphPath bestPath = getBestPath(graph, shortestPath, stackOrder.size());
-//        if (Math.abs(v.getWeight() - bestPath.getWeight()) > 0.0005) {
-//            System.out.println("PROBLEM:");
-//            System.out.println("MY: " + v.getWeight());
-//            System.out.println("BELLMAN-FORD: " + bestPath.getWeight());
-//            System.exit(0);
-//        }
+        GraphPath bellManBestPath = getBestPath(graph, shortestPath, stackOrder.size());
+        if (Math.abs(bestPath.getWeight() - bellManBestPath.getWeight()) > 0.0005) {
+            System.out.println("PROBLEM:");
+            System.out.println("MY: " + bestPath.getWeight());
+            System.out.println("BELLMAN-FORD: " + bellManBestPath.getWeight());
+            System.exit(0);
+        }
 
         System.out.println("----------> Bellman-Ford: " + (System.currentTimeMillis() - start) / 1000.0);
         return bestPath;
