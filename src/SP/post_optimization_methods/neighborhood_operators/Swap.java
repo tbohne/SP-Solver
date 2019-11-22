@@ -1,4 +1,6 @@
-package SP.post_optimization_methods;
+package SP.post_optimization_methods.neighborhood_operators;
+
+import SP.post_optimization_methods.neighborhood_operators.Shift;
 
 /**
  * Represents a swap operation in the tabu search.

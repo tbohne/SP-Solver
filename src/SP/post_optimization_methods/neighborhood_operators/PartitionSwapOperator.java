@@ -1,4 +1,4 @@
-package SP.post_optimization_methods;
+package SP.post_optimization_methods.neighborhood_operators;
 
 import SP.representations.Solution;
 import SP.util.HeuristicUtil;
@@ -11,7 +11,7 @@ public class PartitionSwapOperator {
     public PartitionSwapOperator() {}
 
     public void performSwaps(
-        List<List<Integer>> partitions,  int numberOfSwaps, Solution currSol, List<Shift> performedShifts, int unsuccessfulNeighborGenerationAttempts
+            List<List<Integer>> partitions, int numberOfSwaps, Solution currSol, List<Shift> performedShifts, int unsuccessfulNeighborGenerationAttempts
     ) {
 
         int swapCnt = 0;

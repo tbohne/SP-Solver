@@ -1,4 +1,4 @@
-package SP.post_optimization_methods;
+package SP.post_optimization_methods.neighborhood_operators;
 
 import SP.representations.Instance;
 import SP.representations.Solution;

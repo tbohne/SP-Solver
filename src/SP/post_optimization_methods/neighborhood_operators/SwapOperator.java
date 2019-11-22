@@ -1,5 +1,7 @@
-package SP.post_optimization_methods;
+package SP.post_optimization_methods.neighborhood_operators;
 
+import SP.post_optimization_methods.neighborhood_operators.Shift;
+import SP.post_optimization_methods.neighborhood_operators.Swap;
 import SP.representations.Item;
 import SP.representations.Solution;
 import SP.representations.StackPosition;

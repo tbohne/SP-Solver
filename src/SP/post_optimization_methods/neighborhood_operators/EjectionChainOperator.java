@@ -1,6 +1,7 @@
-package SP.post_optimization_methods;
+package SP.post_optimization_methods.neighborhood_operators;
 
-import SP.representations.OwnPath;
+import SP.representations.PendingItemStackAssignment;
+import SP.representations.EjectionChainPath;
 import SP.representations.Solution;
 import SP.util.HeuristicUtil;
 import org.jgrapht.Graph;
@@ -429,7 +430,7 @@ public class EjectionChainOperator {
         }
 
         // TODO: dbg
-        if (lastNodeOfPath.isEmpty()) { return new OwnPath(graph); }
+        if (lastNodeOfPath.isEmpty()) { return new EjectionChainPath(graph); }
 
         String curr = lastNodeOfPath;
         List<String> reversedPath = new ArrayList<>();
@@ -441,7 +442,7 @@ public class EjectionChainOperator {
             if (curr == null) { System.exit(0); }
         }
         Collections.reverse(reversedPath);
-        OwnPath bestPath = new OwnPath(graph);
+        EjectionChainPath bestPath = new EjectionChainPath(graph);
         bestPath.setPath(reversedPath, graph);
         return bestPath;
     }
@@ -502,7 +503,8 @@ public class EjectionChainOperator {
         addVerticesForItems(graph, currSol.getSolvedInstance().getItems().length);
         addVerticesForStacks(graph, currSol.getFilledStacks().length, currSol);
         addEdges(graph, stackOrder, currSol.getSolvedInstance().getItems().length, currSol);
-        System.out.println("----------> graph const: " + (System.currentTimeMillis() - start) / 1000.0);
+
+//        System.out.println("----------> graph const: " + (System.currentTimeMillis() - start) / 1000.0);
 
         // creating bellman-ford instance
         BellmanFordShortestPath shortestPath = new BellmanFordShortestPath(graph);
@@ -512,16 +514,16 @@ public class EjectionChainOperator {
         // return best ejection chain:
         GraphPath bestPath = this.getBestPathNewWay(graph);
 
-        // TODO: further check whether both results always the same
-        GraphPath bellManBestPath = getBestPath(graph, shortestPath, stackOrder.size());
-        if (Math.abs(bestPath.getWeight() - bellManBestPath.getWeight()) > 0.0005) {
-            System.out.println("PROBLEM:");
-            System.out.println("MY: " + bestPath.getWeight());
-            System.out.println("BELLMAN-FORD: " + bellManBestPath.getWeight());
-            System.exit(0);
-        }
+//        // TODO: further check whether both results always the same
+//        GraphPath bellManBestPath = getBestPath(graph, shortestPath, stackOrder.size());
+//        if (Math.abs(bestPath.getWeight() - bellManBestPath.getWeight()) > 0.0005) {
+//            System.out.println("PROBLEM:");
+//            System.out.println("MY: " + bestPath.getWeight());
+//            System.out.println("BELLMAN-FORD: " + bellManBestPath.getWeight());
+//            System.exit(0);
+//        }
 
-        System.out.println("----------> Bellman-Ford: " + (System.currentTimeMillis() - start) / 1000.0);
+//        System.out.println("----------> my new algo: " + (System.currentTimeMillis() - start) / 1000.0);
         return bestPath;
     }
 }
