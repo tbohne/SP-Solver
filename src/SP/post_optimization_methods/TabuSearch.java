@@ -1,13 +1,17 @@
 package SP.post_optimization_methods;
 
 import SP.experiments.PostOptimization;
+import SP.post_optimization_methods.neighborhood_operators.EjectionChainOperator;
+import SP.post_optimization_methods.neighborhood_operators.Shift;
+import SP.post_optimization_methods.neighborhood_operators.ShiftOperator;
+import SP.post_optimization_methods.neighborhood_operators.SwapOperator;
 import SP.representations.Solution;
 import SP.util.HeuristicUtil;
 import org.jgrapht.GraphPath;
 
 import java.util.*;
 
-public class VariableTabuSearchTabuSearchNeighborhood implements Neighborhood {
+public class TabuSearch implements LocalSearchAlgorithm {
 
     private int numberOfNeighbors;
     private PostOptimization.ShortTermStrategies shortTermStrategy;
@@ -21,7 +25,7 @@ public class VariableTabuSearchTabuSearchNeighborhood implements Neighborhood {
     private ShiftOperator shiftOperator;
     private SwapOperator swapOperator;
 
-    public VariableTabuSearchTabuSearchNeighborhood(
+    public TabuSearch(
         int numberOfNeighbors, PostOptimization.ShortTermStrategies shortTermStrategy,
         int maxTabuListLength, int unsuccessfulNeighborGenerationAttempts,
         EjectionChainOperator ejectionChainOperator, ShiftOperator shiftOperator, SwapOperator swapOperator
