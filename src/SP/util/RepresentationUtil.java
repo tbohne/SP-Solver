@@ -6,7 +6,7 @@ import SP.constructive_heuristics.TwoCapHeuristic;
 import SP.experiments.CompareSolvers;
 import SP.mip_formulations.BinPackingFormulation;
 import SP.mip_formulations.ThreeIndexFormulation;
-import SP.post_optimization_methods.TabuSearch;
+import SP.post_optimization_methods.LocalSearch;
 
 /**
  * A collection of general utility methods used in the representations.
@@ -79,7 +79,7 @@ public class RepresentationUtil {
             case CONSTRUCTIVE_THREE_CAP:
                 return ThreeCapHeuristic.class.getName();
             case TABU_SEARCH:
-                return TabuSearch.class.getName();
+                return LocalSearch.class.getName();
             case GENERAL_HEURISTIC:
                 return GeneralHeuristic.class.getName();
             default:

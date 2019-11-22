@@ -1,6 +1,6 @@
 package SP.util;
 
-import SP.post_optimization_methods.Shift;
+import SP.post_optimization_methods.neighborhood_operators.Shift;
 import SP.representations.BipartiteGraph;
 import SP.representations.ItemConflict;
 import SP.representations.Solution;

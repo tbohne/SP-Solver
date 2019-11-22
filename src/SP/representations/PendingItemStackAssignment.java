@@ -1,4 +1,4 @@
-package SP.post_optimization_methods;
+package SP.representations;
 
 /**
  * Represents a pending stack assignment that is yet to be performed.
