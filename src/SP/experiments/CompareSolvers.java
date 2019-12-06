@@ -20,7 +20,8 @@ public class CompareSolvers {
         CONSTRUCTIVE_TWO_CAP,
         CONSTRUCTIVE_THREE_CAP,
         TABU_SEARCH,
-        GENERAL_HEURISTIC
+        GENERAL_HEURISTIC,
+        HILL_CLIMBING
     }
 
     private static final String INSTANCE_PREFIX = "res/instances/";
@@ -32,7 +33,9 @@ public class CompareSolvers {
         Solver.MIP_THREEINDEX,
 //        Solver.CONSTRUCTIVE_TWO_CAP
 //        Solver.CONSTRUCTIVE_THREE_CAP
-        Solver.GENERAL_HEURISTIC
+        Solver.GENERAL_HEURISTIC,
+        Solver.HILL_CLIMBING,
+        Solver.TABU_SEARCH
     );
 
     /********************** CPLEX CONFIG **********************/
@@ -44,7 +47,7 @@ public class CompareSolvers {
     /**********************************************************/
 
     // specifies the time limit for the solving procedure in seconds
-    private static final double TIME_LIMIT = 600;
+    private static final double TIME_LIMIT = 1800;
 
     // 2Cap and 3Cap provide post processing procedures that can be enabled here
     private static final boolean POST_PROCESSING = true;
@@ -89,10 +92,12 @@ public class CompareSolvers {
 
         // only using solvers for general b
         } else {
+
             SolverComparison solverComp = new SolverComparison(
                 SOLUTION_PREFIX, INSTANCE_PREFIX, TIME_LIMIT, HIDE_CPLEX_OUTPUT, MIP_EMPHASIS, MIP_TOLERANCE
             );
             solverComp.compareSolvers(SOLVERS);
+
         }
     }
 }

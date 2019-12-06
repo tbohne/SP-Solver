@@ -6,6 +6,7 @@ import SP.io.SolutionWriter;
 import SP.mip_formulations.BinPackingFormulation;
 import SP.mip_formulations.ThreeIndexFormulation;
 import SP.representations.Instance;
+import SP.representations.OptimizableSolution;
 import SP.representations.Solution;
 import SP.util.HeuristicUtil;
 import SP.util.RepresentationUtil;
@@ -90,7 +91,7 @@ public class SolverComparison {
      * @param instance     - instance to be solved
      * @param solutionName - name of the generated solution
      */
-    public void solveWithGeneralHeuristic(Instance instance, String solutionName) {
+    public Solution solveWithGeneralHeuristic(Instance instance, String solutionName) {
         GeneralHeuristic heuristic = new GeneralHeuristic(instance, this.timeLimit);
         Solution sol = heuristic.solve();
         System.out.println("is feasible ? " + sol.isFeasible());
@@ -100,6 +101,7 @@ public class SolverComparison {
         SolutionWriter.writeSolutionAsCSV(
             this.solutionPrefix + "solutions.csv", sol, RepresentationUtil.getAbbreviatedNameOfSolver(CompareSolvers.Solver.GENERAL_HEURISTIC)
         );
+        return sol;
     }
 
     /**
@@ -170,8 +172,17 @@ public class SolverComparison {
                 }
                 if (solversToBeCompared.contains(CompareSolvers.Solver.GENERAL_HEURISTIC)) {
                     System.out.println("solving with general heuristic..");
-                    solveWithGeneralHeuristic(instance, solutionName);
+                    Solution sol = solveWithGeneralHeuristic(instance, solutionName);
                     instance.resetStacks();
+
+                    if (solversToBeCompared.contains(CompareSolvers.Solver.TABU_SEARCH)) {
+                        System.out.println("improving with tabu search..");
+                        PostOptimization.optimizeSolutionWithTabuSearch(sol);
+                    }
+                    if (solversToBeCompared.contains(CompareSolvers.Solver.HILL_CLIMBING)) {
+                        System.out.println("improving with hill climbing..");
+                        PostOptimization.optimizeSolutionWithHillClimbing(sol);
+                    }
                 }
             }
         }
