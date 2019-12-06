@@ -26,7 +26,6 @@ public class HillClimbing implements LocalSearchAlgorithm {
     ) {
         this.numberOfNeighbors = numberOfNeighbors;
         this.shortTermStrategy = shortTermStrategy;
-
         this.ejectionChainOperator = ejectionChainOperator;
         this.shiftOperator = shiftOperator;
         this.swapOperator = swapOperator;
@@ -54,9 +53,7 @@ public class HillClimbing implements LocalSearchAlgorithm {
             neighbor = this.swapOperator.generateSwapNeighbor(currSol, new ArrayList<>(), rand);
             if (!neighbor.isFeasible() || neighbor.computeCosts() > currSol.computeCosts()) {
                 // next operator
-                double start = System.currentTimeMillis();
                 neighbor = this.ejectionChainOperator.generateEjectionChainNeighbor(currSol, new ArrayList<>());
-//                System.out.println("runtime for ejection chain nbr generation: " + (System.currentTimeMillis() - start) / 1000.0);
                 System.out.println("USING EJECTION CHAIN OPERATOR");
             } else {
                 System.out.println("USING SWAP OPERATOR");
