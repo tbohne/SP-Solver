@@ -6,7 +6,9 @@ import SP.constructive_heuristics.TwoCapHeuristic;
 import SP.experiments.CompareSolvers;
 import SP.mip_formulations.BinPackingFormulation;
 import SP.mip_formulations.ThreeIndexFormulation;
+import SP.post_optimization_methods.HillClimbing;
 import SP.post_optimization_methods.LocalSearch;
+import SP.post_optimization_methods.TabuSearch;
 
 /**
  * A collection of general utility methods used in the representations.
@@ -79,7 +81,9 @@ public class RepresentationUtil {
             case CONSTRUCTIVE_THREE_CAP:
                 return ThreeCapHeuristic.class.getName();
             case TABU_SEARCH:
-                return LocalSearch.class.getName();
+                return TabuSearch.class.getName();
+            case HILL_CLIMBING:
+                return HillClimbing.class.getName();
             case GENERAL_HEURISTIC:
                 return GeneralHeuristic.class.getName();
             default:
@@ -107,6 +111,8 @@ public class RepresentationUtil {
                 return "TS";
             case GENERAL_HEURISTIC:
                 return "GH";
+            case HILL_CLIMBING:
+                return "HC";
             default:
                 return "";
         }
