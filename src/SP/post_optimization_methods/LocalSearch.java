@@ -34,7 +34,7 @@ public class LocalSearch {
      * @param numberOfNonImprovingIterations - number of non improving iterations before termination
      * @param numberOfIterations             - number of iterations before termination
      * @param stoppingCriterion              - stopping criterion to be used
-     * @param localSearchAlgorithm                   - neighborhood structure to be used in the local search
+     * @param localSearchAlgorithm           - neighborhood structure to be used in the local search
      */
     public LocalSearch(
         Solution initialSolution, double timeLimit, double optimalObjectiveValue,
@@ -48,7 +48,6 @@ public class LocalSearch {
         this.numberOfNonImprovingIterations = numberOfNonImprovingIterations;
         this.numberOfIterations = numberOfIterations;
         this.startTime = System.currentTimeMillis();
-        this.timeLimit = 0;
         this.optimalObjectiveValue = optimalObjectiveValue;
         this.timeLimit = timeLimit;
         this.localSearchAlgorithm = localSearchAlgorithm;

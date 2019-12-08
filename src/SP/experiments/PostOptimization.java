@@ -52,6 +52,7 @@ public class PostOptimization {
     private static final int NUMBER_OF_ITERATIONS = 500;
     private static final int NUMBER_OF_TABU_LIST_CLEARS = 10;
     private static final int NUMBER_OF_NON_IMPROVING_ITERATIONS = 500;
+    private static final double TIME_LIMIT = 1800;
 
     // maximum number of swaps to be performed in a single application of the swap operator
     private static final int MAX_NUMBER_OF_SWAPS = 4;
@@ -74,7 +75,7 @@ public class PostOptimization {
         );
 
         LocalSearch localSearch = new LocalSearch(
-            sol, 0, Double.MIN_VALUE,
+            sol, TIME_LIMIT, Double.MIN_VALUE,
             NUMBER_OF_NON_IMPROVING_ITERATIONS, NUMBER_OF_ITERATIONS, STOPPING_CRITERION, tabuSearch
         );
 
@@ -105,7 +106,7 @@ public class PostOptimization {
         );
 
         LocalSearch localSearch = new LocalSearch(
-            sol, 0, Double.MIN_VALUE,
+            sol, TIME_LIMIT, Double.MIN_VALUE,
             NUMBER_OF_NON_IMPROVING_ITERATIONS, NUMBER_OF_ITERATIONS, STOPPING_CRITERION, hillClimbing
         );
 
