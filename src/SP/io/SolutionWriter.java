@@ -34,7 +34,7 @@ public class SolutionWriter {
             BufferedWriter bw = new BufferedWriter(fw);
 
             if (newFile) {
-                bw.write("instance,solver,time,val,imp(abs), imp(%)\n");
+                bw.write("instance,solver,time(s),val,imp(abs),imp(%),time_to_best(s),iterations_to_best,total_iterations\n");
             }
             bw.write(nameOfInstance.replace("instances/slp_instance_", "")
                 + "," + "LB" + "," + "-" + "," + lowerBound + "\n");
@@ -90,7 +90,11 @@ public class SolutionWriter {
         }
     }
 
-    public static void writeImpAsCSV(String filename, Solution impSol, String postOptimizationMethod, Solution initialSol) {
+    public static void writeImpAsCSV(
+        String filename, Solution impSol, String postOptimizationMethod, Solution initialSol,
+        double timeToBestSolution, int iterationsToBestSolution, int totalNumberOfPerformedIterations
+    ) {
+
         try {
             File file = new File(filename);
             boolean newFile = false;
@@ -101,7 +105,7 @@ public class SolutionWriter {
             FileWriter fw = new FileWriter(file, true);
             BufferedWriter bw = new BufferedWriter(fw);
             if (newFile) {
-                bw.write("instance,solver,time,val,imp(abs), imp(%)\n");
+                bw.write("instance,solver,time(s),val,imp(abs),imp(%),time_to_best(s),iterations_to_best,total_iterations\n");
             }
 
             String solver;
@@ -119,7 +123,8 @@ public class SolutionWriter {
 
             bw.write(impSol.getNameOfSolvedInstance().replace("instances/slp_instance_", "")
                 + "," + solver + "," + totalRuntime + "," + impSol.computeCosts()
-                + "," + absoluteImprovement + "," + relativeImprovement + "\n");
+                + "," + absoluteImprovement + "," + relativeImprovement + "," + timeToBestSolution + ","
+                + iterationsToBestSolution + "," + totalNumberOfPerformedIterations + "\n");
 
             bw.close();
             fw.close();
@@ -137,7 +142,11 @@ public class SolutionWriter {
      * @param sol      - original solution
      * @param impSol   - improved solution (post optimization result)
      */
-    public static void writeOptAndImpAsCSV(String filename, OptimizableSolution sol, Solution impSol, String postOptimizationMethod) {
+    public static void writeOptAndImpAsCSV(
+        String filename, OptimizableSolution sol, Solution impSol, String postOptimizationMethod,
+        double timeToBestSolution, int iterationsToBestSolution, int totalNumberOfPerformedIterations
+    ) {
+
         try {
             File file = new File(filename);
             boolean newFile = false;
@@ -148,13 +157,13 @@ public class SolutionWriter {
             FileWriter fw = new FileWriter(file, true);
             BufferedWriter bw = new BufferedWriter(fw);
             if (newFile) {
-                bw.write("instance,solver,time,val\n");
+                bw.write("instance,solver,time(s),val,imp(abs),imp(%),time_to_best(s),iterations_to_best,total_iterations\n");
             }
 
             bw.write(impSol.getNameOfSolvedInstance().replace("instances/slp_instance_", "")
                 + "," + "OPT" + "," + sol.getRuntimeForOptimalSolution() + "," + sol.getOptimalObjectiveValue() + "\n");
 
-            writeImpAsCSV(filename, impSol, postOptimizationMethod, sol.getSol());
+            writeImpAsCSV(filename, impSol, postOptimizationMethod, sol.getSol(), timeToBestSolution, iterationsToBestSolution, totalNumberOfPerformedIterations);
 
             bw.close();
             fw.close();
@@ -183,7 +192,7 @@ public class SolutionWriter {
             BufferedWriter bw = new BufferedWriter(fw);
 
             if (newFile) {
-                bw.write("instance,solver,time,val,imp(abs), imp(%)\n");
+                bw.write("instance,solver,time(s),val,imp(abs),imp(%),time_to_best(s),iterations_to_best,total_iterations\n");
             }
             if (sol.isFeasible()) {
                 bw.write(
