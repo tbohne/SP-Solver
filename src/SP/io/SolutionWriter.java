@@ -34,7 +34,7 @@ public class SolutionWriter {
             BufferedWriter bw = new BufferedWriter(fw);
 
             if (newFile) {
-                bw.write("instance,solver,time,val\n");
+                bw.write("instance,solver,time,val,imp(abs), imp(%)\n");
             }
             bw.write(nameOfInstance.replace("instances/slp_instance_", "")
                 + "," + "LB" + "," + "-" + "," + lowerBound + "\n");
@@ -90,7 +90,7 @@ public class SolutionWriter {
         }
     }
 
-    public static void writeImpAsCSV(String filename, Solution impSol, String postOptimizationMethod) {
+    public static void writeImpAsCSV(String filename, Solution impSol, String postOptimizationMethod, Solution initialSol) {
         try {
             File file = new File(filename);
             boolean newFile = false;
@@ -101,7 +101,7 @@ public class SolutionWriter {
             FileWriter fw = new FileWriter(file, true);
             BufferedWriter bw = new BufferedWriter(fw);
             if (newFile) {
-                bw.write("instance,solver,time,val\n");
+                bw.write("instance,solver,time,val,imp(abs), imp(%)\n");
             }
 
             String solver;
@@ -114,9 +114,12 @@ public class SolutionWriter {
             }
 
             double totalRuntime = (double)Math.round((impSol.getTimeToSolveAsDouble() + impSol.getTimeToSolveAsDouble()) * 100) / 100;
+            double absoluteImprovement = Math.round(initialSol.computeCosts() - impSol.computeCosts());
+            double relativeImprovement = Math.round((initialSol.computeCosts() - impSol.computeCosts()) / initialSol.computeCosts() * 100.0);
 
             bw.write(impSol.getNameOfSolvedInstance().replace("instances/slp_instance_", "")
-                + "," + solver + "," + totalRuntime + "," + impSol.computeCosts() + "\n");
+                + "," + solver + "," + totalRuntime + "," + impSol.computeCosts()
+                + "," + absoluteImprovement + "," + relativeImprovement + "\n");
 
             bw.close();
             fw.close();
@@ -151,7 +154,7 @@ public class SolutionWriter {
             bw.write(impSol.getNameOfSolvedInstance().replace("instances/slp_instance_", "")
                 + "," + "OPT" + "," + sol.getRuntimeForOptimalSolution() + "," + sol.getOptimalObjectiveValue() + "\n");
 
-            writeImpAsCSV(filename, impSol, postOptimizationMethod);
+            writeImpAsCSV(filename, impSol, postOptimizationMethod, sol.getSol());
 
             bw.close();
             fw.close();
@@ -180,7 +183,7 @@ public class SolutionWriter {
             BufferedWriter bw = new BufferedWriter(fw);
 
             if (newFile) {
-                bw.write("instance,solver,time,val\n");
+                bw.write("instance,solver,time,val,imp(abs), imp(%)\n");
             }
             if (sol.isFeasible()) {
                 bw.write(
