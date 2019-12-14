@@ -90,7 +90,8 @@ public class PostOptimization {
         );
 
         SolutionWriter.writeImpAsCSV(
-            SOLUTION_PREFIX + "solutions.csv", impSol, RepresentationUtil.getAbbreviatedNameOfSolver(CompareSolvers.Solver.TABU_SEARCH)
+            SOLUTION_PREFIX + "solutions.csv", impSol, RepresentationUtil.getAbbreviatedNameOfSolver(CompareSolvers.Solver.TABU_SEARCH), sol,
+                localSearch.getTimeToBestSolution(), localSearch.getIterationsToBestSolution(), localSearch.getTotalNumOfPerformedIterations()
         );
     }
 
@@ -121,7 +122,8 @@ public class PostOptimization {
         );
 
         SolutionWriter.writeImpAsCSV(
-            SOLUTION_PREFIX + "solutions.csv", impSol, RepresentationUtil.getAbbreviatedNameOfSolver(CompareSolvers.Solver.HILL_CLIMBING)
+            SOLUTION_PREFIX + "solutions.csv", impSol, RepresentationUtil.getAbbreviatedNameOfSolver(CompareSolvers.Solver.HILL_CLIMBING), sol,
+                localSearch.getTimeToBestSolution(), localSearch.getIterationsToBestSolution(), localSearch.getTotalNumOfPerformedIterations()
         );
 
         SolutionWriter.writePostOptimizationConfig(
@@ -184,7 +186,8 @@ public class PostOptimization {
                 RepresentationUtil.getAbbreviatedNameOfSolver(SOLVER_OF_INITIAL_SOLUTION)
             );
             SolutionWriter.writeOptAndImpAsCSV(
-                SOLUTION_PREFIX + "solutions_imp.csv", sol, impSol, RepresentationUtil.getAbbreviatedNameOfSolver(CompareSolvers.Solver.TABU_SEARCH)
+                SOLUTION_PREFIX + "solutions_imp.csv", sol, impSol, RepresentationUtil.getAbbreviatedNameOfSolver(CompareSolvers.Solver.TABU_SEARCH),
+                ts.getTimeToBestSolution(), ts.getIterationsToBestSolution(), ts.getTotalNumOfPerformedIterations()
             );
 
             SolutionWriter.writePostOptimizationConfig(

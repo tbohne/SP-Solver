@@ -22,6 +22,8 @@ public class LocalSearch {
     private final LocalSearchAlgorithm localSearchAlgorithm;
 
     private int iterationOfLastImprovement;
+    private double timeToBestSolution;
+    private int totalNumOfPerformedIterations;
     private final int numberOfNonImprovingIterations;
     private final int numberOfIterations;
 
@@ -51,6 +53,20 @@ public class LocalSearch {
         this.optimalObjectiveValue = optimalObjectiveValue;
         this.timeLimit = timeLimit;
         this.localSearchAlgorithm = localSearchAlgorithm;
+        this.timeToBestSolution = 0.0;
+        this.totalNumOfPerformedIterations = 0;
+    }
+
+    public double getTimeToBestSolution() {
+        return this.timeToBestSolution;
+    }
+
+    public int getIterationsToBestSolution() {
+        return this.iterationOfLastImprovement;
+    }
+
+    public int getTotalNumOfPerformedIterations() {
+        return totalNumOfPerformedIterations;
     }
 
     /**
@@ -104,7 +120,7 @@ public class LocalSearch {
      * Updates the current solution with the best neighbor.
      * Additionally, the best solution gets updated if a new best solution is found.
      *
-     * @param iteration    - current iteration
+     * @param iteration            - current iteration
      * @param localSearchAlgorithm - neighborhood structure used to generate neighboring solutions
      */
     private void updateCurrentSolution(int iteration, LocalSearchAlgorithm localSearchAlgorithm) {
@@ -112,6 +128,7 @@ public class LocalSearch {
         if (this.currSol.computeCosts() < this.bestSol.computeCosts()) {
             this.bestSol = this.currSol;
             this.iterationOfLastImprovement = iteration;
+            this.timeToBestSolution = (System.currentTimeMillis() - this.startTime) / 1000;
         }
     }
 
@@ -134,12 +151,12 @@ public class LocalSearch {
      * @param localSearchAlgorithm - neighborhood structure used to generate neighboring solutions
      */
     private void solveIterationsSinceLastImprovement(LocalSearchAlgorithm localSearchAlgorithm) {
-        int iteration = 0;
-        while (Math.abs(this.iterationOfLastImprovement - iteration) < this.numberOfNonImprovingIterations) {
-            System.out.println("non improving iterations: " + Math.abs(this.iterationOfLastImprovement - iteration));
+        this.totalNumOfPerformedIterations = 0;
+        while (Math.abs(this.iterationOfLastImprovement - this.totalNumOfPerformedIterations) < this.numberOfNonImprovingIterations) {
+            System.out.println("non improving iterations: " + Math.abs(this.iterationOfLastImprovement - this.totalNumOfPerformedIterations));
             if (this.timeLimit != 0 && (System.currentTimeMillis() - this.startTime) / 1000 > this.timeLimit) { break; }
             if (this.bestSol.computeCosts() == this.optimalObjectiveValue) { break; }
-            this.updateCurrentSolution(iteration++, localSearchAlgorithm);
+            this.updateCurrentSolution(this.totalNumOfPerformedIterations++, localSearchAlgorithm);
         }
     }
 }
