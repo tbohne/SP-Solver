@@ -77,7 +77,7 @@ public class SolverComparison3Cap extends SolverComparison {
                     System.out.println("working on: " + instanceName);
                     String solutionName = instanceName.replace("instance", "sol");
 
-                    computeLowerBound(instance, solutionName);
+                    computeLowerBound(instance, solutionName, this.timeLimit);
 
                     if (solversToBeCompared.contains(CompareSolvers.Solver.MIP_BINPACKING)) {
                         System.out.println("solving with BinP..");

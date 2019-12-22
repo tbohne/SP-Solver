@@ -59,11 +59,11 @@ public class SolverComparison {
      * @param instance     - instance to compute a LB for
      * @param solutionName - name of the generated solution
      */
-    public void computeLowerBound(Instance instance, String solutionName) {
+    public void computeLowerBound(Instance instance, String solutionName, double timeLimit) {
         LowerBoundsCalculator lbc = new LowerBoundsCalculator(instance);
         double lowerBound = lbc.computeLowerBound();
         SolutionWriter.writeLowerBound(this.solutionPrefix + solutionName + ".txt", lowerBound);
-        SolutionWriter.writeLowerBoundAsCSV(this.solutionPrefix + "solutions.csv", lowerBound, instance.getName());
+        SolutionWriter.writeLowerBoundAsCSV(this.solutionPrefix + "solutions.csv", lowerBound, instance.getName(), timeLimit);
     }
 
     /**
@@ -129,11 +129,11 @@ public class SolverComparison {
      *
      * @param instanceFile - file to load the instance from
      */
-    public void prepareRuntimeMeasurementByPreLoadingAllClasses(File instanceFile) {
+    public void prepareRuntimeMeasurementByPreLoadingAllClasses(File instanceFile, double timeLimit) {
         String instanceName = instanceFile.toString().replace("res/instances/", "").replace(".txt", "");
         Instance instance = InstanceReader.readInstance(this.instancePrefix + instanceName + ".txt");
         String solutionName = instanceName.replace("instance", "sol");
-        computeLowerBound(instance, solutionName);
+        computeLowerBound(instance, solutionName, timeLimit);
     }
 
     /**
@@ -158,7 +158,7 @@ public class SolverComparison {
                 Instance instance = InstanceReader.readInstance(this.instancePrefix + instanceName + ".txt");
                 String solutionName = instanceName.replace("instance", "sol");
 
-                computeLowerBound(instance, solutionName);
+                computeLowerBound(instance, solutionName, this.timeLimit);
 
                 if (solversToBeCompared.contains(CompareSolvers.Solver.MIP_BINPACKING)) {
                     System.out.println("solving with BinP..");

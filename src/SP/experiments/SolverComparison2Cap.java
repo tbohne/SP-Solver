@@ -62,7 +62,7 @@ class SolverComparison2Cap extends SolverComparison {
                     Instance instance = InstanceReader.readInstance(this.instancePrefix + instanceName + ".txt");
                     String solutionName = instanceName.replace("instance", "sol");
 
-                    computeLowerBound(instance, solutionName);
+                    computeLowerBound(instance, solutionName, this.timeLimit);
 
                     if (solversToBeCompared.contains(CompareSolvers.Solver.MIP_BINPACKING)) {
                         System.out.println("solving with BinP..");

@@ -21,7 +21,7 @@ public class SolutionWriter {
      * @param lowerBound     - LB to be written to the file
      * @param nameOfInstance - name of the instance the LB was computed for
      */
-    public static void writeLowerBoundAsCSV(String filename, double lowerBound, String nameOfInstance) {
+    public static void writeLowerBoundAsCSV(String filename, double lowerBound, String nameOfInstance, double timeLimit) {
         try {
             File file = new File(filename);
             boolean newFile = false;
@@ -34,10 +34,10 @@ public class SolutionWriter {
             BufferedWriter bw = new BufferedWriter(fw);
 
             if (newFile) {
-                bw.write("instance,solver,time(s),val,imp(abs),imp(%),time_to_best(s),iterations_to_best,total_iterations\n");
+                bw.write("instance,solver,time_limit,time,val,imp(abs),imp(%),time_to_best(s),iterations_to_best,total_iterations\n");
             }
             bw.write(nameOfInstance.replace("instances/slp_instance_", "")
-                + "," + "LB" + "," + "-" + "," + lowerBound + "\n");
+                + "," + "LB" + "," + timeLimit + ",-," + lowerBound + ",-,-,-,-,-" + "\n");
 
             bw.close();
             fw.close();
@@ -105,7 +105,7 @@ public class SolutionWriter {
             FileWriter fw = new FileWriter(file, true);
             BufferedWriter bw = new BufferedWriter(fw);
             if (newFile) {
-                bw.write("instance,solver,time(s),val,imp(abs),imp(%),time_to_best(s),iterations_to_best,total_iterations\n");
+                bw.write("instance,solver,time_limit,time,val,imp(abs),imp(%),time_to_best(s),iterations_to_best,total_iterations\n");
             }
 
             String solver;
@@ -122,7 +122,7 @@ public class SolutionWriter {
             double relativeImprovement = Math.round((initialSol.computeCosts() - impSol.computeCosts()) / initialSol.computeCosts() * 100.0);
 
             bw.write(impSol.getNameOfSolvedInstance().replace("instances/slp_instance_", "")
-                + "," + solver + "," + totalRuntime + "," + impSol.computeCosts()
+                + "," + solver + "," + initialSol.getTimeLimit() + "," + totalRuntime + "," + impSol.computeCosts()
                 + "," + absoluteImprovement + "," + relativeImprovement + "," + timeToBestSolution + ","
                 + iterationsToBestSolution + "," + totalNumberOfPerformedIterations + "\n");
 
@@ -157,11 +157,11 @@ public class SolutionWriter {
             FileWriter fw = new FileWriter(file, true);
             BufferedWriter bw = new BufferedWriter(fw);
             if (newFile) {
-                bw.write("instance,solver,time(s),val,imp(abs),imp(%),time_to_best(s),iterations_to_best,total_iterations\n");
+                bw.write("instance,solver,time_limit,time,val,imp(abs),imp(%),time_to_best(s),iterations_to_best,total_iterations\n");
             }
 
             bw.write(impSol.getNameOfSolvedInstance().replace("instances/slp_instance_", "")
-                + "," + "OPT" + "," + sol.getRuntimeForOptimalSolution() + "," + sol.getOptimalObjectiveValue() + "\n");
+                + "," + "OPT" + "," + sol.getSol().getTimeLimit() + "," + sol.getRuntimeForOptimalSolution() + "," + sol.getOptimalObjectiveValue() + "\n");
 
             writeImpAsCSV(filename, impSol, postOptimizationMethod, sol.getSol(), timeToBestSolution, iterationsToBestSolution, totalNumberOfPerformedIterations);
 
@@ -192,12 +192,12 @@ public class SolutionWriter {
             BufferedWriter bw = new BufferedWriter(fw);
 
             if (newFile) {
-                bw.write("instance,solver,time(s),val,imp(abs),imp(%),time_to_best(s),iterations_to_best,total_iterations\n");
+                bw.write("instance,solver,time_limit,time,val,imp(abs),imp(%),time_to_best(s),iterations_to_best,total_iterations\n");
             }
             if (sol.isFeasible()) {
                 bw.write(
                     sol.getNameOfSolvedInstance().replace("instances/slp_instance_", "")
-                    + "," + solver + "," + sol.getTimeToSolve() + "," + sol.computeCosts() + "\n"
+                    + "," + solver + "," + sol.getTimeLimit() + "," + sol.getTimeToSolve() + "," + sol.computeCosts() + "\n"
                 );
             }
 
