@@ -319,7 +319,7 @@ public class EjectionChainOperator {
      * @param currSol         - current solution
      * @param pending         - pending stack assignment
      * @param performedShifts - list that keeps track of the performed shifts
-     * @return pensing stack assignment (may be same as before)
+     * @return pending stack assignment (may be same as before)
      */
     private PendingItemStackAssignment applyStackToItemEdge(
         String lhs, String rhs, Solution currSol, PendingItemStackAssignment pending, List<Shift> performedShifts
@@ -371,6 +371,12 @@ public class EjectionChainOperator {
         }
     }
 
+    /**
+     * Retrieves a topological order for the vertices of the given graph.
+     *
+     * @param graph - graph to determine a topological order for
+     * @return topological order for the graph's vertices
+     */
     private List<String> getTopologicalOrder(DefaultDirectedWeightedGraph<String, DefaultWeightedEdge> graph) {
         List<String> topologicalOrderList = new ArrayList<>();
         TopologicalOrderIterator topologicalOrder = new TopologicalOrderIterator<>(graph);
@@ -380,22 +386,18 @@ public class EjectionChainOperator {
         return topologicalOrderList;
     }
 
-    private GraphPath getBestPathNewWay(DefaultDirectedWeightedGraph<String, DefaultWeightedEdge> graph) {
-
-        List<String> topologicalOrder = this.getTopologicalOrder(graph);
-
-        // TODO: dbg
-        if (!topologicalOrder.get(0).equals("source")) {
-            System.out.println("PROBLEM - NO SOURCE VERTEX!");
-            System.exit(0);
-        }
-
-        Map<String, Double> distances = new HashMap<>();
-        // init distances
-        for (String node : topologicalOrder) { distances.put(node, Double.MAX_VALUE); }
-
-        Map<String, String> pred = new HashMap<>();
-
+    /**
+     * Computes distances and predecessors for each node.
+     *
+     * @param topologicalOrder - topological order to loop through
+     * @param distances        - map to store the distances in
+     * @param graph            - graph the distances are based on
+     * @param pred             - map to store the predecessors in
+     */
+    private void computeDistAndPred(
+        List<String> topologicalOrder, Map<String, Double> distances,
+        DefaultDirectedWeightedGraph<String, DefaultWeightedEdge> graph, Map<String, String> pred
+    ) {
         for (String node : topologicalOrder) {
             if (node.contains("source")) {
                 distances.put(node, 0.0);
@@ -418,6 +420,46 @@ public class EjectionChainOperator {
                 }
             }
         }
+    }
+
+    /**
+     * Retrieves the reversed path.
+     *
+     * @param lastNodeOfPath - specifies the last node of the path
+     * @param pred           - map containing each node's predecessor
+     * @return reversed path
+     */
+    private List<String> getReversedPath(String lastNodeOfPath, Map<String, String> pred) {
+        String curr = lastNodeOfPath;
+        List<String> reversedPath = new ArrayList<>();
+        reversedPath.add(curr);
+        while (!curr.equals("source")) {
+            reversedPath.add(pred.get(curr));
+            curr = pred.get(curr);
+        }
+        return reversedPath;
+    }
+
+    /**
+     * Retrieves the best ejection chain (shortest path from source to any stack).
+     *
+     * @param graph - graph containing the paths
+     * @return best ejection chain (biggest cost reduction)
+     */
+    private GraphPath getBestPath(DefaultDirectedWeightedGraph<String, DefaultWeightedEdge> graph) {
+
+        List<String> topologicalOrder = this.getTopologicalOrder(graph);
+        if (!topologicalOrder.get(0).equals("source")) {
+            System.out.println("PROBLEM - NO SOURCE VERTEX!");
+            System.exit(0);
+        }
+
+        Map<String, Double> distances = new HashMap<>();
+        // init distances
+        for (String node : topologicalOrder) { distances.put(node, Double.MAX_VALUE); }
+        Map<String, String> pred = new HashMap<>();
+        this.computeDistAndPred(topologicalOrder, distances, graph, pred);
+
         double minCosts = Double.MAX_VALUE;
         String lastNodeOfPath = "";
         for (String node : distances.keySet()) {
@@ -429,18 +471,8 @@ public class EjectionChainOperator {
             }
         }
 
-        // TODO: dbg
         if (lastNodeOfPath.isEmpty()) { return new EjectionChainPath(graph); }
-
-        String curr = lastNodeOfPath;
-        List<String> reversedPath = new ArrayList<>();
-        reversedPath.add(curr);
-        while (!curr.equals("source")) {
-            reversedPath.add(pred.get(curr));
-            curr = pred.get(curr);
-            // TODO: dbg
-            if (curr == null) { System.exit(0); }
-        }
+        List<String> reversedPath = this.getReversedPath(lastNodeOfPath, pred);
         Collections.reverse(reversedPath);
         EjectionChainPath bestPath = new EjectionChainPath(graph);
         bestPath.setPath(reversedPath, graph);
@@ -455,7 +487,7 @@ public class EjectionChainOperator {
      * @param numberOfStacks - number of stacks available in the storage area
      * @return best ejection chain (biggest cost reduction)
      */
-    private GraphPath getBestPath(
+    private GraphPath getBestPathUsingBellmanFord(
         DefaultDirectedWeightedGraph<String, DefaultWeightedEdge> graph,
         BellmanFordShortestPath shortestPath, int numberOfStacks
     ) {
@@ -495,8 +527,6 @@ public class EjectionChainOperator {
     private GraphPath constructEjectionChain(Solution currSol) {
 
         List<Integer> stackOrder = getRandomStackOrder(currSol);
-
-        double start = System.currentTimeMillis();
         // construct auxiliary graph
         DefaultDirectedWeightedGraph<String, DefaultWeightedEdge> graph = new DefaultDirectedWeightedGraph<>(DefaultWeightedEdge.class);
         graph.addVertex("source");
@@ -504,26 +534,13 @@ public class EjectionChainOperator {
         addVerticesForStacks(graph, currSol.getFilledStacks().length, currSol);
         addEdges(graph, stackOrder, currSol.getSolvedInstance().getItems().length, currSol);
 
-//        System.out.println("----------> graph const: " + (System.currentTimeMillis() - start) / 1000.0);
-
         // creating bellman-ford instance
-        BellmanFordShortestPath shortestPath = new BellmanFordShortestPath(graph);
-
-        start = System.currentTimeMillis();
+//        BellmanFordShortestPath shortestPath = new BellmanFordShortestPath(graph);
+//        GraphPath bellManBestPath = getBestPathUsingBellmanFord(graph, shortestPath, stackOrder.size());
 
         // return best ejection chain:
-        GraphPath bestPath = this.getBestPathNewWay(graph);
+        GraphPath bestPath = this.getBestPath(graph);
 
-//        // TODO: further check whether both results always the same
-//        GraphPath bellManBestPath = getBestPath(graph, shortestPath, stackOrder.size());
-//        if (Math.abs(bestPath.getWeight() - bellManBestPath.getWeight()) > 0.0005) {
-//            System.out.println("PROBLEM:");
-//            System.out.println("MY: " + bestPath.getWeight());
-//            System.out.println("BELLMAN-FORD: " + bellManBestPath.getWeight());
-//            System.exit(0);
-//        }
-
-//        System.out.println("----------> my new algo: " + (System.currentTimeMillis() - start) / 1000.0);
         return bestPath;
     }
 }
