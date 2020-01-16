@@ -78,9 +78,10 @@ public class ShiftOperator {
         int failCnt = 0;
         Instance instance = neighbor.getSolvedInstance();
 
-        while (!HeuristicUtil.itemCompatibleWithStack(instance.getCosts(), item, shiftTarget.getStackIdx()) ||
-            !HeuristicUtil.itemCompatibleWithAlreadyAssignedItems(
-                item, neighbor.getFilledStacks()[shiftTarget.getStackIdx()],instance.getItemObjects(), instance.getStackingConstraints()
+        while (!HeuristicUtil.itemCompatibleWithStack(instance.getCosts(), item, shiftTarget.getStackIdx())
+            || !HeuristicUtil.itemCompatibleWithAlreadyAssignedItems(
+                item, neighbor.getFilledStacks()[shiftTarget.getStackIdx()],
+                instance.getItemObjects(), instance.getStackingConstraints()
             )
         ) {
             if (failCnt == this.unsuccessfulNbrGenerationAttempts) {

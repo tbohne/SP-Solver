@@ -57,27 +57,31 @@ public class LocalSearch {
         this.totalNumOfPerformedIterations = 0;
     }
 
+    /**
+     * Returns the runtime to find the best solution.
+     *
+     * @return runtime to best solution
+     */
     public double getTimeToBestSolution() {
         return this.timeToBestSolution;
     }
 
+    /**
+     * Returns the number of iterations to find the best solution.
+     *
+     * @return number of iteration to best solution
+     */
     public int getIterationsToBestSolution() {
         return this.iterationOfLastImprovement;
     }
 
+    /**
+     * Returns the total number of performed iterations.
+     *
+     * @return total number of performed iterations
+     */
     public int getTotalNumOfPerformedIterations() {
         return totalNumOfPerformedIterations;
-    }
-
-    /**
-     * Ignores the best solution's current stack assignments and generates the cheapest stack assignments
-     * for its given partitions (item tuples) by computing a min-cost-perfect-matching.
-     */
-    private void computeBestAssignmentForCurrentPartitions() {
-        PartitionList partitionSol = new PartitionList(this.bestSol);
-        System.out.println("best sol before: " + this.bestSol.computeCosts() + " feasible? " + this.bestSol.isFeasible());
-        this.bestSol = partitionSol.generateSolutionFromPartitions();
-        System.out.println("best sol after: " + this.bestSol.computeCosts() + " feasible? " + this.bestSol.isFeasible());
     }
 
     /**
@@ -103,6 +107,17 @@ public class LocalSearch {
 
         this.computeBestAssignmentForCurrentPartitions();
         return this.bestSol;
+    }
+
+    /**
+     * Ignores the best solution's current stack assignments and generates the cheapest stack assignments
+     * for its given partitions (item tuples) by computing a min-cost-perfect-matching.
+     */
+    private void computeBestAssignmentForCurrentPartitions() {
+        PartitionList partitionSol = new PartitionList(this.bestSol);
+        System.out.println("best sol before final minCostPM: " + this.bestSol.computeCosts() + " feasible? " + this.bestSol.isFeasible());
+        this.bestSol = partitionSol.generateSolutionFromPartitions();
+        System.out.println("best sol after final minCostPM: " + this.bestSol.computeCosts() + " feasible? " + this.bestSol.isFeasible());
     }
 
     /**
@@ -154,6 +169,7 @@ public class LocalSearch {
         this.totalNumOfPerformedIterations = 0;
         while (Math.abs(this.iterationOfLastImprovement - this.totalNumOfPerformedIterations) < this.numberOfNonImprovingIterations) {
             System.out.println("non improving iterations: " + Math.abs(this.iterationOfLastImprovement - this.totalNumOfPerformedIterations));
+            System.out.println("time limit: " + this.timeLimit + " curr: " + (System.currentTimeMillis() - this.startTime) / 1000);
             if (this.timeLimit != 0 && (System.currentTimeMillis() - this.startTime) / 1000 > this.timeLimit) { break; }
             if (this.bestSol.computeCosts() == this.optimalObjectiveValue) { break; }
             this.updateCurrentSolution(this.totalNumOfPerformedIterations++, localSearchAlgorithm);

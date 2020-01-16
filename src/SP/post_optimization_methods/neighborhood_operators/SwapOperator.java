@@ -1,7 +1,5 @@
 package SP.post_optimization_methods.neighborhood_operators;
 
-import SP.post_optimization_methods.neighborhood_operators.Shift;
-import SP.post_optimization_methods.neighborhood_operators.Swap;
 import SP.representations.Item;
 import SP.representations.Solution;
 import SP.representations.StackPosition;
@@ -12,7 +10,7 @@ import java.util.List;
 
 /**
  * Operator to be used in neighborhood structures for the local search.
- * A swap operation swaps to compatible items which means that the items exchange positions in the stacks.
+ * A swap operation swaps two compatible items which means that the items exchange positions in the stacks.
  *
  * @author Tim Bohne
  */

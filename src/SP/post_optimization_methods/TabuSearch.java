@@ -11,6 +11,9 @@ import org.jgrapht.GraphPath;
 
 import java.util.*;
 
+/**
+ * Tabu search approach to solve stacking problems.
+ */
 public class TabuSearch implements LocalSearchAlgorithm {
 
     private int numberOfNeighbors;
@@ -25,6 +28,18 @@ public class TabuSearch implements LocalSearchAlgorithm {
     private ShiftOperator shiftOperator;
     private SwapOperator swapOperator;
 
+    /**
+     * Constructor
+     *
+     * @param numberOfNeighbors                      - number of neighboring solutions to be generated
+     * @param shortTermStrategy                      - short term strategy to be used during the neighborhood search
+     * @param maxTabuListLength                      - maximum length of the tabu list
+     * @param unsuccessfulNeighborGenerationAttempts - number of failed neighbor generation attempts after which the
+     *                                                 neighborhood search gets stopped
+     * @param ejectionChainOperator                  - ejection chain operator to be used in neighbor generation
+     * @param shiftOperator                          - shift operator to be used in neighbor generation
+     * @param swapOperator                           - swap operator to be used in neighbor generation
+     */
     public TabuSearch(
         int numberOfNeighbors, PostOptimization.ShortTermStrategies shortTermStrategy,
         int maxTabuListLength, int unsuccessfulNeighborGenerationAttempts,
@@ -37,7 +52,6 @@ public class TabuSearch implements LocalSearchAlgorithm {
         this.tabuListClears = 0;
         this.unsuccessfulNeighborGenerationAttempts = unsuccessfulNeighborGenerationAttempts;
         this.tabuList = new LinkedList<>();
-
         this.ejectionChainOperator = ejectionChainOperator;
         this.shiftOperator = shiftOperator;
         this.swapOperator = swapOperator;
@@ -51,10 +65,12 @@ public class TabuSearch implements LocalSearchAlgorithm {
         this.tabuListClears++;
     }
 
-    public int getTabuListClears() {
-        return this.tabuListClears;
-    }
-
+    /**
+     * Checks whether the tabu list contains any of the shifts in the specified list.
+     *
+     * @param performedShifts - list to check against the tabu list
+     * @return whether or not the specified list contains any tabu shifts
+     */
     public boolean tabuListContainsAnyOfTheShifts(List<Shift> performedShifts) {
         for (Shift shift : performedShifts) {
             if (this.tabuList.contains(shift)) {
@@ -80,6 +96,13 @@ public class TabuSearch implements LocalSearchAlgorithm {
         }
     }
 
+    /**
+     * Logs the current state to the console (dbg).
+     *
+     * @param currSol  - current solution (before applying the ejection chain)
+     * @param bestPath - best ejection chain
+     * @param tmpSol   - solution generating by applying the ejection chain
+     */
     private void logCurrentState(Solution currSol, GraphPath bestPath, Solution tmpSol) {
         System.out.println("costs before: " + currSol.computeCosts());
         System.out.println("costs of best path: " + bestPath.getWeight());
@@ -88,6 +111,13 @@ public class TabuSearch implements LocalSearchAlgorithm {
         System.exit(0);
     }
 
+    /**
+     * Applies a variable neighborhood consisting of the shift, swap and ejection chain neighborhood.
+     *
+     * @param currSol         - solution to generate a neighbor for
+     * @param performedShifts - stores the performed shifts which get appended to the tabu list
+     * @return first successfully generated neighbor
+     */
     private Solution applyVariableNeighborhood(Solution currSol, List<Shift> performedShifts) {
 
         Solution neighbor = new Solution();
@@ -100,7 +130,6 @@ public class TabuSearch implements LocalSearchAlgorithm {
             // next operator
             int rand = HeuristicUtil.getRandomIntegerInBetween(1, 4);
             performedShifts.clear();
-
             neighbor = this.swapOperator.generateSwapNeighbor(currSol, performedShifts, rand);
 
             if (!neighbor.isFeasible() || neighbor.computeCosts() > currSol.computeCosts()) {
@@ -117,6 +146,13 @@ public class TabuSearch implements LocalSearchAlgorithm {
         return neighbor;
     }
 
+    /**
+     * Returns a neighboring solution for the current one.
+     *
+     * @param currSol - current solution to retrieve a neighbor for
+     * @param bestSol - so far best solution
+     * @return best generated neighbor in terms of costs
+     */
     public Solution getNeighbor(Solution currSol, Solution bestSol) {
         List<Solution> nbrs = new ArrayList<>();
         int failCnt = 0;
