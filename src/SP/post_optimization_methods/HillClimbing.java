@@ -79,12 +79,12 @@ public class HillClimbing implements LocalSearchAlgorithm {
             if (!neighbor.isFeasible() || neighbor.computeCosts() > currSol.computeCosts()) {
                 // next operator
                 neighbor = this.ejectionChainOperator.generateEjectionChainNeighbor(currSol, new ArrayList<>());
-                System.out.println("USING EJECTION CHAIN OPERATOR");
+//                System.out.println("USING EJECTION CHAIN OPERATOR");
             } else {
-                System.out.println("USING SWAP OPERATOR");
+//                System.out.println("USING SWAP OPERATOR");
             }
         } else {
-            System.out.println("USING SHIFT OPERATOR");
+//            System.out.println("USING SHIFT OPERATOR");
         }
         return neighbor;
     }

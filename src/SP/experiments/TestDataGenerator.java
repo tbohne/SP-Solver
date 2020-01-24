@@ -26,12 +26,12 @@ public class TestDataGenerator {
 
     /******************************* CONFIGURATION *************************************/
     private static final int NUMBER_OF_INSTANCES = 20;
-    private static final int NUMBER_OF_ITEMS = 500;
-    private static final int STACK_CAPACITY = 4;
+    private static final int NUMBER_OF_ITEMS = 1000;
+    private static final int STACK_CAPACITY = 7;
 
     // The number of stacks m is initially m = n / b,
     // this number specifies the percentage by which the initial m gets increased.
-    private static final int ADDITIONAL_STACK_PERCENTAGE = 20;
+    private static final int ADDITIONAL_STACK_PERCENTAGE = 5;
 
     private static final float CHANCE_FOR_ONE_IN_STACKING_CONSTRAINTS = 0.0259F;
     private static final float CHANCE_FOR_ONE_IN_PLACEMENT_CONSTRAINTS = 0.7F;

@@ -51,7 +51,7 @@ public class PostOptimization {
     // STOPPING SPECIFIC
     private static final int NUMBER_OF_ITERATIONS = 500;
     private static final int NUMBER_OF_TABU_LIST_CLEARS = 10;
-    private static final int NUMBER_OF_NON_IMPROVING_ITERATIONS = 500;
+    private static final int NUMBER_OF_NON_IMPROVING_ITERATIONS = 350;
     private static final double TIME_LIMIT = 1800;
 
     // maximum number of swaps to be performed in a single application of the swap operator

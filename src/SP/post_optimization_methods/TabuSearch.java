@@ -136,12 +136,12 @@ public class TabuSearch implements LocalSearchAlgorithm {
                 // next operator
                 performedShifts.clear();
                 neighbor = this.ejectionChainOperator.generateEjectionChainNeighbor(currSol, performedShifts);
-                System.out.println("USING EJECTION CHAIN OPERATOR");
+//                System.out.println("USING EJECTION CHAIN OPERATOR");
             } else {
-                System.out.println("USING SWAP OPERATOR");
+//                System.out.println("USING SWAP OPERATOR");
             }
         } else {
-            System.out.println("USING SHIFT OPERATOR");
+//            System.out.println("USING SHIFT OPERATOR");
         }
         return neighbor;
     }
@@ -158,7 +158,7 @@ public class TabuSearch implements LocalSearchAlgorithm {
         int failCnt = 0;
         Map<Solution, List<Shift>> shiftsForSolution = new HashMap<>();
 
-        System.out.println("TL: " + this.tabuList.size());
+//        System.out.println("TL: " + this.tabuList.size());
 
         while (nbrs.size() < this.numberOfNeighbors) {
 
@@ -173,19 +173,19 @@ public class TabuSearch implements LocalSearchAlgorithm {
                 && neighbor.computeCosts() < currSol.computeCosts()
             ) {
                 this.forbidShifts(performedShifts);
-                System.out.println("FIRST-FIT RETURN");
+//                System.out.println("FIRST-FIT RETURN");
                 return neighbor;
             // BEST-FIT
             } else if (!this.tabuListContainsAnyOfTheShifts(performedShifts)) {
                 nbrs.add(neighbor);
             } else {
 
-                System.out.println("TABU");
+//                System.out.println("TABU");
 
                 // TABU
                 // ASPIRATION CRITERION
                 if (neighbor.computeCosts() < bestSol.computeCosts()) {
-                    System.out.println("ASPIRATION!");
+//                    System.out.println("ASPIRATION!");
                     if (this.shortTermStrategy == PostOptimization.ShortTermStrategies.FIRST_FIT) {
                         return neighbor;
                     } else {
@@ -197,10 +197,10 @@ public class TabuSearch implements LocalSearchAlgorithm {
                         failCnt = 0;
 
                         if (nbrs.size() == 0) {
-                            System.out.println("CLEARING TL");
+//                            System.out.println("CLEARING TL");
                             this.clearTabuList();
                         } else {
-                            System.out.println("FAIL RETURN");
+//                            System.out.println("FAIL RETURN");
                             return HeuristicUtil.getBestSolution(nbrs);
                         }
                     }
@@ -208,7 +208,7 @@ public class TabuSearch implements LocalSearchAlgorithm {
             }
         }
 
-        System.out.println("BEST-FIT RETURN");
+//        System.out.println("BEST-FIT RETURN");
         Solution best = HeuristicUtil.getBestSolution(nbrs);
         this.forbidShifts(shiftsForSolution.get(best));
         return HeuristicUtil.getBestSolution(nbrs);

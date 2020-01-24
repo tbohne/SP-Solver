@@ -49,14 +49,13 @@ public class ThreeIndexFormulation {
 
         try {
             // define new model
-            IloCplex cplex = new IloCplex();
+           IloCplex cplex = new IloCplex();
 
             IloIntVar[][][] x = new IloIntVar[this.instance.getItems().length][][];
             this.initVariables(cplex, x);
             IloLinearNumExpr objective = cplex.linearNumExpr();
             this.defineObjective(cplex, objective, x);
             this.addConstraints(cplex, x);
-
             this.setCPLEXConfig(cplex);
             double startTime = cplex.getCplexTime();
 
@@ -177,6 +176,9 @@ public class ThreeIndexFormulation {
 
         // set time limit
         cplex.setParam(IloCplex.Param.TimeLimit, this.timeLimit);
+
+        // deactivate pre solving procedure (takes too long for large instances)
+//        cplex.setParam(IloCplex.Param.Preprocessing.Presolve, false);
 
         // control trade-offs between speed, feasibility and optimality
         cplex.setParam(IloCplex.IntParam.MIPEmphasis, this.mipEmphasis);
