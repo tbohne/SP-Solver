@@ -6,12 +6,12 @@ import SP.io.SolutionWriter;
 import SP.mip_formulations.BinPackingFormulation;
 import SP.mip_formulations.ThreeIndexFormulation;
 import SP.representations.Instance;
-import SP.representations.OptimizableSolution;
 import SP.representations.Solution;
 import SP.util.HeuristicUtil;
 import SP.util.RepresentationUtil;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -90,17 +90,19 @@ public class SolverComparison {
      *
      * @param instance     - instance to be solved
      * @param solutionName - name of the generated solution
+     * @param write        - determines whether the results get written to file
      */
-    public Solution solveWithGeneralHeuristic(Instance instance, String solutionName) {
+    public Solution solveWithGeneralHeuristic(Instance instance, String solutionName, boolean write) {
         GeneralHeuristic heuristic = new GeneralHeuristic(instance, this.timeLimit);
         Solution sol = heuristic.solve();
-        System.out.println("is feasible ? " + sol.isFeasible());
-        SolutionWriter.writeSolution(
-            this.solutionPrefix + solutionName + ".txt", sol, RepresentationUtil.getNameOfSolver(CompareSolvers.Solver.GENERAL_HEURISTIC)
-        );
-        SolutionWriter.writeSolutionAsCSV(
-            this.solutionPrefix + "solutions.csv", sol, RepresentationUtil.getAbbreviatedNameOfSolver(CompareSolvers.Solver.GENERAL_HEURISTIC)
-        );
+        if (write) {
+            SolutionWriter.writeSolution(
+                this.solutionPrefix + solutionName + ".txt", sol, RepresentationUtil.getNameOfSolver(CompareSolvers.Solver.GENERAL_HEURISTIC)
+            );
+            SolutionWriter.writeSolutionAsCSV(
+                this.solutionPrefix + "solutions.csv", sol, RepresentationUtil.getAbbreviatedNameOfSolver(CompareSolvers.Solver.GENERAL_HEURISTIC)
+            );
+        }
         return sol;
     }
 
@@ -165,25 +167,39 @@ public class SolverComparison {
                     solveWithBinPacking(instance, solutionName);
                     instance.resetStacks();
                 }
+
+                // clear memory (cplex still allocates a lot of memory)
+                System.gc();
+
                 if (solversToBeCompared.contains(CompareSolvers.Solver.MIP_THREEINDEX)) {
                     System.out.println("solving with 3Idx..");
                     solveWithThreeIdx(instance, solutionName);
                     instance.resetStacks();
                 }
-                if (solversToBeCompared.contains(CompareSolvers.Solver.GENERAL_HEURISTIC)) {
-                    System.out.println("solving with general heuristic..");
-                    Solution sol = solveWithGeneralHeuristic(instance, solutionName);
-                    instance.resetStacks();
 
-                    if (solversToBeCompared.contains(CompareSolvers.Solver.TABU_SEARCH)) {
-                        System.out.println("improving with tabu search..");
-                        PostOptimization.optimizeSolutionWithTabuSearch(sol);
+                // clear memory (cplex still allocates a lot of memory)
+                System.gc();
+
+                if (solversToBeCompared.contains(CompareSolvers.Solver.GENERAL_HEURISTIC)) {
+
+                    System.out.println("solving with general heuristic..");
+
+                    int cores = Runtime.getRuntime().availableProcessors();
+
+                    List<Solution> initialSolutions = new ArrayList<>();
+                    for (int i = 0; i < cores; i++) {
+                        Solution sol = solveWithGeneralHeuristic(instance, solutionName, i == 0);
+                        instance.resetStacks();
+                        initialSolutions.add(new Solution(sol));
                     }
+
                     if (solversToBeCompared.contains(CompareSolvers.Solver.HILL_CLIMBING)) {
                         System.out.println("improving with hill climbing..");
-                        PostOptimization.optimizeSolutionWithHillClimbing(sol);
+                        PostOptimization.optimizeSolutionWithHillClimbing(initialSolutions);
                     }
                 }
+
+                System.gc();
             }
         }
     }

@@ -30,12 +30,11 @@ public class CompareSolvers {
     // solvers to be used
     private static final List<Solver> SOLVERS = Lists.newArrayList(
         Solver.MIP_BINPACKING,
-//        Solver.MIP_THREEINDEX,
+        Solver.MIP_THREEINDEX,
 //        Solver.CONSTRUCTIVE_TWO_CAP
 //        Solver.CONSTRUCTIVE_THREE_CAP
         Solver.GENERAL_HEURISTIC,
-        Solver.HILL_CLIMBING,
-        Solver.TABU_SEARCH
+        Solver.HILL_CLIMBING
     );
 
     /********************** CPLEX CONFIG **********************/
@@ -47,7 +46,7 @@ public class CompareSolvers {
     /**********************************************************/
 
     // specifies the time limit for the solving procedure in seconds
-    private static final double TIME_LIMIT = 1800;
+    private static final double TIME_LIMIT = 3600;
 
     // 2Cap and 3Cap provide post processing procedures that can be enabled here
     private static final boolean POST_PROCESSING = true;
@@ -97,7 +96,6 @@ public class CompareSolvers {
                 SOLUTION_PREFIX, INSTANCE_PREFIX, TIME_LIMIT, HIDE_CPLEX_OUTPUT, MIP_EMPHASIS, MIP_TOLERANCE
             );
             solverComp.compareSolvers(SOLVERS);
-
         }
     }
 }

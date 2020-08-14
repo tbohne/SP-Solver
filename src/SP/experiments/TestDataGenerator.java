@@ -1,5 +1,6 @@
 package SP.experiments;
 
+import SP.representations.FourDimensionalItem;
 import SP.representations.GridPosition;
 import SP.representations.Instance;
 import SP.io.InstanceWriter;
@@ -31,7 +32,7 @@ public class TestDataGenerator {
 
     // The number of stacks m is initially m = n / b,
     // this number specifies the percentage by which the initial m gets increased.
-    private static final int ADDITIONAL_STACK_PERCENTAGE = 5;
+    private static final int ADDITIONAL_STACK_PERCENTAGE = 20;
 
     private static final float CHANCE_FOR_ONE_IN_STACKING_CONSTRAINTS = 0.0259F;
     private static final float CHANCE_FOR_ONE_IN_PLACEMENT_CONSTRAINTS = 0.7F;
@@ -61,6 +62,7 @@ public class TestDataGenerator {
         for (int idx = 0; idx < NUMBER_OF_INSTANCES; idx++) {
 
             List<GridPosition> stackPositions = generateStackPositionsOnSpecifiedNumberOfRows(numOfStacks);
+
             Item[] items = generateItems(stackPositions);
 
             int[][] stackingConstraintMatrix;
@@ -181,6 +183,19 @@ public class TestDataGenerator {
         return items;
     }
 
+    private static FourDimensionalItem[] generateFourDimensionalItems(List<GridPosition> stackPositions) {
+        List<GridPosition> itemPositions = generateItemPositions(stackPositions);
+        FourDimensionalItem[] items = new FourDimensionalItem[NUMBER_OF_ITEMS];
+        for (int i = 0; i < NUMBER_OF_ITEMS; i++) {
+            float length = HeuristicUtil.getRandomValueInBetweenHalfSteps(ITEM_LENGTH_LB, ITEM_LENGTH_UB);
+            float width = HeuristicUtil.getRandomValueInBetweenHalfSteps(ITEM_WIDTH_LB, ITEM_WIDTH_UB);
+            float addDimOne = HeuristicUtil.getRandomValueInBetweenHalfSteps(ITEM_WIDTH_LB, ITEM_WIDTH_UB);
+            float addDimTwo = HeuristicUtil.getRandomValueInBetweenHalfSteps(ITEM_WIDTH_LB, ITEM_WIDTH_UB);
+            items[i] = new FourDimensionalItem(i, length, width, addDimOne, addDimTwo, itemPositions.get(i));
+        }
+        return items;
+    }
+
     /**
      * Generates the stacking constraint matrix. In this approach, an item is stackable on top of another item
      * if its length and width values are less than or equal to the length and width of the other item.
@@ -199,12 +214,18 @@ public class TestDataGenerator {
 
                 // If the items have the same length and width, they're stackable in both directions.
                 if (items[i].getLength() == items[j].getLength()
-                    && items[i].getWidth() == items[j].getWidth()) {
+                    && items[i].getWidth() == items[j].getWidth()
+//                    && ((FourDimensionalItem)items[i]).getAddDimOne() == ((FourDimensionalItem)items[j]).getAddDimOne()
+//                    && ((FourDimensionalItem)items[i]).getAddDimTwo() == ((FourDimensionalItem)items[j]).getAddDimTwo()
+                ) {
                         stackingConstraintMatrix[i][j] = 1;
                         stackingConstraintMatrix[j][i] = 1;
                 } else if (items[i].getLength() <= items[j].getLength()
-                    && items[i].getWidth() <= items[j].getWidth()) {
-                        stackingConstraintMatrix[i][j] = 1;
+                    && items[i].getWidth() <= items[j].getWidth()
+//                    && ((FourDimensionalItem)items[i]).getAddDimOne() <= ((FourDimensionalItem)items[j]).getAddDimOne()
+//                    && ((FourDimensionalItem)items[i]).getAddDimTwo() <= ((FourDimensionalItem)items[j]).getAddDimTwo()
+                ) {
+                    stackingConstraintMatrix[i][j] = 1;
                 } else {
                     stackingConstraintMatrix[i][j] = 0;
                 }

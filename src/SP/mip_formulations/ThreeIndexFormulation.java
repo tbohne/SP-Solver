@@ -66,10 +66,10 @@ public class ThreeIndexFormulation {
                 sol = new Solution(timeToSolve, timeLimit, this.instance);
             }
             cplex.end();
-
         } catch (IloException e) {
             e.printStackTrace();
         }
+
         return sol;
     }
 
@@ -178,7 +178,19 @@ public class ThreeIndexFormulation {
         cplex.setParam(IloCplex.Param.TimeLimit, this.timeLimit);
 
         // deactivate pre solving procedure (takes too long for large instances)
+        // time limit is not considered during pre solving
 //        cplex.setParam(IloCplex.Param.Preprocessing.Presolve, false);
+
+        // if you don't want to eliminate the presolve totally, you can
+        // limit the number of passes the presolving performs
+//        cplex.setParam(IloCplex.Param.Preprocessing.NumPass, 100);
+
+        // avoid out-of-memory problems
+//        cplex.setParam(IloCplex.DoubleParam.WorkMem, 16384);
+//        cplex.setParam(IloCplex.Param.WorkMem, 16384);
+//        cplex.setParam(IloCplex.Param.MIP.Limits.TreeMemory, 16384);
+//        cplex.setParam(IloCplex.Param.MIP.Strategy.File, 3);
+//        cplex.setParam(IloCplex.Param.WorkDir, "/tmp");
 
         // control trade-offs between speed, feasibility and optimality
         cplex.setParam(IloCplex.IntParam.MIPEmphasis, this.mipEmphasis);

@@ -186,6 +186,13 @@ public class BinPackingFormulation {
         // control trade-offs between speed, feasibility and optimality
         cplex.setParam(IloCplex.IntParam.MIPEmphasis, this.mipEmphasis);
 
+        // avoid out-of-memory problems
+//        cplex.setParam(IloCplex.DoubleParam.WorkMem, 16384);
+//        cplex.setParam(IloCplex.Param.WorkMem, 16384);
+//        cplex.setParam(IloCplex.Param.MIP.Limits.TreeMemory, 16384);
+//        cplex.setParam(IloCplex.Param.MIP.Strategy.File, 3);
+//        cplex.setParam(IloCplex.Param.WorkDir, "/tmp");
+
         // set termination tolerance
         cplex.setParam(IloCplex.DoubleParam.EpAGap, this.tolerance);
         cplex.setParam(IloCplex.DoubleParam.EpGap, this.tolerance);
