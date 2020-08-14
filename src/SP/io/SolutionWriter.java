@@ -55,18 +55,14 @@ public class SolutionWriter {
      * @param shortTermStrategy                      - used short-term strategy
      * @param stoppingCriterion                      - used stopping criterion
      * @param numOfNeighbors                         - number of neighbors considered in each iteration
-     * @param maxTabuListLengthFactor                - factor that is multiplied with the number of nbrs to provide a max length for the tabu list
      * @param unsuccessfulNeighborGenerationAttempts - number of unsuccessful neighbor generation attempts before the nbh search is stopped
      * @param numOfIterations                        - number of iterations (only used when stopping criterion)
-     * @param numOfTabuListClears                    - number of tabu list clears (only used when stopping criterion)
      * @param numOfNonImprovingIterations            - number of non-improving iterations (only used when stopping criterion)
-     * @param maxNumOfSwaps                          - maximum number of swaps (only used in swap-operator)
      */
     public static void writePostOptimizationConfig(
         String filename, CompareSolvers.Solver solverOfInitialSolution, PostOptimization.ShortTermStrategies shortTermStrategy,
-        PostOptimization.StoppingCriteria stoppingCriterion, int numOfNeighbors, int maxTabuListLengthFactor,
-        int unsuccessfulNeighborGenerationAttempts, int numOfIterations, int numOfTabuListClears,
-        int numOfNonImprovingIterations, int maxNumOfSwaps
+        PostOptimization.StoppingCriteria stoppingCriterion, int numOfNeighbors, int unsuccessfulNeighborGenerationAttempts,
+        int numOfIterations, int numOfNonImprovingIterations
     ) {
 
         File file = new File(filename);
@@ -75,13 +71,13 @@ public class SolutionWriter {
             FileOutputStream fos = new FileOutputStream(file);
             BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));
             bw.write(
-            "solverOfInitialSolution,shortTermStrategy,stoppingCriterion,numOfNeighbors,maxTabuListLengthFactor,"
-                + "unsuccessfulNeighborGenerationAttempts,numOfIterations,numOfTabuListClears,numOfNonImprovingIterations,maxNumOfSwaps\n"
+            "solverOfInitialSolution,shortTermStrategy,stoppingCriterion,numOfNeighbors,"
+                + "unsuccessfulNeighborGenerationAttempts,numOfIterations,numOfNonImprovingIterations\n"
             );
             bw.write(
             solverOfInitialSolution + "," + shortTermStrategy + "," + stoppingCriterion + "," + numOfNeighbors
-                + "," + maxTabuListLengthFactor + "," + unsuccessfulNeighborGenerationAttempts + ","
-                + numOfIterations + "," + numOfTabuListClears + "," + numOfNonImprovingIterations + "," + maxNumOfSwaps
+                + "," + unsuccessfulNeighborGenerationAttempts + "," + numOfIterations + ","
+                + numOfNonImprovingIterations
             );
             bw.close();
             fos.close();
@@ -109,15 +105,15 @@ public class SolutionWriter {
             }
 
             String solver;
-            if (impSol.getFilledStacks()[0].length == 2) {
-                solver = "2Cap + " + postOptimizationMethod;
-            } else if (impSol.getFilledStacks()[0].length == 3) {
-                solver = "3Cap + " + postOptimizationMethod;
-            } else {
+//            if (impSol.getFilledStacks()[0].length == 2) {
+//                solver = "2Cap + " + postOptimizationMethod;
+//            } else if (impSol.getFilledStacks()[0].length == 3) {
+//                solver = "3Cap + " + postOptimizationMethod;
+//            } else {
                 solver = "GH + " + postOptimizationMethod;
-            }
+//            }
 
-            double totalRuntime = (double)Math.round((impSol.getTimeToSolveAsDouble() + impSol.getTimeToSolveAsDouble()) * 100) / 100;
+            double totalRuntime = Math.round(impSol.getTimeToSolveAsDouble() * 100.0) / 100.0;
             double absoluteImprovement = Math.round(initialSol.computeCosts() - impSol.computeCosts());
             double relativeImprovement = Math.round((initialSol.computeCosts() - impSol.computeCosts()) / initialSol.computeCosts() * 100.0);
 
@@ -197,10 +193,10 @@ public class SolutionWriter {
             if (sol.isFeasible()) {
                 bw.write(
                     sol.getNameOfSolvedInstance().replace("instances/slp_instance_", "")
-                    + "," + solver + "," + sol.getTimeLimit() + "," + sol.getTimeToSolve() + "," + sol.computeCosts() + "\n"
+                    + "," + solver + "," + sol.getTimeLimit() + "," + sol.getTimeToSolve() + "," + sol.computeCosts()
+                    + ",-,-,-,-,-" + "\n"
                 );
             }
-
             bw.close();
             fw.close();
         } catch (IOException e) {
