@@ -1,0 +1,610 @@
+lower bound for relaxed s_ij: 501920.3
+
+#####################################################
+
+solved with: SP.constructive_heuristics.GeneralHeuristic
+time limit: 3600.0 s
+time to solve: 0,03 s
+objective value: 1013690.84
+
+stacks (top to bottom):
+stack 0:    826 76 
+stack 1:    633 909 
+stack 2:    401 72 
+stack 3:    796 134 
+stack 4:    245 833 
+stack 5:    174 720 
+stack 6:    569 49 
+stack 7:    904 407 
+stack 8:    306 856 
+stack 9:    348 397 
+stack 10:    135 551 
+stack 11:    389 752 
+stack 12:    266 162 
+stack 13:    219 297 
+stack 14:    705 299 
+stack 15:    132 529 
+stack 16:    312 520 
+stack 17:    791 524 
+stack 18:    437 111 
+stack 19:    929 822 
+stack 20:    987 479 
+stack 21:    115 233 
+stack 22:    32 723 
+stack 23:    15 232 
+stack 24:    568 923 
+stack 25:    920 578 
+stack 26:    491 535 
+stack 27:    281 956 
+stack 28:    555 601 
+stack 29:    834 321 
+stack 30:    253 259 
+stack 31:    390 602 
+stack 32:    293 98 
+stack 33:    444 78 
+stack 34:    737 787 
+stack 35:    861 145 
+stack 36:    46 416 
+stack 37:    157 719 
+stack 38:    514 639 
+stack 39:    751 63 
+stack 40:    64 231 
+stack 41:    721 183 
+stack 42:    727 632 
+stack 43:    229 709 
+stack 44:    776 815 
+stack 45:    745 992 
+stack 46:    207 843 
+stack 47:    614 863 
+stack 48:    202 149 
+stack 49:    430 748 
+stack 50:    200 360 
+stack 51:    317 458 
+stack 52:    889 972 
+stack 53:    324 781 
+stack 54:    993 853 
+stack 55:    859 816 
+stack 56:    341 763 
+stack 57:    533 283 
+stack 58:    247 190 
+stack 59:    871 114 
+stack 60:    439 522 
+stack 61:    801 204 
+stack 62:    22 101 
+stack 63:    715 876 
+stack 64:    461 965 
+stack 65:    678 211 
+stack 66:    985 51 
+stack 67:    322 772 
+stack 68:    265 287 
+stack 69:    556 206 
+stack 70:    184 7 
+stack 71:    610 212 
+stack 72:    131 180 
+stack 73:    939 953 
+stack 74:    358 255 
+stack 75:    268 19 
+stack 76:    619 504 
+stack 77:    238 470 
+stack 78:    854 860 
+stack 79:    884 463 
+stack 80:    438 5 
+stack 81:    359 546 
+stack 82:    353 412 
+stack 83:    916 367 
+stack 84:    973 464 
+stack 85:    124 809 
+stack 86:    441 81 
+stack 87:    858 60 
+stack 88:    634 547 
+stack 89:    667 272 
+stack 90:    598 627 
+stack 91:    528 538 
+stack 92:    622 355 
+stack 93:    488 964 
+stack 94:    541 895 
+stack 95:    446 9 
+stack 96:    967 641 
+stack 97:    688 738 
+stack 98:    45 804 
+stack 99:    519 908 
+stack 100:    695 404 
+stack 101:    55 144 
+stack 102:    398 11 
+stack 103:    725 468 
+stack 104:    366 685 
+stack 105:    515 980 
+stack 106:    943 181 
+stack 107:    448 471 
+stack 108:    329 663 
+stack 109:    249 896 
+stack 110:    543 710 
+stack 111:    228 340 
+stack 112:    960 92 
+stack 113:    58 553 
+stack 114:    588 336 
+stack 115:    571 845 
+stack 116:    986 294 
+stack 117:    257 426 
+stack 118:    750 475 
+stack 119:    638 990 
+stack 120:    869 503 
+stack 121:    386 971 
+stack 122:    900 754 
+stack 123:    308 673 
+stack 124:    636 343 
+stack 125:    974 338 
+stack 126:    821 466 
+stack 127:    697 562 
+stack 128:    564 567 
+stack 129:    769 537 
+stack 130:    937 150 
+stack 131:    594 16 
+stack 132:    814 6 
+stack 133:    770 176 
+stack 134:    500 413 
+stack 135:    669 159 
+stack 136:    333 3 
+stack 137:    199 818 
+stack 138:    496 194 
+stack 139:    609 393 
+stack 140:    712 576 
+stack 141:    177 339 
+stack 142:    350 374 
+stack 143:    356 205 
+stack 144:    882 497 
+stack 145:    864 94 
+stack 146:    628 189 
+stack 147:    545 456 
+stack 148:    409 239 
+stack 149:    224 462 
+stack 150:    913 665 
+stack 151:    225 385 
+stack 152:    857 925 
+stack 153:    982 606 
+stack 154:    478 649 
+stack 155:    930 510 
+stack 156:    373 191 
+stack 157:    250 37 
+stack 158:    988 788 
+stack 159:    823 405 
+stack 160:    910 295 
+stack 161:    136 474 
+stack 162:    61 52 
+stack 163:    851 300 
+stack 164:    693 161 
+stack 165:    129 38 
+stack 166:    2 290 
+stack 167:    807 592 
+stack 168:    399 757 
+stack 169:    86 762 
+stack 170:    480 485 
+stack 171:    84 429 
+stack 172:    711 119 
+stack 173:    112 273 
+stack 174:    557 17 
+stack 175:    662 80 
+stack 176:    683 296 
+stack 177:    450 661 
+stack 178:    616 744 
+stack 179:    928 388 
+stack 180:    914 502 
+stack 181:    596 572 
+stack 182:    549 684 
+stack 183:    626 847 
+stack 184:    451 113 
+stack 185:    143 345 
+stack 186:    558 582 
+stack 187:    23 109 
+stack 188:    759 813 
+stack 189:    34 35 
+stack 190:    216 668 
+stack 191:    893 472 
+stack 192:    170 517 
+stack 193:    746 226 
+stack 194:    915 867 
+stack 195:    887 642 
+stack 196:    230 873 
+stack 197:    490 954 
+stack 198:    580 933 
+stack 199:    141 611 
+stack 200:    42 152 
+stack 201:    133 595 
+stack 202:    460 729 
+stack 203:    126 97 
+stack 204:    879 499 
+stack 205:    419 618 
+stack 206:    650 56 
+stack 207:    285 417 
+stack 208:    516 156 
+stack 209:    44 714 
+stack 210:    301 117 
+stack 211:    108 434 
+stack 212:    178 635 
+stack 213:    50 457 
+stack 214:    552 696 
+stack 215:    984 590 
+stack 216:    968 182 
+stack 217:    828 127 
+stack 218:    376 8 
+stack 219:    950 981 
+stack 220:    764 838 
+stack 221:    110 30 
+stack 222:    877 142 
+stack 223:    585 137 
+stack 224:    260 240 
+stack 225:    264 483 
+stack 226:    282 936 
+stack 227:    946 656 
+stack 228:    945 621 
+stack 229:    371 560 
+stack 230:    735 659 
+stack 231:    481 797 
+stack 232:    344 742 
+stack 233:    280 901 
+stack 234:    768 573 
+stack 235:    782 138 
+stack 236:    989 357 
+stack 237:    372 251 
+stack 238:    436 774 
+stack 239:    679 187 
+stack 240:    827 325 
+stack 241:    369 771 
+stack 242:    604 311 
+stack 243:    214 453 
+stack 244:    643 74 
+stack 245:    379 380 
+stack 246:    171 467 
+stack 247:    778 261 
+stack 248:    724 704 
+stack 249:    741 163 
+stack 250:    120 706 
+stack 251:    346 363 
+stack 252:    927 959 
+stack 253:    452 785 
+stack 254:    310 629 
+stack 255:    840 320 
+stack 256:    270 559 
+stack 257:    753 963 
+stack 258:    104 802 
+stack 259:    587 805 
+stack 260:    93 675 
+stack 261:    846 213 
+stack 262:    215 1 
+stack 263:    703 722 
+stack 264:    395 799 
+stack 265:    599 836 
+stack 266:    40 698 
+stack 267:    589 352 
+stack 268:    831 926 
+stack 269:    96 906 
+stack 270:    957 403 
+stack 271:    687 87 
+stack 272:    275 33 
+stack 273:    561 540 
+stack 274:    400 617 
+stack 275:    952 577 
+stack 276:    375 354 
+stack 277:    305 747 
+stack 278:    455 997 
+stack 279:    267 427 
+stack 280:    415 938 
+stack 281:    432 279 
+stack 282:    26 428 
+stack 283:    54 79 
+stack 284:    246 328 
+stack 285:    406 223 
+stack 286:    25 486 
+stack 287:    786 505 
+stack 288:    217 692 
+stack 289:    164 271 
+stack 290:    691 243 
+stack 291:    899 169 
+stack 292:    842 447 
+stack 293:    36 218 
+stack 294:    175 347 
+stack 295:    278 702 
+stack 296:    888 509 
+stack 297:    690 902 
+stack 298:    337 892 
+stack 299:    146 95 
+stack 300:    780 334 
+stack 301:    603 835 
+stack 302:    319 994 
+stack 303:    70 682 
+stack 304:    911 775 
+stack 305:    381 431 
+stack 306:    512 620 
+stack 307:    976 377 
+stack 308:    575 67 
+stack 309:    605 88 
+stack 310:    507 71 
+stack 311:    392 27 
+stack 312:    492 607 
+stack 313:    870 527 
+stack 314:    327 523 
+stack 315:    940 508 
+stack 316:    459 506 
+stack 317:    433 736 
+stack 318:    978 570 
+stack 319:    82 237 
+stack 320:    349 708 
+stack 321:    139 707 
+stack 322:    874 227 
+stack 323:    331 532 
+stack 324:    39 829 
+stack 325:    739 670 
+stack 326:    210 155 
+stack 327:    962 743 
+stack 328:    307 222 
+stack 329:    612 583 
+stack 330:    593 681 
+stack 331:    90 625 
+stack 332:    935 631 
+stack 333:    996 810 
+stack 334:    890 837 
+stack 335:    660 20 
+stack 336:    12 122 
+stack 337:    89 565 
+stack 338:    932 276 
+stack 339:    420 313 
+stack 340:    586 408 
+stack 341:    378 440 
+stack 342:    808 425 
+stack 343:    613 128 
+stack 344:    891 584 
+stack 345:    185 24 
+stack 346:    107 383 
+stack 347:    513 274 
+stack 348:    931 330 
+stack 349:    550 179 
+stack 350:    83 608 
+stack 351:    526 728 
+stack 352:    489 784 
+stack 353:    542 849 
+stack 354:    648 600 
+stack 355:    674 699 
+stack 356:    677 106 
+stack 357:    531 167 
+stack 358:    898 756 
+stack 359:    66 165 
+stack 360:    318 484 
+stack 361:    903 803 
+stack 362:    760 530 
+stack 363:    21 875 
+stack 364:    130 812 
+stack 365:    998 85 
+stack 366:    844 172 
+stack 367:    732 794 
+stack 368:    105 160 
+stack 369:    31 983 
+stack 370:    473 476 
+stack 371:    969 790 
+stack 372:    717 493 
+stack 373:    221 195 
+stack 374:    368 917 
+stack 375:    384 646 
+stack 376:    442 422 
+stack 377:    637 795 
+stack 378:    689 0 
+stack 379:    680 100 
+stack 380:    922 979 
+stack 381:    734 991 
+stack 382:    521 886 
+stack 383:    75 792 
+stack 384:    43 469 
+stack 385:    658 454 
+stack 386:    269 203 
+stack 387:    824 666 
+stack 388:    13 924 
+stack 389:    186 248 
+stack 390:    819 208 
+stack 391:    284 640 
+stack 392:    907 209 
+stack 393:    286 365 
+stack 394:    482 897 
+stack 395:    832 116 
+stack 396:    4 494 
+stack 397:    342 288 
+stack 398:    410 449 
+stack 399:    41 866 
+stack 400:    263 966 
+stack 401:    361 14 
+stack 402:    921 934 
+stack 403:    382 855 
+stack 404:    651 302 
+stack 405:    694 498 
+stack 406:    949 351 
+stack 407:    53 252 
+stack 408:    18 597 
+stack 409:    765 465 
+stack 410:    848 262 
+stack 411:    878 644 
+stack 412:    241 323 
+stack 413:    653 951 
+stack 414:    852 800 
+stack 415:    28 304 
+stack 416:    121 713 
+stack 417:    258 148 
+stack 418:    758 894 
+stack 419:    830 256 
+stack 420:    525 811 
+stack 421:    647 91 
+stack 422:    566 726 
+stack 423:    740 69 
+stack 424:    140 235 
+stack 425:    158 198 
+stack 426:    880 841 
+stack 427:    277 624 
+stack 428:    534 563 
+stack 429:    314 652 
+stack 430:    850 716 
+stack 431:    192 394 
+stack 432:    402 57 
+stack 433:    958 166 
+stack 434:    539 10 
+stack 435:    303 292 
+stack 436:    581 123 
+stack 437:    234 676 
+stack 438:    435 645 
+stack 439:    495 289 
+stack 440:    103 970 
+stack 441:    872 291 
+stack 442:    591 820 
+stack 443:    686 411 
+stack 444:    173 62 
+stack 445:    671 48 
+stack 446:    154 654 
+stack 447:    511 153 
+stack 448:    370 445 
+stack 449:    999 99 
+stack 450:    783 881 
+stack 451:    664 977 
+stack 452:    862 29 
+stack 453:    168 73 
+stack 454:    865 730 
+stack 455:    941 918 
+stack 456:    477 919 
+stack 457:    868 188 
+stack 458:    201 59 
+stack 459:    254 536 
+stack 460:    396 424 
+stack 461:    244 777 
+stack 462:    77 789 
+stack 463:    749 501 
+stack 464:    761 995 
+stack 465:    574 391 
+stack 466:    298 220 
+stack 467:    955 544 
+stack 468:    548 700 
+stack 469:    147 825 
+stack 470:    948 615 
+stack 471:    443 942 
+stack 472:    362 242 
+stack 473:    364 332 
+stack 474:    151 773 
+stack 475:    883 423 
+stack 476:    554 326 
+stack 477:    125 701 
+stack 478:    655 414 
+stack 479:    798 817 
+stack 480:    316 579 
+stack 481:    421 47 
+stack 482:    672 118 
+stack 483:    487 418 
+stack 484:    793 630 
+stack 485:    309 905 
+stack 486:    193 196 
+stack 487:    766 623 
+stack 488:    68 102 
+stack 489:    657 947 
+stack 490:    975 387 
+stack 491:    335 944 
+stack 492:    518 733 
+stack 493:    912 236 
+stack 494:    718 767 
+stack 495:    731 315 
+stack 496:    779 806 
+stack 497:    839 
+stack 498:    197 755 
+stack 499:    65 885 
+stack 500:    
+stack 501:    961 
+stack 502:    
+stack 503:    
+stack 504:    
+stack 505:    
+stack 506:    
+stack 507:    
+stack 508:    
+stack 509:    
+stack 510:    
+stack 511:    
+stack 512:    
+stack 513:    
+stack 514:    
+stack 515:    
+stack 516:    
+stack 517:    
+stack 518:    
+stack 519:    
+stack 520:    
+stack 521:    
+stack 522:    
+stack 523:    
+stack 524:    
+stack 525:    
+stack 526:    
+stack 527:    
+stack 528:    
+stack 529:    
+stack 530:    
+stack 531:    
+stack 532:    
+stack 533:    
+stack 534:    
+stack 535:    
+stack 536:    
+stack 537:    
+stack 538:    
+stack 539:    
+stack 540:    
+stack 541:    
+stack 542:    
+stack 543:    
+stack 544:    
+stack 545:    
+stack 546:    
+stack 547:    
+stack 548:    
+stack 549:    
+stack 550:    
+stack 551:    
+stack 552:    
+stack 553:    
+stack 554:    
+stack 555:    
+stack 556:    
+stack 557:    
+stack 558:    
+stack 559:    
+stack 560:    
+stack 561:    
+stack 562:    
+stack 563:    
+stack 564:    
+stack 565:    
+stack 566:    
+stack 567:    
+stack 568:    
+stack 569:    
+stack 570:    
+stack 571:    
+stack 572:    
+stack 573:    
+stack 574:    
+stack 575:    
+stack 576:    
+stack 577:    
+stack 578:    
+stack 579:    
+stack 580:    
+stack 581:    
+stack 582:    
+stack 583:    
+stack 584:    
+stack 585:    
+stack 586:    
+stack 587:    
+stack 588:    
+stack 589:    
+stack 590:    
+stack 591:    
+stack 592:    
+stack 593:    
+stack 594:    
+stack 595:    
+stack 596:    
+stack 597:    
+stack 598:    
+stack 599:    

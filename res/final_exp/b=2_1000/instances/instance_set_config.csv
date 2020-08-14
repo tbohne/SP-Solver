@@ -1,0 +1,2 @@
+numOfInstances,numOfItems,stackCapacity,additionalStackPercentage,chanceForOneInStackingConstraints,chanceForOneInPlacementConstraints,usingStackingConstraintGenerationApproachOne,transitiveStackingConstraints,costGenerationApproach,minCost, maxCost,itemLengthLB,itemLengthUB,itemWidthLB,itemWidthUB,storageAreaSlotLength,storageAreaSlotWidth,storageAreaVehicleDistanceFactor,numberOfRowsInStorageArea
+20,1000,2,20,0.0259,0.7,false,true,MANHATTAN,90.0,100.0,1.0,6.0,1.0,2.4,6.06,2.44,5.0,2
