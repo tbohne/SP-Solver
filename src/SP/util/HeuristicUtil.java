@@ -577,6 +577,23 @@ public class HeuristicUtil {
     }
 
     /**
+     * Returns the best improved solution from the list of improved solutions based on the transport costs.
+     *
+     * @param solutions - list of improved solutions
+     * @return best solution based on the costs
+     */
+    public static ImprovedSolution getBestImpSolution(List<ImprovedSolution> solutions) {
+        ImprovedSolution bestSol = solutions.get(0);
+        for (ImprovedSolution sol : solutions) {
+            System.out.println("sol: " + sol.getSol().computeCosts());
+            if (sol.getSol().computeCosts() < bestSol.getSol().computeCosts()) {
+                bestSol = sol;
+            }
+        }
+        return bestSol;
+    }
+
+    /**
      * Returns the best solution from the list of generated solutions based on the transport costs.
      *
      * @param solutions - list of generated solutions

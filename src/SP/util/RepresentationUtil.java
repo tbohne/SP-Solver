@@ -7,8 +7,7 @@ import SP.experiments.CompareSolvers;
 import SP.mip_formulations.BinPackingFormulation;
 import SP.mip_formulations.ThreeIndexFormulation;
 import SP.post_optimization_methods.HillClimbing;
-import SP.post_optimization_methods.LocalSearch;
-import SP.post_optimization_methods.TabuSearch;
+import SP.deprecated.TabuSearch;
 
 /**
  * A collection of general utility methods used in the representations.
