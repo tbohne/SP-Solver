@@ -1,6 +1,7 @@
 package SP.post_optimization_methods;
 
 import SP.experiments.PostOptimization;
+import SP.representations.ImprovedSolution;
 import SP.representations.PartitionList;
 import SP.representations.Solution;
 
@@ -10,11 +11,11 @@ import SP.representations.Solution;
  *
  * @author Tim Bohne
  */
-public class LocalSearch {
+public class LocalSearch implements Runnable {
 
     private Solution currSol;
     private Solution bestSol;
-    private double timeLimit;
+    private final double timeLimit;
     private double startTime;
     private final double optimalObjectiveValue;
 
@@ -22,10 +23,12 @@ public class LocalSearch {
     private final LocalSearchAlgorithm localSearchAlgorithm;
 
     private int iterationOfLastImprovement;
+    private final int numberOfNonImprovingIterations;
     private double timeToBestSolution;
     private int totalNumOfPerformedIterations;
-    private final int numberOfNonImprovingIterations;
     private final int numberOfIterations;
+
+    private final ImprovedSolution impSol;
 
     /**
      * Constructor
@@ -41,7 +44,8 @@ public class LocalSearch {
     public LocalSearch(
         Solution initialSolution, double timeLimit, double optimalObjectiveValue,
         int numberOfNonImprovingIterations, int numberOfIterations,
-        PostOptimization.StoppingCriteria stoppingCriterion, LocalSearchAlgorithm localSearchAlgorithm
+        PostOptimization.StoppingCriteria stoppingCriterion, LocalSearchAlgorithm localSearchAlgorithm,
+        ImprovedSolution impSol
     ) {
         this.currSol = new Solution(initialSolution);
         this.bestSol = new Solution(initialSolution);
@@ -55,33 +59,14 @@ public class LocalSearch {
         this.localSearchAlgorithm = localSearchAlgorithm;
         this.timeToBestSolution = 0.0;
         this.totalNumOfPerformedIterations = 0;
+        this.impSol = impSol;
     }
 
     /**
-     * Returns the runtime to find the best solution.
-     *
-     * @return runtime to best solution
+     * Starts the solving procedure when used as runnable.
      */
-    public double getTimeToBestSolution() {
-        return this.timeToBestSolution;
-    }
-
-    /**
-     * Returns the number of iterations to find the best solution.
-     *
-     * @return number of iteration to best solution
-     */
-    public int getIterationsToBestSolution() {
-        return this.iterationOfLastImprovement;
-    }
-
-    /**
-     * Returns the total number of performed iterations.
-     *
-     * @return total number of performed iterations
-     */
-    public int getTotalNumOfPerformedIterations() {
-        return totalNumOfPerformedIterations;
+    public void run() {
+        this.solve();
     }
 
     /**
@@ -106,6 +91,11 @@ public class LocalSearch {
         }
 
         this.computeBestAssignmentForCurrentPartitions();
+        this.impSol.setSol(this.bestSol);
+        this.impSol.setTimeToBestSolution(this.timeToBestSolution);
+        this.impSol.setPerformedIterations(this.totalNumOfPerformedIterations);
+        this.impSol.setIterationOfLastImprovement(this.iterationOfLastImprovement);
+
         return this.bestSol;
     }
 
@@ -117,6 +107,7 @@ public class LocalSearch {
         PartitionList partitionSol = new PartitionList(this.bestSol);
         System.out.println("best sol before final minCostPM: " + this.bestSol.computeCosts() + " feasible? " + this.bestSol.isFeasible());
         this.bestSol = partitionSol.generateSolutionFromPartitions();
+        this.currSol = this.bestSol;
         System.out.println("best sol after final minCostPM: " + this.bestSol.computeCosts() + " feasible? " + this.bestSol.isFeasible());
     }
 
@@ -167,9 +158,10 @@ public class LocalSearch {
      */
     private void solveIterationsSinceLastImprovement(LocalSearchAlgorithm localSearchAlgorithm) {
         this.totalNumOfPerformedIterations = 0;
+
         while (Math.abs(this.iterationOfLastImprovement - this.totalNumOfPerformedIterations) < this.numberOfNonImprovingIterations) {
-            System.out.println("non improving iterations: " + Math.abs(this.iterationOfLastImprovement - this.totalNumOfPerformedIterations));
-            System.out.println("time limit: " + this.timeLimit + " curr: " + (System.currentTimeMillis() - this.startTime) / 1000);
+//            System.out.println("non improving iterations: " + Math.abs(this.iterationOfLastImprovement - this.totalNumOfPerformedIterations));
+//            System.out.println("time limit: " + this.timeLimit + " curr: " + (System.currentTimeMillis() - this.startTime) / 1000);
             if (this.timeLimit != 0 && (System.currentTimeMillis() - this.startTime) / 1000 > this.timeLimit) { break; }
             if (this.bestSol.computeCosts() == this.optimalObjectiveValue) { break; }
             this.updateCurrentSolution(this.totalNumOfPerformedIterations++, localSearchAlgorithm);

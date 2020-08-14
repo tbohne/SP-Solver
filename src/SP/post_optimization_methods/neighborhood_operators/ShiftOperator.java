@@ -5,8 +5,6 @@ import SP.representations.Solution;
 import SP.representations.StackPosition;
 import SP.util.HeuristicUtil;
 
-import java.util.List;
-
 /**
  * Operator to be used in neighborhood structures for the local search.
  * A shift operation moves an item from one stack to a compatible free position in another stack.
@@ -28,23 +26,79 @@ public class ShiftOperator {
     }
 
     /**
-     * Generates a neighbor for the specified solution by applying the shift operator.
+     * Generates a neighbor for the specified solution by searching through the whole shift neighborhood.
+     * A best neighbor in the shift neighborhood of the current solution gets returned.
      *
-     * @param currSol         - current solution to generate neighbor for
-     * @param performedShifts - list of performed shifts
+     * @param currSol - current solution to generate neighbor for
      * @return generated neighboring solution
      */
-    public Solution generateShiftNeighbor(Solution currSol, List<Shift> performedShifts) {
+    public Solution generateShiftNeighbor(Solution currSol) {
+
+        Solution bestShiftNbr = new Solution(currSol);
+        double currSolCosts = currSol.computeCosts();
+        double bestNbrCosts = currSolCosts;
+
+        for (int stack = 0; stack < currSol.getFilledStacks().length; stack++) {
+            for (int level = 0; level < currSol.getFilledStacks()[stack].length; level++) {
+
+                if (currSol.getFilledStacks()[stack][level] != -1) {
+
+                    int item = currSol.getFilledStacks()[stack][level];
+                    StackPosition srcPos = new StackPosition(stack, level);
+
+                    // shift this item to every free compatible position
+                    for (int targetStack = 0; targetStack < currSol.getFilledStacks().length; targetStack++) {
+
+                        if (targetStack != srcPos.getStackIdx() && HeuristicUtil.stackHasFreePosition(currSol.getFilledStacks()[targetStack])) {
+
+                            Instance instance = currSol.getSolvedInstance();
+
+                            if (HeuristicUtil.itemCompatibleWithStack(instance.getCosts(), item, targetStack)
+                                && HeuristicUtil.itemCompatibleWithAlreadyAssignedItems(
+                                    item, currSol.getFilledStacks()[targetStack], instance.getItemObjects(), instance.getStackingConstraints()
+                                )
+                            ) {
+
+                                double nbrCosts = currSolCosts - instance.getCosts()[item][srcPos.getStackIdx()] + instance.getCosts()[item][targetStack];
+
+                                if (nbrCosts < bestNbrCosts) {
+                                    Solution nbr = new Solution(currSol);
+                                    this.shiftItem(nbr, item, srcPos, targetStack);
+                                    nbr.lowerItemsThatAreStackedInTheAirForSpecificStack(srcPos.getStackIdx());
+                                    nbr.lowerItemsThatAreStackedInTheAirForSpecificStack(targetStack);
+                                    nbr.sortItemsInStackBasedOnTransitiveStackingConstraints(targetStack);
+                                    bestNbrCosts = nbrCosts;
+                                    bestShiftNbr = nbr;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return bestShiftNbr;
+    }
+
+    /**
+     * Generates a random neighbor for the specified solution by applying the shift operator.
+     *
+     * @param currSol - current solution to generate neighbor for
+     * @return generated neighboring solution
+     */
+    public Solution generateRandomShiftNeighbor(Solution currSol) {
+
         Solution neighbor = new Solution(currSol);
+
         StackPosition srcPos = HeuristicUtil.getRandomStackPositionFilledWithItem(neighbor);
         int item = neighbor.getFilledStacks()[srcPos.getStackIdx()][srcPos.getLevel()];
         StackPosition shiftTarget = this.getFeasibleShiftTarget(neighbor, srcPos, item);
         if (shiftTarget == null) { return neighbor; }
         Shift shift = this.shiftItem(neighbor, item, srcPos, shiftTarget.getStackIdx());
-        performedShifts.clear();
-        performedShifts.add(shift);
-        neighbor.lowerItemsThatAreStackedInTheAir();
-        neighbor.sortItemsInStacksBasedOnTransitiveStackingConstraints();
+
+        neighbor.lowerItemsThatAreStackedInTheAirForSpecificStack(srcPos.getStackIdx());
+        neighbor.lowerItemsThatAreStackedInTheAirForSpecificStack(shiftTarget.getStackIdx());
+        neighbor.sortItemsInStackBasedOnTransitiveStackingConstraints(shiftTarget.getStackIdx());
+
         return neighbor;
     }
 
@@ -85,7 +139,6 @@ public class ShiftOperator {
             )
         ) {
             if (failCnt == this.unsuccessfulNbrGenerationAttempts) {
-                System.out.println("FAILED TO FIND A COMPATIBLE SHIFT TARGET");
                 return null;
             }
             shiftTarget = HeuristicUtil.getRandomFreeSlot(neighbor);

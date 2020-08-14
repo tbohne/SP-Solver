@@ -1,12 +1,10 @@
 package SP.post_optimization_methods.neighborhood_operators;
 
+import SP.representations.Instance;
 import SP.representations.Item;
 import SP.representations.Solution;
 import SP.representations.StackPosition;
 import SP.util.HeuristicUtil;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Operator to be used in neighborhood structures for the local search.
@@ -16,40 +14,80 @@ import java.util.List;
  */
 public class SwapOperator {
 
-    private final int maxNumberOfSwaps;
     private final int unsuccessfulNbrGenerationAttempts;
 
     /**
      * Constructor
      *
-     * @param maxNumberOfSwaps                  - maximum number of swaps performed in one operator application
      * @param unsuccessfulNbrGenerationAttempts - number of failing attempts to generate a neighboring solution
      *                                            after which the search for a neighbor is stopped
      */
-    public SwapOperator(int maxNumberOfSwaps, int unsuccessfulNbrGenerationAttempts) {
-        this.maxNumberOfSwaps = maxNumberOfSwaps;
+    public SwapOperator(int unsuccessfulNbrGenerationAttempts) {
         this.unsuccessfulNbrGenerationAttempts = unsuccessfulNbrGenerationAttempts;
     }
 
     /**
      * Generates a neighbor for the specified solution by applying the swap operator.
+     * The swap operator searches the whole swap neighborhood and returns a best found solution.
      *
-     * @param currSol         - current solution to generate neighbor for
-     * @param performedShifts - list of performed shifts (a swap consists of two shifts)
-     * @param numberOfSwaps   - number of swaps to be performed
+     * @param currSol - current solution to generate neighbor for
      * @return generated neighboring solution
      */
-    public Solution generateSwapNeighbor(Solution currSol, List<Shift> performedShifts, int numberOfSwaps) {
-        int numOfSwaps = numberOfSwaps > maxNumberOfSwaps ? maxNumberOfSwaps : numberOfSwaps;
-        List<Swap> swapList = new ArrayList<>();
-        Solution neighbor = this.performSwaps(swapList, currSol, numOfSwaps);
-        for (Swap swap : swapList) {
-            performedShifts.add(swap.getShiftOne());
-            performedShifts.add(swap.getShiftTwo());
+    public Solution generateSwapNeighbor(Solution currSol) {
+
+        Solution bestNbr = new Solution(currSol);
+        double currSolCosts = currSol.computeCosts();
+        double bestNbrCosts = currSolCosts;
+
+        for (int stack = 0; stack < currSol.getFilledStacks().length; stack++) {
+            for (int level = 0; level < currSol.getFilledStacks()[stack].length; level++) {
+
+                if (currSol.getFilledStacks()[stack][level] != -1) {
+
+                    StackPosition posOne = new StackPosition(stack, level);
+                    int swapItemOne = currSol.getFilledStacks()[stack][level];
+                    Instance instance = currSol.getSolvedInstance();
+
+                    for (int targetStack = 0; targetStack < currSol.getFilledStacks().length; targetStack++) {
+
+                        if (posOne.getStackIdx() == targetStack) { continue; }
+
+                        for (int targetLevel = 0; targetLevel < currSol.getFilledStacks()[targetStack].length; targetLevel++) {
+
+                            if (currSol.getFilledStacks()[targetStack][targetLevel] != -1) {
+
+                                int swapItemTwo = currSol.getFilledStacks()[targetStack][targetLevel];
+
+                                if (HeuristicUtil.itemCompatibleWithStack(instance.getCosts(), swapItemOne, targetStack)
+                                    && HeuristicUtil.itemCompatibleWithStack(instance.getCosts(), swapItemTwo, posOne.getStackIdx())
+                                    && HeuristicUtil.itemCompatibleWithAlreadyAssignedItems(
+                                        swapItemOne, currSol.getFilledStacks()[targetStack],
+                                        instance.getItemObjects(), instance.getStackingConstraints()
+                                    )
+                                    && HeuristicUtil.itemCompatibleWithAlreadyAssignedItems(
+                                        swapItemTwo, currSol.getFilledStacks()[posOne.getStackIdx()],
+                                        instance.getItemObjects(), instance.getStackingConstraints()
+                                    )
+                                ) {
+                                    double nbrCosts = currSolCosts - instance.getCosts()[swapItemOne][posOne.getStackIdx()]
+                                        - instance.getCosts()[swapItemTwo][targetStack]
+                                        + instance.getCosts()[swapItemOne][targetStack]
+                                        + instance.getCosts()[swapItemTwo][posOne.getStackIdx()];
+
+                                    if (nbrCosts < bestNbrCosts) {
+                                        Solution nbr = new Solution(currSol);
+                                        this.swapItems(nbr, posOne, new StackPosition(targetStack, targetLevel));
+                                        bestNbr = nbr;
+                                        bestNbrCosts = nbrCosts;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
-        neighbor.lowerItemsThatAreStackedInTheAir();
-        neighbor.sortItemsInStacksBasedOnTransitiveStackingConstraints();
-        return neighbor;
+        return bestNbr;
     }
 
     /**
@@ -72,6 +110,12 @@ public class SwapOperator {
         HeuristicUtil.assignItemToStack(
             itemTwo, sol.getFilledStacks()[posOne.getStackIdx()], sol.getSolvedInstance().getItemObjects()
         );
+
+        sol.lowerItemsThatAreStackedInTheAirForSpecificStack(posOne.getStackIdx());
+        sol.lowerItemsThatAreStackedInTheAirForSpecificStack(posTwo.getStackIdx());
+        sol.sortItemsInStackBasedOnTransitiveStackingConstraints(posOne.getStackIdx());
+        sol.sortItemsInStackBasedOnTransitiveStackingConstraints(posTwo.getStackIdx());
+
         // the swap operations consists of two shift operations
         return new Swap(new Shift(itemOne, posTwo.getStackIdx()), new Shift(itemTwo, posOne.getStackIdx()));
     }
@@ -101,7 +145,6 @@ public class SwapOperator {
             || posOne.getStackIdx() == posTwo.getStackIdx()
         ) {
             if (failCnt == this.unsuccessfulNbrGenerationAttempts) {
-                System.out.println("FAILED TO FIND A COMPATIBLE SWAP");
                 return null;
             }
             posTwo = HeuristicUtil.getRandomStackPositionFilledWithItem(neighbor);
@@ -114,31 +157,21 @@ public class SwapOperator {
     /**
      * Performs the specified number of swap operations and stores them in the swap list.
      *
-     * @param swapList      - list to store the performed swaps
-     * @param currSol       - current solution
-     * @param numberOfSwaps - number of swaps to be performed
+     * @param currSol - current solution
      * @return generated neighboring solution
      */
-    private Solution performSwaps(List<Swap> swapList, Solution currSol, int numberOfSwaps) {
+    public Solution generateRandomSwapNeighbor(Solution currSol) {
 
         Solution neighbor = new Solution(currSol);
-        int swapCnt = 0;
 
-        while (swapCnt < numberOfSwaps) {
-            StackPosition posOne = HeuristicUtil.getRandomStackPositionFilledWithItem(neighbor);
-            int swapItemOne = neighbor.getFilledStacks()[posOne.getStackIdx()][posOne.getLevel()];
-            StackPosition posTwo = this.getFeasibleSwapPartner(neighbor, posOne, swapItemOne);
+        StackPosition posOne = HeuristicUtil.getRandomStackPositionFilledWithItem(neighbor);
+        int swapItemOne = neighbor.getFilledStacks()[posOne.getStackIdx()][posOne.getLevel()];
+        StackPosition posTwo = this.getFeasibleSwapPartner(neighbor, posOne, swapItemOne);
 
-            if (posTwo == null) { return neighbor; }
+        if (posTwo == null) { return neighbor; }
 
-            Solution tmpSol = new Solution(neighbor);
-            Swap swap = this.swapItems(tmpSol, posOne, posTwo);
-            if (!swapList.contains(swap)) {
-                swapList.add(swap);
-                neighbor = tmpSol;
-                swapCnt++;
-            }
-        }
+        this.swapItems(neighbor, posOne, posTwo);
+
         return neighbor;
     }
 }

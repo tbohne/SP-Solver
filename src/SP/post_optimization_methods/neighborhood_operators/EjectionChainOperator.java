@@ -29,15 +29,14 @@ public class EjectionChainOperator {
     /**
      * Generates a neighbor for the specified solution by applying the ejection chain operator.
      *
-     * @param currSol         - current solution to generate neighbor for
-     * @param performedShifts - list that keeps track of the performed shifts
+     * @param currSol - current solution to generate neighbor for
      * @return generated neighboring solution
      */
-    public Solution generateEjectionChainNeighbor(Solution currSol, List<Shift> performedShifts) {
+    public Solution generateEjectionChainNeighbor(Solution currSol) {
         GraphPath bestPath = constructEjectionChain(currSol);
         Solution neighbor = new Solution(currSol);
         if (bestPath == null) { return neighbor; }
-        applyEjectionChain(neighbor, bestPath, performedShifts);
+        applyEjectionChain(neighbor, bestPath);
         neighbor.lowerItemsThatAreStackedInTheAir();
         neighbor.sortItemsInStacksBasedOnTransitiveStackingConstraints();
         return neighbor;
@@ -265,12 +264,11 @@ public class EjectionChainOperator {
      * Applies item to item edge which means that both items are removed from their original stacks
      * and item one gets assigned to the stack of item two.
      *
-     * @param lhs             - left hand side of the edge string
-     * @param rhs             - right hand side of the edge string
-     * @param currSol         - current solution
-     * @param performedShifts - list that keeps track of performed shifts
+     * @param lhs     - left hand side of the edge string
+     * @param rhs     - right hand side of the edge string
+     * @param currSol - current solution
      */
-    private void applyItemToItemEdge(String lhs, String rhs, Solution currSol, List<Shift> performedShifts) {
+    private void applyItemToItemEdge(String lhs, String rhs, Solution currSol) {
         int itemOne = Integer.parseInt(lhs.replace("(item", "").trim());
         int itemTwo = Integer.parseInt(rhs.replace("item", "").replace(")", "").trim());
         int stackOfItemOne = currSol.getStackIdxForAssignedItem(itemOne);
@@ -281,21 +279,19 @@ public class EjectionChainOperator {
         if (stackOfItemTwo != -1) {
             HeuristicUtil.removeItemFromStack(itemTwo, currSol.getFilledStacks()[stackOfItemTwo]);
         }
-        performedShifts.add(new Shift(itemOne, stackOfItemTwo));
         HeuristicUtil.assignItemToStack(itemOne, currSol.getFilledStacks()[stackOfItemTwo], currSol.getSolvedInstance().getItemObjects());
     }
 
     /**
      * Applies item to stack edge which means that the item gets shifted to the stack.
      *
-     * @param lhs             - left hand side of the edge string
-     * @param rhs             - right hand side of the edge string
-     * @param currSol         - current solution
-     * @param performedShifts - list that keeps track of the performed shifts
-     * @param pending         - pending stack assignment
+     * @param lhs     - left hand side of the edge string
+     * @param rhs     - right hand side of the edge string
+     * @param currSol - current solution
+     * @param pending - pending stack assignment
      * @return pending stack assignment (may be same as before)
      */
-    private PendingItemStackAssignment applyItemToStackEdge(String lhs, String rhs, Solution currSol, List<Shift> performedShifts, PendingItemStackAssignment pending) {
+    private PendingItemStackAssignment applyItemToStackEdge(String lhs, String rhs, Solution currSol, PendingItemStackAssignment pending) {
         int item = Integer.parseInt(lhs.replace("(item", "").trim());
         int stack = Integer.parseInt(rhs.replace("stack", "").replace(")", "").trim());
         int stackOfItem = currSol.getStackIdxForAssignedItem(item);
@@ -305,7 +301,6 @@ public class EjectionChainOperator {
         if (HeuristicUtil.completelyFilledStack(currSol.getFilledStacks()[stack])) {
             return new PendingItemStackAssignment(item, stack);
         } else {
-            performedShifts.add(new Shift(item, stack));
             HeuristicUtil.assignItemToStack(item, currSol.getFilledStacks()[stack], currSol.getSolvedInstance().getItemObjects());
         }
         return pending;
@@ -314,22 +309,20 @@ public class EjectionChainOperator {
     /**
      * Applies stack to item edge which means that the item gets removed from the stack.
      *
-     * @param lhs             - left hand side of edge string
-     * @param rhs             - right hand side of edge string
-     * @param currSol         - current solution
-     * @param pending         - pending stack assignment
-     * @param performedShifts - list that keeps track of the performed shifts
+     * @param lhs     - left hand side of edge string
+     * @param rhs     - right hand side of edge string
+     * @param currSol - current solution
+     * @param pending - pending stack assignment
      * @return pending stack assignment (may be same as before)
      */
     private PendingItemStackAssignment applyStackToItemEdge(
-        String lhs, String rhs, Solution currSol, PendingItemStackAssignment pending, List<Shift> performedShifts
+        String lhs, String rhs, Solution currSol, PendingItemStackAssignment pending
     ) {
         int stack = Integer.parseInt(lhs.replace("(stack", "").trim());
         int item = Integer.parseInt(rhs.replace("item", "").replace(")", "").trim());
         HeuristicUtil.removeItemFromStack(item, currSol.getFilledStacks()[stack]);
 
         if (pending != null && stack == pending.getStack()) {
-            performedShifts.add(new Shift(pending.getItem(), stack));
             HeuristicUtil.assignItemToStack(pending.getItem(), currSol.getFilledStacks()[stack], currSol.getSolvedInstance().getItemObjects());
             return null;
         }
@@ -339,14 +332,12 @@ public class EjectionChainOperator {
     /**
      * Applies the generated ejection chain (combination of item insertions and removals).
      *
-     * @param currSol         -  current solution
-     * @param path            - ejection chain
-     * @param performedShifts - list that keeps track of the performed shifts
+     * @param currSol -  current solution
+     * @param path    - ejection chain
      */
-    private void applyEjectionChain(Solution currSol, GraphPath path, List<Shift> performedShifts) {
+    private void applyEjectionChain(Solution currSol, GraphPath path) {
 
         PendingItemStackAssignment pending = null;
-        performedShifts.clear();
 
         for (Object o : path.getEdgeList()) {
 
@@ -356,15 +347,14 @@ public class EjectionChainOperator {
             if (lhs.contains("source") && rhs.contains("item")) {
                 applySourceToItemEdge(rhs, currSol);
             } else if (lhs.contains("item") && rhs.contains("item")) {
-                applyItemToItemEdge(lhs, rhs, currSol, performedShifts);
+                applyItemToItemEdge(lhs, rhs, currSol);
             } else if (lhs.contains("item") && rhs.contains("stack")) {
-                pending = applyItemToStackEdge(lhs, rhs, currSol, performedShifts, pending);
+                pending = applyItemToStackEdge(lhs, rhs, currSol, pending);
             } else if (lhs.contains("stack") && rhs.contains("item")) {
-                pending = applyStackToItemEdge(lhs, rhs, currSol, pending, performedShifts);
+                pending = applyStackToItemEdge(lhs, rhs, currSol, pending);
             }
         }
         if (pending != null) {
-            performedShifts.add(new Shift(pending.getItem(), pending.getStack()));
             HeuristicUtil.assignItemToStack(
                 pending.getItem(), currSol.getFilledStacks()[pending.getStack()], currSol.getSolvedInstance().getItemObjects()
             );

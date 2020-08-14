@@ -12,16 +12,23 @@ import java.util.*;
 
 /**
  * Hill climbing approach to solve stacking problems.
+ *
+ * @author Tim Bohne
  */
 public class HillClimbing implements LocalSearchAlgorithm {
 
-    private int numberOfNeighbors;
-    private PostOptimization.ShortTermStrategies shortTermStrategy;
+    private final int numberOfNeighbors;
+    private final PostOptimization.ShortTermStrategies shortTermStrategy;
+    private final int unsuccessfulNeighborGenerationAttempts;
 
     // nbh operators
-    private EjectionChainOperator ejectionChainOperator;
-    private ShiftOperator shiftOperator;
-    private SwapOperator swapOperator;
+    private final EjectionChainOperator ejectionChainOperator;
+    private final ShiftOperator shiftOperator;
+    private final SwapOperator swapOperator;
+
+    // used to only apply shift and swap once since they are deterministic
+    private boolean generatedShiftNbr;
+    private boolean generatedSwapNbr;
 
     /**
      * Constructor
@@ -34,13 +41,17 @@ public class HillClimbing implements LocalSearchAlgorithm {
      */
     public HillClimbing(
         int numberOfNeighbors, PostOptimization.ShortTermStrategies shortTermStrategy,
-        EjectionChainOperator ejectionChainOperator, ShiftOperator shiftOperator, SwapOperator swapOperator
+        int unsuccessfulNeighborGenerationAttempts, EjectionChainOperator ejectionChainOperator,
+        ShiftOperator shiftOperator, SwapOperator swapOperator
     ) {
         this.numberOfNeighbors = numberOfNeighbors;
         this.shortTermStrategy = shortTermStrategy;
+        this.unsuccessfulNeighborGenerationAttempts = unsuccessfulNeighborGenerationAttempts;
         this.ejectionChainOperator = ejectionChainOperator;
         this.shiftOperator = shiftOperator;
         this.swapOperator = swapOperator;
+        this.generatedShiftNbr = false;
+        this.generatedSwapNbr = false;
     }
 
     /**
@@ -67,24 +78,28 @@ public class HillClimbing implements LocalSearchAlgorithm {
     private Solution applyVariableNeighborhood(Solution currSol) {
 
         Solution neighbor = new Solution();
+        double currSolCosts = currSol.computeCosts();
 
         // shift is only possible if there are free slots
-        if (currSol.getNumberOfAssignedItems() < currSol.getFilledStacks().length * currSol.getFilledStacks()[0].length) {
-            neighbor = this.shiftOperator.generateShiftNeighbor(currSol, new ArrayList<>());
+        if (!this.generatedShiftNbr && currSol.getNumberOfAssignedItems() < currSol.getFilledStacks().length * currSol.getFilledStacks()[0].length) {
+            neighbor = this.shiftOperator.generateShiftNeighbor(currSol);
         }
-        if (!neighbor.isFeasible() || neighbor.computeCosts() > currSol.computeCosts()) {
+        if (!neighbor.isFeasible() || neighbor.computeCosts() >= currSolCosts) {
             // next operator
-            int rand = HeuristicUtil.getRandomIntegerInBetween(1, 4);
-            neighbor = this.swapOperator.generateSwapNeighbor(currSol, new ArrayList<>(), rand);
-            if (!neighbor.isFeasible() || neighbor.computeCosts() > currSol.computeCosts()) {
+            if (!this.generatedSwapNbr) {
+                neighbor = this.swapOperator.generateSwapNeighbor(currSol);
+            }
+            if (!neighbor.isFeasible() || neighbor.computeCosts() >= currSolCosts) {
                 // next operator
-                neighbor = this.ejectionChainOperator.generateEjectionChainNeighbor(currSol, new ArrayList<>());
-//                System.out.println("USING EJECTION CHAIN OPERATOR");
+                neighbor = this.ejectionChainOperator.generateEjectionChainNeighbor(currSol);
+//                System.out.println("USING EJECTION CHAIN OPERATOR: " + neighbor.computeCosts());
             } else {
-//                System.out.println("USING SWAP OPERATOR");
+//                System.out.println("USING SWAP OPERATOR: " + neighbor.computeCosts());
+                this.generatedSwapNbr = true;
             }
         } else {
-//            System.out.println("USING SHIFT OPERATOR");
+//            System.out.println("USING SHIFT OPERATOR: " + neighbor.computeCosts());
+            this.generatedShiftNbr = true;
         }
         return neighbor;
     }
@@ -99,16 +114,28 @@ public class HillClimbing implements LocalSearchAlgorithm {
     public Solution getNeighbor(Solution currSol, Solution bestSol) {
 
         List<Solution> nbrs = new ArrayList<>();
+        int nbrGenerationFails = 0;
+        double currSolCosts = currSol.computeCosts();
+
+        this.generatedShiftNbr = false;
+        this.generatedSwapNbr = false;
 
         while (nbrs.size() < this.numberOfNeighbors) {
 
+            if (nbrGenerationFails == this.unsuccessfulNeighborGenerationAttempts) {
+                Solution sol = HeuristicUtil.getBestSolution(nbrs);
+                return sol.isEmpty() ? currSol : sol;
+            }
             Solution neighbor = this.applyVariableNeighborhood(currSol);
-            if (!neighbor.isFeasible()) { continue; }
+
+            if (!neighbor.isFeasible() || neighbor.computeCosts() >= currSolCosts) {
+                nbrGenerationFails++;
+                continue;
+            }
+            nbrGenerationFails = 0;
 
             // FIRST-FIT
-            if (this.shortTermStrategy == PostOptimization.ShortTermStrategies.FIRST_FIT
-                && neighbor.computeCosts() < currSol.computeCosts()
-            ) {
+            if (this.shortTermStrategy == PostOptimization.ShortTermStrategies.FIRST_FIT) {
                 return neighbor;
             // BEST-FIT
             } else {
