@@ -1,6 +1,7 @@
-package SP.post_optimization_methods;
+package SP.deprecated;
 
 import SP.experiments.PostOptimization;
+import SP.post_optimization_methods.LocalSearchAlgorithm;
 import SP.post_optimization_methods.neighborhood_operators.EjectionChainOperator;
 import SP.post_optimization_methods.neighborhood_operators.Shift;
 import SP.post_optimization_methods.neighborhood_operators.ShiftOperator;
@@ -124,18 +125,17 @@ public class TabuSearch implements LocalSearchAlgorithm {
 
         // shift is only possible if there are free slots
         if (currSol.getNumberOfAssignedItems() < currSol.getFilledStacks().length * currSol.getFilledStacks()[0].length) {
-            neighbor = this.shiftOperator.generateShiftNeighbor(currSol, performedShifts);
+            neighbor = this.shiftOperator.generateShiftNeighbor(currSol/*, performedShifts*/);
         }
         if (!neighbor.isFeasible() || neighbor.computeCosts() > currSol.computeCosts()) {
             // next operator
-            int rand = HeuristicUtil.getRandomIntegerInBetween(1, 4);
             performedShifts.clear();
-            neighbor = this.swapOperator.generateSwapNeighbor(currSol, performedShifts, rand);
+            neighbor = this.swapOperator.generateSwapNeighbor(currSol);
 
             if (!neighbor.isFeasible() || neighbor.computeCosts() > currSol.computeCosts()) {
                 // next operator
                 performedShifts.clear();
-                neighbor = this.ejectionChainOperator.generateEjectionChainNeighbor(currSol, performedShifts);
+                neighbor = this.ejectionChainOperator.generateEjectionChainNeighbor(currSol);
 //                System.out.println("USING EJECTION CHAIN OPERATOR");
             } else {
 //                System.out.println("USING SWAP OPERATOR");
